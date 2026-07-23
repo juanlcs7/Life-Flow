@@ -50,6 +50,8 @@ export function GoalInsights({ personalGoals, financialGoals }: GoalInsightsProp
       value: totalGoals,
       color: "text-primary",
       bgColor: "bg-primary/10",
+      accent: "before:bg-primary",
+      glow: "from-primary/[0.08]",
     },
     {
       icon: CheckCircle2,
@@ -57,6 +59,8 @@ export function GoalInsights({ personalGoals, financialGoals }: GoalInsightsProp
       value: totalCompleted,
       color: "text-success",
       bgColor: "bg-success/10",
+      accent: "before:bg-success",
+      glow: "from-success/[0.07]",
     },
     {
       icon: TrendingUp,
@@ -64,6 +68,8 @@ export function GoalInsights({ personalGoals, financialGoals }: GoalInsightsProp
       value: totalNearCompletion,
       color: "text-info",
       bgColor: "bg-info/10",
+      accent: "before:bg-info",
+      glow: "from-info/[0.07]",
     },
     {
       icon: AlertTriangle,
@@ -71,6 +77,8 @@ export function GoalInsights({ personalGoals, financialGoals }: GoalInsightsProp
       value: totalOverdue,
       color: "text-destructive",
       bgColor: "bg-destructive/10",
+      accent: "before:bg-destructive",
+      glow: "from-destructive/[0.06]",
     },
   ];
 
@@ -83,14 +91,14 @@ export function GoalInsights({ personalGoals, financialGoals }: GoalInsightsProp
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 + idx * 0.05 }}
         >
-          <Card className="p-3 sm:p-4">
+          <Card className={`relative h-full min-h-[96px] overflow-hidden border-border/70 bg-gradient-to-br ${insight.glow} via-card to-card p-3 shadow-sm before:absolute before:inset-x-0 before:top-0 before:h-0.5 ${insight.accent} transition-all hover:-translate-y-0.5 hover:shadow-md sm:p-4`}>
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-lg ${insight.bgColor} flex items-center justify-center flex-shrink-0`}>
+              <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${insight.bgColor}`}>
                 <insight.icon className={`w-5 h-5 ${insight.color}`} />
               </div>
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground truncate">{insight.label}</p>
-                <p className={`text-xl font-bold ${insight.color}`}>{insight.value}</p>
+                <p className={`mt-0.5 text-2xl font-bold tracking-tight ${insight.color}`}>{insight.value}</p>
               </div>
             </div>
           </Card>

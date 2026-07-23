@@ -224,12 +224,12 @@ export default function Metas() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:inline-flex">
-          <TabsTrigger value="personal" className="flex items-center gap-2">
+        <TabsList className="grid h-11 w-full grid-cols-2 rounded-xl border border-border/60 bg-card/60 p-1 lg:w-auto">
+          <TabsTrigger value="personal" className="flex items-center gap-2 rounded-lg px-6 data-[state=active]:bg-goals data-[state=active]:text-goals-foreground data-[state=active]:shadow-sm">
             <Target className="w-4 h-4" />
             Pessoais
           </TabsTrigger>
-          <TabsTrigger value="financial" className="flex items-center gap-2">
+          <TabsTrigger value="financial" className="flex items-center gap-2 rounded-lg px-6 data-[state=active]:bg-goals data-[state=active]:text-goals-foreground data-[state=active]:shadow-sm">
             <Wallet className="w-4 h-4" />
             Financeiras
           </TabsTrigger>
@@ -255,7 +255,7 @@ export default function Metas() {
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : personalGoals.length === 0 ? (
-            <Card className="p-8 text-center text-muted-foreground">
+            <Card className="border-dashed border-border/70 bg-muted/15 p-8 text-center text-muted-foreground">
               <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p className="text-sm">Nenhuma meta pessoal definida</p>
               <Button
@@ -304,9 +304,9 @@ export default function Metas() {
 
         {/* Financial Goals Tab */}
         <TabsContent value="financial" className="mt-4 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col gap-3 rounded-2xl border border-warning/15 bg-gradient-to-r from-warning/[0.08] to-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/10">
                 <Wallet className="w-6 h-6 text-warning" />
               </div>
               <div>
@@ -333,7 +333,7 @@ export default function Metas() {
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : financialGoals.length === 0 ? (
-            <Card className="p-8 text-center text-muted-foreground">
+            <Card className="border-dashed border-border/70 bg-muted/15 p-8 text-center text-muted-foreground">
               <Wallet className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p className="text-sm">Nenhuma meta financeira definida</p>
               <Button
@@ -431,7 +431,7 @@ function PersonalGoalCard({
       transition={{ delay: 0.1 + index * 0.05 }}
     >
       <Card className={cn(
-        "p-4 sm:p-5 transition-all",
+        "relative overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-goals/[0.035] p-4 shadow-sm transition-all before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-goals hover:-translate-y-0.5 hover:shadow-md sm:p-5",
         isCompleted && "opacity-80",
         isOverdue && "border-destructive/50"
       )}>
@@ -614,7 +614,7 @@ function FinancialGoalCard({
       transition={{ delay: 0.1 + index * 0.05 }}
     >
       <Card className={cn(
-        "p-4 sm:p-5 transition-all",
+        "relative overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-warning/[0.035] p-4 shadow-sm transition-all before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-warning hover:-translate-y-0.5 hover:shadow-md sm:p-5",
         isCompleted && "border-success/50 bg-success/5",
         isOverdue && "border-destructive/50"
       )}>
@@ -668,7 +668,7 @@ function FinancialGoalCard({
             <span className="text-muted-foreground">Progresso</span>
             <span className="font-medium">{progress.toFixed(0)}%</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className="h-2.5" />
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>R$ {goal.current_amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
             <span>R$ {goal.target_amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
@@ -681,7 +681,7 @@ function FinancialGoalCard({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2 mt-4">
+        <div className="mt-4 flex gap-2 border-t border-border/60 pt-4">
           <Button
             variant="outline"
             size="sm"

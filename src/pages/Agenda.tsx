@@ -176,10 +176,10 @@ export default function Agenda() {
       />
 
       <Tabs defaultValue="today" className="w-full">
-        <TabsList className="bg-muted/50 w-full sm:w-auto">
-          <TabsTrigger value="today" className="flex-1 sm:flex-none text-xs sm:text-sm">Hoje</TabsTrigger>
-          <TabsTrigger value="calendar" className="flex-1 sm:flex-none text-xs sm:text-sm">Calendário</TabsTrigger>
-          <TabsTrigger value="goals" className="flex-1 sm:flex-none text-xs sm:text-sm">Metas</TabsTrigger>
+        <TabsList className="grid h-11 w-full grid-cols-3 rounded-xl border border-border/60 bg-card/60 p-1 sm:w-auto">
+          <TabsTrigger value="today" className="rounded-lg px-5 text-xs data-[state=active]:bg-tasks data-[state=active]:text-tasks-foreground data-[state=active]:shadow-sm sm:text-sm">Hoje</TabsTrigger>
+          <TabsTrigger value="calendar" className="rounded-lg px-5 text-xs data-[state=active]:bg-tasks data-[state=active]:text-tasks-foreground data-[state=active]:shadow-sm sm:text-sm">Calendário</TabsTrigger>
+          <TabsTrigger value="goals" className="rounded-lg px-5 text-xs data-[state=active]:bg-tasks data-[state=active]:text-tasks-foreground data-[state=active]:shadow-sm sm:text-sm">Metas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="today" className="mt-4 sm:mt-6">
@@ -191,14 +191,16 @@ export default function Agenda() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <Card className="p-4 sm:p-5">
+                <Card className="overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-tasks/[0.035] p-4 shadow-sm sm:p-5">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-display font-semibold text-sm sm:text-base">
-                      Tarefas de Hoje
-                      <span className="ml-2 text-xs sm:text-sm font-normal text-muted-foreground">
-                        ({todayTasks.filter((t) => !t.completed).length} pendentes)
-                      </span>
-                    </h3>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-tasks">Seu foco de hoje</p>
+                      <h3 className="mt-1 font-display text-base font-semibold sm:text-lg">Tarefas de Hoje</h3>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{todayTasks.filter((t) => !t.completed).length} pendentes de {todayTasks.length} tarefas</p>
+                    </div>
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-tasks/10">
+                      <Check className="h-5 w-5 text-tasks" />
+                    </div>
                   </div>
                   
                   {tasksLoading ? (
@@ -225,7 +227,7 @@ export default function Agenda() {
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.1 + index * 0.05 }}
                           className={cn(
-                            "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors group",
+                            "group flex items-center gap-2 rounded-xl border border-transparent bg-muted/25 p-3 transition-all hover:border-tasks/15 hover:bg-tasks/[0.04] sm:gap-3",
                             task.completed && "opacity-60"
                           )}
                         >
@@ -234,11 +236,11 @@ export default function Agenda() {
                             onClick={() => toggleTask({ id: task.id, completed: !task.completed })}
                           >
                             {task.completed ? (
-                              <div className="w-5 h-5 rounded-full bg-success flex items-center justify-center">
+                              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-success shadow-sm shadow-success/20">
                                 <Check className="w-3 h-3 text-success-foreground" />
                               </div>
                             ) : (
-                              <Circle className="w-5 h-5 text-muted-foreground hover:text-primary transition-colors" />
+                              <Circle className="h-5 w-5 text-muted-foreground transition-colors hover:text-tasks" />
                             )}
                           </button>
                           <div className="flex-1 min-w-0">
@@ -283,7 +285,7 @@ export default function Agenda() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="p-4 sm:p-5">
+              <Card className="h-full overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-primary/[0.035] p-4 shadow-sm sm:p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-display font-semibold text-sm sm:text-base">
                     {currentDate.toLocaleString("pt-BR", { month: "long", year: "numeric" })}
@@ -311,7 +313,7 @@ export default function Agenda() {
                       className={cn(
                         "aspect-square rounded-lg text-xs sm:text-sm flex items-center justify-center transition-colors active:scale-90",
                         !day && "invisible",
-                        day === selectedDate && "gradient-primary text-primary-foreground",
+                        day === selectedDate && "gradient-tasks text-tasks-foreground shadow-sm",
                         day === currentDate.getDate() && day !== selectedDate && "bg-muted font-medium",
                         day && day !== selectedDate && "hover:bg-muted/50"
                       )}
@@ -326,7 +328,7 @@ export default function Agenda() {
         </TabsContent>
 
         <TabsContent value="calendar" className="mt-4 sm:mt-6">
-          <Card className="p-4 sm:p-5">
+          <Card className="border-border/70 bg-gradient-to-br from-card via-card to-tasks/[0.035] p-4 shadow-sm sm:p-5">
             <div className="flex items-center justify-center h-48 sm:h-64 text-muted-foreground">
               <div className="text-center">
                 <Calendar className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 opacity-50" />
@@ -373,7 +375,7 @@ export default function Agenda() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 + index * 0.05 }}
                 >
-                  <Card className="p-4 sm:p-5">
+                  <Card className="relative overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-tasks/[0.035] p-4 shadow-sm transition-all before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-tasks hover:-translate-y-0.5 hover:shadow-md sm:p-5">
                     <div className="flex items-start justify-between mb-3">
                       <div className="min-w-0 flex-1">
                         <h4 className="font-semibold text-sm sm:text-base truncate">{goal.title}</h4>
