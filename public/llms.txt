@@ -1,0 +1,10 @@
+# LifeFlow
+
+> App pessoal para organizar finanças, hábitos, metas, agenda, saúde e estudos em um só lugar.
+
+LifeFlow é uma aplicação web mobile-first que reúne módulos integrados de gestão financeira, saúde e bem-estar, agenda, estudos universitários e visão geral consolidada do dia a dia.
+
+## Pages
+
+- [Início](/): Visão geral consolidada da rotina, finanças e hábitos.
+- [Entrar](/auth): Acesso à conta do LifeFlow.

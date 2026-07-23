@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* LifeFlow Design System */
+
+@layer base {
+  :root {
+    /* Core Background & Foreground */
+    --background: 210 20% 98%;
+    --foreground: 220 30% 15%;
+
+    /* Cards with subtle glassmorphism */
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 15%;
+
+    /* Primary - Teal/Cyan for productivity */
+    --primary: 175 70% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Soft slate */
+    --secondary: 210 20% 94%;
+    --secondary-foreground: 220 30% 25%;
+
+    /* Muted elements */
+    --muted: 210 20% 96%;
+    --muted-foreground: 220 15% 50%;
+
+    /* Accent - Warm coral for CTAs */
+    --accent: 15 90% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Semantic colors */
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 150 60% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 40 90% 55%;
+    --warning-foreground: 40 90% 15%;
+
+    --info: 200 80% 55%;
+    --info-foreground: 0 0% 100%;
+
+    /* Finance module */
+    --finance: 250 70% 60%;
+    --finance-foreground: 0 0% 100%;
+
+    /* Health module */
+    --health: 140 65% 50%;
+    --health-foreground: 0 0% 100%;
+
+    /* Tasks module */
+    --tasks: 200 80% 50%;
+    --tasks-foreground: 0 0% 100%;
+
+    /* Documents module */
+    --documents: 35 80% 55%;
+    --documents-foreground: 0 0% 100%;
+
+    /* Contacts module */
+    --contacts: 320 70% 55%;
+    --contacts-foreground: 0 0% 100%;
+
+    /* UI Elements */
+    --border: 220 15% 90%;
+    --input: 220 15% 92%;
+    --ring: 175 70% 40%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar */
+    --sidebar-background: 220 25% 12%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 175 70% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 25% 18%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 220 20% 20%;
+    --sidebar-ring: 175 70% 50%;
+    --sidebar-muted: 220 15% 45%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(175 70% 40%) 0%, hsl(200 80% 45%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(15 90% 60%) 0%, hsl(35 90% 55%) 100%);
+    --gradient-finance: linear-gradient(135deg, hsl(250 70% 60%) 0%, hsl(280 70% 55%) 100%);
+    --gradient-health: linear-gradient(135deg, hsl(140 65% 50%) 0%, hsl(160 70% 45%) 100%);
+    --gradient-tasks: linear-gradient(135deg, hsl(200 80% 50%) 0%, hsl(220 80% 55%) 100%);
+    --gradient-documents: linear-gradient(135deg, hsl(35 80% 55%) 0%, hsl(25 85% 50%) 100%);
+    --gradient-contacts: linear-gradient(135deg, hsl(320 70% 55%) 0%, hsl(340 75% 50%) 100%);
+    --gradient-sidebar: linear-gradient(180deg, hsl(220 25% 12%) 0%, hsl(220 30% 8%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(220 30% 15% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(220 30% 15% / 0.08), 0 2px 4px -1px hsl(220 30% 15% / 0.04);
+    --shadow-lg: 0 10px 15px -3px hsl(220 30% 15% / 0.1), 0 4px 6px -2px hsl(220 30% 15% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(220 30% 15% / 0.1), 0 10px 10px -5px hsl(220 30% 15% / 0.04);
+    --shadow-card: 0 2px 8px -2px hsl(220 30% 15% / 0.08), 0 4px 16px -4px hsl(220 30% 15% / 0.12);
+    --shadow-glow: 0 0 20px hsl(175 70% 40% / 0.3);
+  }
+
+  .dark {
+    --background: 220 25% 8%;
+    --foreground: 210 20% 95%;
+
+    --card: 220 25% 12%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 220 25% 12%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 175 70% 50%;
+    --primary-foreground: 220 30% 10%;
+
+    --secondary: 220 25% 18%;
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 220 25% 16%;
+    --muted-foreground: 220 15% 55%;
+
+    --accent: 15 90% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 20% 20%;
+    --input: 220 25% 18%;
+    --ring: 175 70% 50%;
+
+    --sidebar-background: 220 30% 6%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 175 70% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 25% 12%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 220 20% 15%;
+    --sidebar-ring: 175 70% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  .gradient-finance {
+    background: var(--gradient-finance);
+  }
+
+  .gradient-health {
+    background: var(--gradient-health);
+  }
+
+  .gradient-tasks {
+    background: var(--gradient-tasks);
+  }
+
+  .gradient-documents {
+    background: var(--gradient-documents);
+  }
+
+  .gradient-contacts {
+    background: var(--gradient-contacts);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background: var(--gradient-primary);
+  }
+}
