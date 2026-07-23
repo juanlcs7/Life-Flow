@@ -21,7 +21,20 @@ import { useGoals } from "@/hooks/useGoals";
 import { TaskModal } from "@/components/modals/TaskModal";
 import { GoalModal } from "@/components/modals/GoalModal";
 import { ContextActionMenu } from "@/components/ui/context-action-menu";
-import { format, parseISO, isToday } from "date-fns";
+import {
+  addMonths,
+  eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isSameDay,
+  isSameMonth,
+  isToday,
+  parseISO,
+  startOfMonth,
+  startOfWeek,
+  subMonths,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { downloadIcs, IcsEvent } from "@/lib/icsExport";
@@ -37,7 +50,8 @@ const priorityColors = {
 };
 
 export default function Agenda() {
-  const [selectedDate, setSelectedDate] = useState(currentDate.getDate());
+  const [selectedDate, setSelectedDate] = useState(currentDate);
+  const [calendarMonth, setCalendarMonth] = useState(startOfMonth(currentDate));
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [goalModalOpen, setGoalModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -53,20 +67,26 @@ export default function Agenda() {
     }
   });
 
-  const getDaysInMonth = () => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const calendarDays = eachDayOfInterval({
+    start: startOfWeek(startOfMonth(calendarMonth)),
+    end: endOfWeek(endOfMonth(calendarMonth)),
+  });
 
-    const days = [];
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
-    }
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(i);
-    }
-    return days;
+  const tasksForDate = (date: Date) =>
+    tasks.filter((task) => {
+      try {
+        return isSameDay(parseISO(task.due_date), date);
+      } catch {
+        return false;
+      }
+    });
+
+  const selectedDayTasks = tasksForDate(selectedDate);
+
+  const changeMonth = (direction: "previous" | "next") => {
+    const nextMonth = direction === "previous" ? subMonths(calendarMonth, 1) : addMonths(calendarMonth, 1);
+    setCalendarMonth(nextMonth);
+    setSelectedDate(startOfMonth(nextMonth));
   };
 
   const handleAddTask = async (data: {
@@ -288,13 +308,13 @@ export default function Agenda() {
               <Card className="h-full overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-primary/[0.035] p-4 shadow-sm sm:p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-display font-semibold text-sm sm:text-base">
-                    {currentDate.toLocaleString("pt-BR", { month: "long", year: "numeric" })}
+                    {format(calendarMonth, "MMMM yyyy", { locale: ptBR })}
                   </h3>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-7 w-7 active:scale-90">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 active:scale-90" onClick={() => changeMonth("previous")}>
                       <ChevronLeft className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 active:scale-90">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 active:scale-90" onClick={() => changeMonth("next")}>
                       <ChevronRight className="w-4 h-4" />
                     </Button>
                   </div>
@@ -305,20 +325,22 @@ export default function Agenda() {
                       {day}
                     </div>
                   ))}
-                  {getDaysInMonth().map((day, index) => (
+                  {calendarDays.map((day) => (
                     <button
-                      key={index}
-                      onClick={() => day && setSelectedDate(day)}
-                      disabled={!day}
+                      key={day.toISOString()}
+                      onClick={() => setSelectedDate(day)}
                       className={cn(
-                        "aspect-square rounded-lg text-xs sm:text-sm flex items-center justify-center transition-colors active:scale-90",
-                        !day && "invisible",
-                        day === selectedDate && "gradient-tasks text-tasks-foreground shadow-sm",
-                        day === currentDate.getDate() && day !== selectedDate && "bg-muted font-medium",
-                        day && day !== selectedDate && "hover:bg-muted/50"
+                        "relative flex aspect-square items-center justify-center rounded-lg text-xs transition-colors active:scale-90 sm:text-sm",
+                        !isSameMonth(day, calendarMonth) && "text-muted-foreground/35",
+                        isSameDay(day, selectedDate) && "gradient-tasks text-tasks-foreground shadow-sm",
+                        isToday(day) && !isSameDay(day, selectedDate) && "bg-muted font-semibold",
+                        !isSameDay(day, selectedDate) && "hover:bg-muted/50"
                       )}
                     >
-                      {day}
+                      {format(day, "d")}
+                      {tasksForDate(day).length > 0 && (
+                        <span className={cn("absolute bottom-1 h-1 w-1 rounded-full bg-tasks", isSameDay(day, selectedDate) && "bg-tasks-foreground")} />
+                      )}
                     </button>
                   ))}
                 </div>
@@ -328,15 +350,97 @@ export default function Agenda() {
         </TabsContent>
 
         <TabsContent value="calendar" className="mt-4 sm:mt-6">
-          <Card className="border-border/70 bg-gradient-to-br from-card via-card to-tasks/[0.035] p-4 shadow-sm sm:p-5">
-            <div className="flex items-center justify-center h-48 sm:h-64 text-muted-foreground">
-              <div className="text-center">
-                <Calendar className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">Visualização completa do calendário</p>
-                <p className="text-xs sm:text-sm">Em desenvolvimento</p>
+          <div className="grid gap-4 xl:grid-cols-[1fr_320px]">
+            <Card className="overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-tasks/[0.035] p-4 shadow-sm sm:p-5">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-tasks">Visão mensal</p>
+                  <h3 className="mt-1 font-display text-lg font-semibold capitalize">
+                    {format(calendarMonth, "MMMM yyyy", { locale: ptBR })}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-1 rounded-lg border border-border/60 bg-background/40 p-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => changeMonth("previous")}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-8 px-3 text-xs" onClick={() => { setCalendarMonth(startOfMonth(currentDate)); setSelectedDate(currentDate); }}>
+                    Hoje
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => changeMonth("next")}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          </Card>
+
+              <div className="grid grid-cols-7 border-b border-border/60 pb-2 text-center">
+                {days.map((day) => <span key={day} className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{day}</span>)}
+              </div>
+              <div className="mt-2 grid grid-cols-7 gap-1 sm:gap-2">
+                {calendarDays.map((day) => {
+                  const dayTasks = tasksForDate(day);
+                  const completed = dayTasks.filter((task) => task.completed).length;
+                  return (
+                    <button
+                      key={day.toISOString()}
+                      onClick={() => setSelectedDate(day)}
+                      className={cn(
+                        "group min-h-[70px] rounded-xl border border-transparent p-1.5 text-left transition-all sm:min-h-[94px] sm:p-2",
+                        !isSameMonth(day, calendarMonth) && "opacity-35",
+                        isSameDay(day, selectedDate) ? "border-tasks/30 bg-tasks/[0.08] shadow-sm" : "hover:border-border/70 hover:bg-muted/30",
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className={cn(
+                          "flex h-6 w-6 items-center justify-center rounded-lg text-xs font-medium",
+                          isToday(day) && "bg-tasks text-tasks-foreground",
+                        )}>{format(day, "d")}</span>
+                        {dayTasks.length > 0 && <span className="text-[9px] text-muted-foreground">{completed}/{dayTasks.length}</span>}
+                      </div>
+                      <div className="mt-1.5 space-y-1">
+                        {dayTasks.slice(0, 2).map((task) => (
+                          <div key={task.id} className={cn(
+                            "truncate rounded px-1.5 py-0.5 text-[9px] sm:text-[10px]",
+                            task.completed ? "bg-success/10 text-success line-through" : "bg-tasks/10 text-tasks",
+                          )}>{task.title}</div>
+                        ))}
+                        {dayTasks.length > 2 && <p className="px-1 text-[9px] text-muted-foreground">+{dayTasks.length - 2} tarefas</p>}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Card>
+
+            <Card className="h-fit border-border/70 bg-card/80 p-4 shadow-sm sm:p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-tasks">Dia selecionado</p>
+              <h3 className="mt-1 font-display text-lg font-semibold capitalize">
+                {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+              </h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">{selectedDayTasks.length} tarefa{selectedDayTasks.length === 1 ? "" : "s"}</p>
+
+              <div className="mt-4 space-y-2">
+                {selectedDayTasks.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border/70 bg-muted/15 p-5 text-center">
+                    <Calendar className="mx-auto mb-2 h-7 w-7 text-muted-foreground/40" />
+                    <p className="text-xs text-muted-foreground">Nenhuma tarefa neste dia</p>
+                  </div>
+                ) : selectedDayTasks.map((task) => (
+                  <div key={task.id} className="group flex items-center gap-2 rounded-xl border border-border/60 bg-muted/20 p-2.5">
+                    <button onClick={() => toggleTask({ id: task.id, completed: !task.completed })}>
+                      {task.completed ? <Check className="h-4 w-4 text-success" /> : <Circle className="h-4 w-4 text-muted-foreground" />}
+                    </button>
+                    <button onClick={() => handleEditTask(task)} className={cn("min-w-0 flex-1 truncate text-left text-xs font-medium", task.completed && "text-muted-foreground line-through")}>
+                      {task.title}
+                    </button>
+                    {task.due_time && <span className="text-[10px] text-muted-foreground">{task.due_time}</span>}
+                  </div>
+                ))}
+              </div>
+              <Button className="mt-4 w-full gradient-tasks text-tasks-foreground" size="sm" onClick={handleOpenTaskModal}>
+                <Plus className="mr-2 h-4 w-4" />Nova tarefa
+              </Button>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="goals" className="mt-4 sm:mt-6">
