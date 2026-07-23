@@ -25,6 +25,7 @@ import { format, parseISO, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { downloadIcs, IcsEvent } from "@/lib/icsExport";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const days = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const currentDate = new Date();
@@ -145,26 +146,19 @@ export default function Agenda() {
         onSubmit={handleAddGoal}
       />
 
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-4"
-      >
-        <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-display font-bold text-foreground">
-            Agenda & Tarefas
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Organize seu tempo e alcance seus objetivos
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+      <PageHeader
+        title="Agenda & Tarefas"
+        description="Organize seu tempo, priorize o dia e mantenha seus compromissos em movimento."
+        eyebrow="Planejamento"
+        icon={Calendar}
+        variant="tasks"
+        actions={
+          <>
           <Button
             variant="outline"
             size="sm"
             onClick={handleExportCalendar}
-            className="h-10 sm:h-9 active:scale-95 transition-transform"
+            className="h-10 border-white/15 bg-white/[0.07] text-white transition-transform hover:bg-white/15 hover:text-white active:scale-95"
           >
             <CalendarPlus className="w-4 h-4 mr-2" />
             Sincronizar com Google / Outlook
@@ -177,8 +171,9 @@ export default function Agenda() {
             <Plus className="w-4 h-4 mr-2" />
             Nova Tarefa
           </Button>
-        </div>
-      </motion.div>
+          </>
+        }
+      />
 
       <Tabs defaultValue="today" className="w-full">
         <TabsList className="bg-muted/50 w-full sm:w-auto">

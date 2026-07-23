@@ -33,6 +33,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { usePlan } from "@/hooks/usePlan";
 import { PremiumModal } from "@/components/premium/PremiumModal";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { UpgradeBanner } from "@/components/premium/UpgradeBanner";
 import { Lock } from "lucide-react";
 
@@ -189,18 +190,18 @@ export default function Financas() {
       <TransferModal open={transferModalOpen} onOpenChange={setTransferModalOpen} onSubmit={async (data) => { await transfer(data); toast.success("Transferência realizada!"); }} accounts={accounts} />
       <AddToGoalModal open={addToGoalModalOpen} onOpenChange={setAddToGoalModalOpen} onSubmit={async (data) => { await addToGoal(data); toast.success("Valor adicionado!"); }} goal={selectedGoalForAdd} accounts={accounts} />
 
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-display font-bold text-foreground">Finanças</h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">Gerencie suas receitas, despesas e orçamentos</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+      <PageHeader
+        title="Finanças"
+        description="Gerencie receitas, despesas e patrimônio com uma visão clara do seu mês."
+        eyebrow="Vida financeira"
+        icon={Wallet}
+        variant="finance"
+        actions={
           <Button className="gradient-finance text-finance-foreground h-10 px-4 active:scale-95 transition-transform" size="sm" onClick={() => { setEditingTransaction(null); setTransactionModalOpen(true); }}>
             <Plus className="w-4 h-4 mr-2" />Nova Transação
           </Button>
-        </div>
-      </motion.div>
+        }
+      />
 
       {!isPremium && !canAddTransaction && (
         <UpgradeBanner
@@ -210,37 +211,36 @@ export default function Financas() {
       )}
 
       {/* Month Selector */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/60 bg-card/40 p-2 sm:px-3">
         <MonthSelector selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
-        <p className="text-xs text-muted-foreground">
+        <p className="px-1 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
           Receitas e despesas são do mês selecionado. Saldo e poupança são acumulados.
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
         {[
-          { label: "Receitas", value: monthlyIncome, icon: TrendingUp, color: "bg-success/10", textColor: "text-success", monthly: true },
-          { label: "Despesas", value: monthlyExpenses, icon: TrendingDown, color: "bg-destructive/10", textColor: "text-destructive", monthly: true },
-          { label: "Saldo", value: totalBalance, icon: Wallet, color: "gradient-finance", textColor: totalBalance >= 0 ? "text-success" : "text-destructive", monthly: false },
-          { label: "Poupança", value: totalSavings, icon: PiggyBank, color: "bg-warning/10", textColor: "text-warning", monthly: false },
-          { label: "Patrimônio", value: patrimony, icon: BarChart3, color: "bg-primary/10", textColor: "text-primary", monthly: false },
+          { label: "Receitas", value: monthlyIncome, icon: TrendingUp, color: "bg-success/10", textColor: "text-success", border: "before:bg-success", glow: "from-success/[0.08]", monthly: true },
+          { label: "Despesas", value: monthlyExpenses, icon: TrendingDown, color: "bg-destructive/10", textColor: "text-destructive", border: "before:bg-destructive", glow: "from-destructive/[0.07]", monthly: true },
+          { label: "Saldo", value: totalBalance, icon: Wallet, color: "bg-finance/15", textColor: totalBalance >= 0 ? "text-success" : "text-destructive", border: "before:bg-finance", glow: "from-finance/[0.1]", monthly: false },
+          { label: "Poupança", value: totalSavings, icon: PiggyBank, color: "bg-warning/10", textColor: "text-warning", border: "before:bg-warning", glow: "from-warning/[0.07]", monthly: false },
+          { label: "Patrimônio", value: patrimony, icon: BarChart3, color: "bg-primary/10", textColor: "text-primary", border: "before:bg-primary", glow: "from-primary/[0.08]", monthly: false },
         ].map((stat, idx) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + idx * 0.05 }}>
-            <Card className="p-4 sm:p-5">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${stat.color} flex items-center justify-center flex-shrink-0`}>
-                  <stat.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${stat.label === "Saldo" ? "text-finance-foreground" : stat.textColor}`} />
+            <Card className={`relative h-full min-h-[112px] overflow-hidden border-border/70 bg-gradient-to-br ${stat.glow} via-card to-card p-4 shadow-sm transition-all before:absolute before:inset-x-0 before:top-0 before:h-0.5 ${stat.border} hover:-translate-y-0.5 hover:border-border hover:shadow-md sm:p-5`}>
+              <div className="flex h-full items-center gap-3">
+                <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${stat.color}`}>
+                  <stat.icon className={`h-5 w-5 ${stat.textColor}`} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground">
+                  <p className="text-xs font-medium text-muted-foreground">
                     {stat.label}
-                    {stat.monthly && <span className="text-[10px] ml-1 opacity-70">(mês)</span>}
-                    {!stat.monthly && <span className="text-[10px] ml-1 opacity-70">(total)</span>}
+                    <span className="ml-1 text-[9px] uppercase tracking-wider opacity-60">{stat.monthly ? "mês" : "total"}</span>
                   </p>
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-                    <p className={`text-base sm:text-xl font-bold truncate ${stat.textColor}`}>
-                      {stat.value !== 0 ? `R$ ${stat.value.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}` : "—"}
+                    <p className={`mt-1 truncate text-lg font-bold tracking-tight sm:text-xl ${stat.textColor}`}>
+                      {stat.value !== 0 ? stat.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "R$ 0,00"}
                     </p>
                   )}
                 </div>
@@ -252,32 +252,48 @@ export default function Financas() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-flex">
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="management">Gestão</TabsTrigger>
-          <TabsTrigger value="reports">Relatórios</TabsTrigger>
+        <TabsList className="grid h-11 w-full grid-cols-3 rounded-xl border border-border/60 bg-card/60 p-1 lg:w-auto lg:inline-grid">
+          <TabsTrigger value="overview" className="rounded-lg px-5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Visão Geral</TabsTrigger>
+          <TabsTrigger value="management" className="rounded-lg px-5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Gestão</TabsTrigger>
+          <TabsTrigger value="reports" className="rounded-lg px-5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Relatórios</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
           {/* Chart */}
-          <Card className="p-4 sm:p-5">
-            <h3 className="font-display font-semibold text-sm sm:text-base mb-4">Receitas vs Despesas</h3>
+          <Card className="overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-primary/[0.025] p-4 shadow-sm sm:p-5">
+            <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Fluxo financeiro</p>
+                <h3 className="mt-1 font-display text-base font-semibold sm:text-lg">Receitas vs Despesas</h3>
+                <p className="mt-0.5 text-xs text-muted-foreground">Evolução dos últimos sete meses</p>
+              </div>
+              <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/45 px-3 py-2">
+                <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className="h-2 w-2 rounded-full bg-success" />Receitas</span>
+                <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className="h-2 w-2 rounded-full bg-destructive" />Despesas</span>
+                <span className={`border-l border-border pl-3 text-xs font-semibold ${monthlyIncome - monthlyExpenses >= 0 ? "text-success" : "text-destructive"}`}>
+                  {monthlyIncome - monthlyExpenses >= 0 ? "+" : ""}{(monthlyIncome - monthlyExpenses).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                </span>
+              </div>
+            </div>
             {transactions.length === 0 ? (
-              <div className="h-48 flex items-center justify-center text-muted-foreground text-sm"><p>Adicione transações para ver o gráfico</p></div>
+              <div className="flex h-56 flex-col items-center justify-center rounded-xl border border-dashed border-border/70 bg-muted/20 text-center text-muted-foreground">
+                <BarChart3 className="mb-2 h-7 w-7 opacity-40" />
+                <p className="text-sm">Adicione transações para visualizar sua evolução</p>
+              </div>
             ) : (
-              <div className="h-48 sm:h-64">
+              <div className="h-56 sm:h-72">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={monthlyData}>
+                  <AreaChart data={monthlyData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorReceitas" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(150, 60%, 45%)" stopOpacity={0.3} /><stop offset="95%" stopColor="hsl(150, 60%, 45%)" stopOpacity={0} /></linearGradient>
                       <linearGradient id="colorDespesas" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(0, 72%, 55%)" stopOpacity={0.3} /><stop offset="95%" stopColor="hsl(0, 72%, 55%)" stopOpacity={0} /></linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} width={40} />
-                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} formatter={(value: number) => `R$ ${value.toLocaleString("pt-BR")}`} />
-                    <Area type="monotone" dataKey="receitas" stroke="hsl(150, 60%, 45%)" fillOpacity={1} fill="url(#colorReceitas)" name="Receitas" />
-                    <Area type="monotone" dataKey="despesas" stroke="hsl(0, 72%, 55%)" fillOpacity={1} fill="url(#colorDespesas)" name="Despesas" />
+                    <CartesianGrid vertical={false} strokeDasharray="4 6" stroke="hsl(var(--border))" opacity={0.7} />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} stroke="hsl(var(--muted-foreground))" fontSize={11} dy={8} />
+                    <YAxis axisLine={false} tickLine={false} stroke="hsl(var(--muted-foreground))" fontSize={10} width={48} tickFormatter={(value) => value >= 1000 ? `${value / 1000}k` : value} />
+                    <Tooltip cursor={{ stroke: "hsl(var(--border))", strokeDasharray: "4 4" }} contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: "12px", boxShadow: "0 12px 30px hsl(220 30% 5% / .22)" }} formatter={(value: number) => value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} />
+                    <Area type="monotone" dataKey="receitas" stroke="hsl(150, 60%, 45%)" strokeWidth={2.25} fillOpacity={1} fill="url(#colorReceitas)" name="Receitas" />
+                    <Area type="monotone" dataKey="despesas" stroke="hsl(0, 72%, 55%)" strokeWidth={2.25} fillOpacity={1} fill="url(#colorDespesas)" name="Despesas" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -286,26 +302,32 @@ export default function Financas() {
 
           {/* Filters & Transactions */}
           <TransactionFilters accounts={accounts} onFilter={setFilters} categories={categories} />
-          <Card className="p-4 sm:p-5">
-            <h3 className="font-display font-semibold text-sm sm:text-base mb-4">Transações ({filteredTransactions.length})</h3>
+          <Card className="overflow-hidden border-border/70 bg-card/80 p-4 shadow-sm sm:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="font-display text-base font-semibold">Transações recentes</h3>
+                <p className="mt-0.5 text-xs text-muted-foreground">{filteredTransactions.length} lançamento{filteredTransactions.length === 1 ? "" : "s"} no período</p>
+              </div>
+              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">{format(selectedMonth, "MMM yyyy", { locale: ptBR })}</span>
+            </div>
             {isLoading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div> : filteredTransactions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground"><p className="text-sm">Nenhuma transação encontrada</p></div>
             ) : (
-              <div className="space-y-1 max-h-80 overflow-y-auto">
+              <div className="max-h-96 space-y-1.5 overflow-y-auto pr-1">
                 {filteredTransactions.slice(0, 20).map(t => (
-                  <div key={t.id} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-muted/50 transition-colors group">
+                  <div key={t.id} className="group flex items-center justify-between rounded-xl border border-transparent bg-muted/25 p-3 transition-all hover:border-border/70 hover:bg-muted/45">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${t.type === "income" ? "bg-success/10" : "bg-destructive/10"}`}>
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${t.type === "income" ? "bg-success/10" : "bg-destructive/10"}`}>
                         {t.type === "income" ? <TrendingUp className="w-4 h-4 text-success" /> : <CreditCard className="w-4 h-4 text-destructive" />}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-xs sm:text-sm truncate">{t.description}</p>
+                        <p className="truncate text-xs font-semibold sm:text-sm">{t.description}</p>
                         <p className="text-[10px] sm:text-xs text-muted-foreground">{t.category} • {format(parseISO(t.date), "dd MMM", { locale: ptBR })}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <p className={`font-semibold text-xs sm:text-sm ${t.type === "income" ? "text-success" : "text-destructive"}`}>
-                        {t.type === "income" ? "+" : "-"}R$ {t.amount.toLocaleString("pt-BR")}
+                      <p className={`text-xs font-bold sm:text-sm ${t.type === "income" ? "text-success" : "text-destructive"}`}>
+                        {t.type === "income" ? "+" : "-"}{t.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                       </p>
                       <ContextActionMenu onEdit={() => { setEditingTransaction(t); setTransactionModalOpen(true); }} onDelete={() => { deleteTransaction(t.id); toast.success("Excluído!"); }} />
                     </div>
@@ -317,7 +339,7 @@ export default function Financas() {
         </TabsContent>
 
         <TabsContent value="management" className="space-y-4 mt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
             <AccountsSection accounts={accounts} totalBalance={totalBalance} isLoading={accountsLoading} onAdd={() => { setEditingAccount(null); setAccountModalOpen(true); }} onEdit={(a) => { setEditingAccount(a); setAccountModalOpen(true); }} onDelete={(id) => { deleteAccount(id); toast.success("Conta excluída!"); }} onTransfer={() => setTransferModalOpen(true)} />
             <FinancialGoalsSection goals={goals} isLoading={goalsLoading} onAdd={() => { setEditingGoal(null); setGoalModalOpen(true); }} onEdit={(g) => { setEditingGoal(g); setGoalModalOpen(true); }} onDelete={(id) => { deleteGoal(id); toast.success("Meta excluída!"); }} onAddToGoal={(g) => { setSelectedGoalForAdd(g); setAddToGoalModalOpen(true); }} onWithdraw={async (id, amount, accountId) => { await withdrawFromGoal({ id, amount, accountId }); toast.success("Valor resgatado!"); }} accounts={accounts} />
             <InstallmentsSection installments={installments} payments={payments} monthlyImpact={monthlyImpact} isLoading={installmentsLoading} onAdd={() => setInstallmentModalOpen(true)} onDelete={(id) => { deleteInstallment(id); toast.success("Parcelamento excluído!"); }} onMarkPaid={(id, paid) => { markPaymentPaid({ paymentId: id, paid }); toast.success(paid ? "Parcela paga!" : "Parcela desmarcada!"); }} />

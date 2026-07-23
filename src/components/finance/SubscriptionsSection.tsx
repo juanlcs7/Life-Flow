@@ -41,7 +41,7 @@ export function SubscriptionsSection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <Card className="p-4 sm:p-5">
+      <Card className="h-full overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-info/[0.025] p-4 shadow-sm sm:p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display font-semibold text-sm sm:text-base flex items-center gap-2">
             <RefreshCw className="w-4 h-4 text-primary" />
@@ -68,7 +68,7 @@ export function SubscriptionsSection({
         ) : (
           <>
             {/* Monthly cost */}
-            <div className="p-3 bg-info/10 rounded-lg mb-4">
+            <div className="mb-4 rounded-xl border border-info/15 bg-info/[0.08] p-3.5">
               <div className="flex items-center justify-between">
                 <span className="text-sm">Custo mensal estimado</span>
                 <span className="font-bold text-info">
@@ -79,7 +79,7 @@ export function SubscriptionsSection({
 
             {/* Upcoming renewals alert */}
             {upcomingRenewals.length > 0 && (
-              <div className="p-3 bg-warning/10 rounded-lg mb-4 flex items-start gap-2">
+              <div className="mb-4 flex items-start gap-2 rounded-xl border border-warning/15 bg-warning/[0.08] p-3">
                 <AlertCircle className="w-4 h-4 text-warning mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-warning">Renovações próximas</p>
@@ -102,7 +102,7 @@ export function SubscriptionsSection({
                 return (
                   <div
                     key={sub.id}
-                    className={`flex items-center justify-between p-3 rounded-lg ${sub.active ? "bg-muted/50" : "bg-muted/30 opacity-60"} hover:bg-muted transition-colors group`}
+                    className={`group flex items-center justify-between rounded-xl border border-transparent p-3 ${sub.active ? "bg-muted/35" : "bg-muted/20 opacity-60"} transition-all hover:border-info/15 hover:bg-info/[0.04]`}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">

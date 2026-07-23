@@ -46,6 +46,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { usePlan } from "@/hooks/usePlan";
 import { PremiumModal } from "@/components/premium/PremiumModal";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const priorityColors = {
   high: "text-destructive bg-destructive/10",
@@ -210,21 +211,13 @@ export default function Metas() {
         goal={selectedGoalForHistory}
       />
 
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-4"
-      >
-        <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-display font-bold text-foreground">
-            Metas Inteligentes
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Acompanhe seu progresso e alcance seus objetivos
-          </p>
-        </div>
-      </motion.div>
+      <PageHeader
+        title="Metas Inteligentes"
+        description="Transforme objetivos em etapas visíveis e acompanhe cada avanço até a conquista."
+        eyebrow="Evolução pessoal"
+        icon={Target}
+        variant="goals"
+      />
 
       {/* Insights */}
       <GoalInsights personalGoals={personalGoals} financialGoals={financialGoals} />

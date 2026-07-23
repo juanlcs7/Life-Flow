@@ -61,7 +61,7 @@ export function TransactionFilters({ accounts, onFilter, categories }: Transacti
   const hasActiveFilters = Object.values(filters).some(v => v !== "");
 
   return (
-    <Card className="p-3 sm:p-4">
+    <Card className="border-border/70 bg-card/75 p-2.5 shadow-sm sm:p-3">
       <div className="space-y-3">
         {/* Search bar - always visible */}
         <div className="flex gap-2">
@@ -71,19 +71,19 @@ export function TransactionFilters({ accounts, onFilter, categories }: Transacti
               placeholder="Buscar transações..."
               value={filters.search}
               onChange={(e) => updateFilter("search", e.target.value)}
-              className="pl-9"
+              className="h-11 border-0 bg-muted/45 pl-10 shadow-none focus-visible:bg-background"
             />
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="h-10"
+            className="h-11 rounded-lg border-border/70 bg-background/50 px-4"
           >
             {isExpanded ? "Menos" : "Mais filtros"}
           </Button>
           {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-10 px-2">
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-11 px-3">
               <X className="w-4 h-4" />
             </Button>
           )}
@@ -91,7 +91,7 @@ export function TransactionFilters({ accounts, onFilter, categories }: Transacti
 
         {/* Expanded filters */}
         {isExpanded && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-2">
+          <div className="grid grid-cols-2 gap-2 border-t border-border/60 pt-3 sm:grid-cols-3 lg:grid-cols-6">
             <Select value={filters.type} onValueChange={(v) => updateFilter("type", v)}>
               <SelectTrigger>
                 <SelectValue placeholder="Tipo" />

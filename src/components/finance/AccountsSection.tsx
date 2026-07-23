@@ -36,7 +36,7 @@ export function AccountsSection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <Card className="p-4 sm:p-5">
+      <Card className="h-full overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-primary/[0.035] p-4 shadow-sm sm:p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display font-semibold text-sm sm:text-base flex items-center gap-2">
             <Wallet className="w-4 h-4 text-primary" />
@@ -75,10 +75,10 @@ export function AccountsSection({
                 return (
                   <div
                     key={account.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"
+                    className="group flex items-center justify-between rounded-xl border border-transparent bg-muted/35 p-3 transition-all hover:border-primary/15 hover:bg-primary/[0.045]"
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-lg ${account.color} flex items-center justify-center`}>
+                      <div className={`w-10 h-10 rounded-xl ${account.color} flex items-center justify-center shadow-sm`}>
                         <IconComponent className="w-4 h-4 text-white" />
                       </div>
                       <div>
@@ -105,7 +105,7 @@ export function AccountsSection({
               })}
             </div>
             
-            <div className="mt-4 pt-3 border-t">
+            <div className="mt-4 rounded-xl border border-success/15 bg-success/[0.055] px-3.5 py-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Saldo Total</span>
                 <span className={`font-bold ${totalBalance >= 0 ? "text-success" : "text-destructive"}`}>

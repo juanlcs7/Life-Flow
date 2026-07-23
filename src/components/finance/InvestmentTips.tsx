@@ -127,7 +127,7 @@ export function InvestmentTips({ patrimony }: Props) {
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
   return (
-    <Card className="p-4 sm:p-5 bg-gradient-to-br from-card to-primary/5 border-primary/20">
+    <Card className="h-full border-primary/20 bg-gradient-to-br from-card via-card to-primary/[0.07] p-4 shadow-sm sm:p-5">
       <div className="flex items-start gap-3 mb-4">
         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
           <Lightbulb className="w-5 h-5 text-primary" />
@@ -141,7 +141,7 @@ export function InvestmentTips({ patrimony }: Props) {
       </div>
       <div className="space-y-2.5">
         {tips.map((t, i) => (
-          <div key={i} className="flex gap-3 p-3 rounded-lg bg-background/60 border border-border/50">
+          <div key={i} className="flex gap-3 rounded-xl border border-border/50 bg-background/50 p-3.5 transition-colors hover:bg-background/80">
             <t.icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${t.tone}`} />
             <div className="min-w-0">
               <p className="text-sm font-medium">{t.title}</p>

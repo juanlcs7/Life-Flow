@@ -148,7 +148,7 @@ export function FinancialGoalsSection({
         </DialogContent>
       </Dialog>
 
-      <Card className="p-4 sm:p-5">
+      <Card className="h-full overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-primary/[0.035] p-4 shadow-sm sm:p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display font-semibold text-sm sm:text-base flex items-center gap-2">
             <Target className="w-4 h-4 text-primary" />
@@ -183,7 +183,7 @@ export function FinancialGoalsSection({
               return (
                 <div
                   key={goal.id}
-                  className="p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"
+                  className="group rounded-xl border border-transparent bg-muted/35 p-3.5 transition-all hover:border-primary/15 hover:bg-primary/[0.045]"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
