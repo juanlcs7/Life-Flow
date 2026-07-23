@@ -11,7 +11,6 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   LogOut,
   History,
   Target,
@@ -94,14 +93,15 @@ export function AppSidebar() {
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        "h-screen sticky top-0 flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 hidden lg:flex",
-        collapsed ? "w-20" : "w-64"
+        "sticky top-0 hidden h-screen flex-col overflow-hidden border-r border-white/10 bg-[linear-gradient(180deg,#07111f_0%,#091827_55%,#07111f_100%)] shadow-2xl shadow-slate-950/10 transition-all duration-300 lg:flex",
+        collapsed ? "w-[84px]" : "w-[272px]"
       )}
     >
+      <div className="pointer-events-none absolute -left-24 top-0 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl" />
       {/* Logo */}
-      <div className="p-4 flex items-center gap-3 border-b border-sidebar-border">
-        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
-          <Sparkles className="w-5 h-5 text-primary-foreground" />
+      <div className="relative flex h-[78px] items-center gap-3 border-b border-white/10 px-5">
+        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06]">
+          <img src="/lifeflow-logo.png" alt="" className="h-8 w-8 object-contain" />
         </div>
         <AnimatePresence>
           {!collapsed && (
@@ -111,20 +111,20 @@ export function AppSidebar() {
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
             >
-              <h1 className="font-display font-bold text-lg text-sidebar-foreground">
+              <h1 className="font-display text-lg font-bold tracking-tight text-white">
                 LifeFlow
               </h1>
-              <p className="text-xs text-sidebar-muted">Organize sua vida</p>
+              <p className="text-xs text-slate-400">Seu ritmo, seu progresso</p>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       {/* User Info */}
-      <div className="p-3 border-b border-sidebar-border">
-        <div className="flex items-center gap-3 px-2 py-2">
-          <Avatar className="w-8 h-8 flex-shrink-0">
-            <AvatarFallback className="bg-primary/20 text-primary text-xs font-medium">
+      <div className="relative border-b border-white/10 p-3">
+        <div className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.045] px-3 py-3">
+          <Avatar className="h-9 w-9 flex-shrink-0 ring-2 ring-cyan-300/10">
+            <AvatarFallback className="bg-gradient-to-br from-cyan-400/20 to-emerald-400/20 text-xs font-semibold text-cyan-200">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -136,10 +136,10 @@ export function AppSidebar() {
                 exit={{ opacity: 0, x: -10 }}
                 className="flex-1 min-w-0"
               >
-                <p className="text-sm font-medium text-sidebar-foreground truncate">
+                <p className="truncate text-sm font-semibold text-slate-100">
                   {displayName}
                 </p>
-                <p className="text-xs text-sidebar-muted truncate">
+                <p className="truncate text-xs text-slate-500">
                   {user?.email}
                 </p>
               </motion.div>
@@ -149,7 +149,12 @@ export function AppSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="relative flex-1 space-y-1 overflow-y-auto p-3">
+        {!collapsed && (
+          <p className="mb-2 px-3 pt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+            Navegação
+          </p>
+        )}
         {navItems.map((item) => {
           const isActive = location.pathname === item.href;
           return (
@@ -157,22 +162,22 @@ export function AppSidebar() {
               key={item.href}
               to={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative",
+                "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200",
                 isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                  ? "bg-white/[0.09] text-white shadow-sm"
+                  : "text-slate-400 hover:bg-white/[0.055] hover:text-slate-100"
               )}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeNav"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full gradient-primary"
+                  className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-cyan-300 to-emerald-300"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
               <item.icon
                 className={cn(
-                  "w-5 h-5 transition-colors",
+                  "h-5 w-5 transition-colors",
                   isActive ? item.color : "text-current"
                 )}
               />
@@ -194,7 +199,7 @@ export function AppSidebar() {
       </nav>
 
       {/* Settings & Logout */}
-      <div className="p-3 border-t border-sidebar-border">
+      <div className="relative border-t border-white/10 p-3">
         <div className="flex items-center justify-between px-3 py-2">
           <AnimatePresence>
             {!collapsed && (
@@ -202,7 +207,7 @@ export function AppSidebar() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="text-xs text-sidebar-muted font-medium"
+                className="text-xs font-medium text-slate-500"
               >
                 Tema
               </motion.span>
@@ -213,7 +218,7 @@ export function AppSidebar() {
 
         <Link
           to="/configuracoes"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-slate-400 transition-all duration-200 hover:bg-white/[0.055] hover:text-white"
         >
           <Settings className="w-5 h-5" />
           <AnimatePresence>
@@ -232,7 +237,7 @@ export function AppSidebar() {
 
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-muted hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-slate-400 transition-all duration-200 hover:bg-red-400/10 hover:text-red-300"
         >
           <LogOut className="w-5 h-5" />
           <AnimatePresence>
@@ -251,7 +256,7 @@ export function AppSidebar() {
 
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="w-full mt-2 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-slate-500 transition-all duration-200 hover:bg-white/[0.055] hover:text-slate-200"
         >
           {collapsed ? (
             <ChevronRight className="w-5 h-5" />

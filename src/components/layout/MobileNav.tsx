@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   Wallet,
@@ -9,10 +8,8 @@ import {
   FolderOpen,
   Users,
   Settings,
-  Sparkles,
   LogOut,
   Menu,
-  X,
   History,
   Target,
 } from "lucide-react";
@@ -92,15 +89,16 @@ export function MobileNav() {
   const initials = displayName.substring(0, 2).toUpperCase();
 
   return (
-    <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-sidebar border-b border-sidebar-border">
-      <div className="flex items-center justify-between p-4">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl lg:hidden">
+      <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center shadow-glow">
-            <Sparkles className="w-4 h-4 text-primary-foreground" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/70 bg-card shadow-sm">
+            <img src="/lifeflow-logo.png" alt="" className="h-8 w-8 object-contain" />
           </div>
-          <h1 className="font-display font-bold text-sidebar-foreground">
-            LifeFlow
-          </h1>
+          <div>
+            <h1 className="font-display font-bold tracking-tight text-foreground">LifeFlow</h1>
+            <p className="text-[10px] font-medium text-muted-foreground">Seu dia em movimento</p>
+          </div>
         </div>
 
         <Sheet open={open} onOpenChange={setOpen}>
@@ -108,29 +106,33 @@ export function MobileNav() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-sidebar-foreground hover:bg-sidebar-accent active:scale-95"
+              className="rounded-xl text-foreground hover:bg-muted active:scale-95"
             >
               <Menu className="w-6 h-6" />
             </Button>
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="w-72 bg-sidebar border-sidebar-border p-0"
+            className="w-[310px] border-white/10 bg-[linear-gradient(180deg,#07111f_0%,#091827_100%)] p-0"
           >
             <div className="flex flex-col h-full">
               {/* User Info */}
-              <div className="p-4 border-b border-sidebar-border">
-                <div className="flex items-center gap-3">
-                  <Avatar className="w-10 h-10">
-                    <AvatarFallback className="bg-primary/20 text-primary text-sm font-medium">
+              <div className="border-b border-white/10 p-5">
+                <div className="mb-5 flex items-center gap-3">
+                  <img src="/lifeflow-logo.png" alt="" className="h-9 w-9 object-contain" />
+                  <span className="font-display text-lg font-bold text-white">LifeFlow</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.045] p-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="bg-cyan-300/10 text-sm font-semibold text-cyan-200">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-sidebar-foreground truncate">
+                    <p className="truncate text-sm font-semibold text-white">
                       {displayName}
                     </p>
-                    <p className="text-xs text-sidebar-muted truncate">
+                    <p className="truncate text-xs text-slate-500">
                       {user?.email}
                     </p>
                   </div>
@@ -138,7 +140,10 @@ export function MobileNav() {
               </div>
 
               {/* Navigation */}
-              <nav className="flex-1 p-3 space-y-1 overflow-auto">
+              <nav className="flex-1 space-y-1 overflow-auto p-3">
+                <p className="mb-2 px-4 pt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+                  Navegação
+                </p>
                 {navItems.map((item) => {
                   const isActive = location.pathname === item.href;
                   return (
@@ -147,10 +152,10 @@ export function MobileNav() {
                       to={item.href}
                       onClick={() => setOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 active:scale-95",
+                        "flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 active:scale-95",
                         isActive
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                          : "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                          ? "bg-white/[0.09] text-white"
+                          : "text-slate-400 hover:bg-white/[0.055] hover:text-white"
                       )}
                     >
                       <item.icon
@@ -166,16 +171,16 @@ export function MobileNav() {
               </nav>
 
               {/* Settings & Logout */}
-              <div className="p-3 border-t border-sidebar-border space-y-1">
+              <div className="space-y-1 border-t border-white/10 p-3">
                 <div className="flex items-center justify-between px-4 py-2">
-                  <span className="text-sm text-sidebar-muted font-medium">Tema</span>
+                  <span className="text-sm font-medium text-slate-500">Tema</span>
                   <ThemeToggle />
                 </div>
 
                 <Link
                   to="/configuracoes"
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200 active:scale-95"
+                  className="flex items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-white/[0.055] hover:text-white active:scale-95"
                 >
                   <Settings className="w-5 h-5" />
                   <span className="font-medium">Configurações</span>
@@ -183,7 +188,7 @@ export function MobileNav() {
 
                 <button
                   onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-muted hover:text-destructive hover:bg-destructive/10 transition-all duration-200 active:scale-95"
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-red-400/10 hover:text-red-300 active:scale-95"
                 >
                   <LogOut className="w-5 h-5" />
                   <span className="font-medium">Sair</span>
