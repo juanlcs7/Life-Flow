@@ -128,11 +128,16 @@ export function QuickActionsWidget({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.3 }}
     >
-      <Card className="shadow-card">
-        <CardHeader className="pb-3 flex flex-row items-center justify-between">
+      <Card className="overflow-hidden border-white/70 bg-card/90 shadow-card backdrop-blur-sm dark:border-white/5">
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
           <div className="flex items-center gap-2">
-            <Plus className="w-4 h-4 text-primary" />
-            <CardTitle className="text-sm font-medium">Ações Rápidas</CardTitle>
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+              <Plus className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-sm font-semibold">Ações rápidas</CardTitle>
+              <p className="mt-0.5 text-xs text-muted-foreground">Registre algo em poucos segundos</p>
+            </div>
           </div>
           <Button
             variant="ghost"
@@ -178,7 +183,7 @@ export function QuickActionsWidget({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="grid grid-cols-2 sm:grid-cols-4 gap-2"
+                className="grid grid-cols-2 gap-2 sm:grid-cols-4"
               >
                 {activeActions.length > 0 ? (
                   activeActions.map((action) => (
@@ -186,12 +191,12 @@ export function QuickActionsWidget({
                       key={action.id}
                       variant="ghost"
                       className={cn(
-                        "flex flex-col items-center gap-1 h-auto py-3 px-2 transition-all active:scale-95",
+                        "h-auto min-h-20 flex-col items-start gap-2 rounded-xl px-3 py-3 transition-all active:scale-95",
                         action.bgColor
                       )}
                       onClick={action.action}
                     >
-                      <action.icon className={cn("w-5 h-5", action.color)} />
+                      <action.icon className={cn("h-5 w-5", action.color)} />
                       <span className="text-xs font-medium">{action.label}</span>
                     </Button>
                   ))

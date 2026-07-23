@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Settings2, Bell, BellOff } from "lucide-react";
+import { CalendarDays, Settings2, Bell, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
@@ -60,6 +60,11 @@ export default function Dashboard() {
   const today = new Date();
   const greeting = today.getHours() < 12 ? "Bom dia" : today.getHours() < 18 ? "Boa tarde" : "Boa noite";
   const displayName = profile?.name || "Usuário";
+  const formattedDate = new Intl.DateTimeFormat("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+  }).format(today);
 
   const cardOrder = preferences?.card_order || ["finances", "tasks", "goals", "health", "agenda", "history"];
   const visibleCards = preferences?.visible_cards || cardOrder;
@@ -134,38 +139,47 @@ export default function Dashboard() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        className="relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 p-6 text-white shadow-[0_24px_70px_-38px_rgba(8,145,178,.7)] sm:p-8"
       >
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-display font-bold text-foreground">
-            {greeting}, <span className="text-gradient">{displayName}</span>! 👋
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Aqui está o resumo do seu dia. Vamos fazer dele um dia produtivo!
-          </p>
-        </div>
+        <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-28 left-1/3 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
 
-        <div className="flex items-center gap-2 self-start">
-          {isNativePlatform && !permissionGranted && (
+        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-medium text-cyan-100 backdrop-blur">
+              <CalendarDays className="h-3.5 w-3.5" />
+              <span className="capitalize">{formattedDate}</span>
+            </div>
+            <h1 className="font-display text-3xl font-bold tracking-[-0.03em] text-white lg:text-4xl">
+              {greeting}, {displayName}.
+            </h1>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
+              Seu dia começa com clareza. Acompanhe o que importa e avance no seu ritmo.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 self-start sm:justify-end">
+            {isNativePlatform && !permissionGranted && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRequestNotifications}
+                className="gap-2 border-white/15 bg-white/[0.07] text-white hover:bg-white/15 hover:text-white"
+              >
+                <Bell className="h-4 w-4" />
+                Ativar lembretes
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
-              onClick={handleRequestNotifications}
-              className="gap-2"
+              onClick={() => setIsCustomizing(!isCustomizing)}
+              className="gap-2 border-white/15 bg-white/[0.07] text-white hover:bg-white/15 hover:text-white"
             >
-              <Bell className="w-4 h-4" />
-              Ativar lembretes
+              {isCustomizing ? <Sparkles className="h-4 w-4" /> : <Settings2 className="h-4 w-4" />}
+              {isCustomizing ? "Concluir" : "Personalizar"}
             </Button>
-          )}
-          <Button
-            variant={isCustomizing ? "default" : "outline"}
-            size="sm"
-            onClick={() => setIsCustomizing(!isCustomizing)}
-            className="gap-2"
-          >
-            <Settings2 className="w-4 h-4" />
-            {isCustomizing ? "Concluir" : "Personalizar"}
-          </Button>
+          </div>
         </div>
       </motion.div>
 
@@ -184,13 +198,13 @@ export default function Dashboard() {
 
       {/* Dashboard Cards Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="h-[180px] bg-muted/50 rounded-lg animate-pulse" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {orderedVisibleCards.map((cardId, index) => {
             const CardComponent = cardComponents[cardId];
             const size = cardSizes[cardId] || "medium";

@@ -21,12 +21,12 @@ interface DashboardCardProps {
 }
 
 const variantStyles = {
-  finance: "border-l-4 border-l-finance",
-  tasks: "border-l-4 border-l-tasks",
-  goals: "border-l-4 border-l-primary",
-  health: "border-l-4 border-l-health",
-  agenda: "border-l-4 border-l-info",
-  history: "border-l-4 border-l-muted-foreground",
+  finance: "before:bg-finance",
+  tasks: "before:bg-tasks",
+  goals: "before:bg-primary",
+  health: "before:bg-health",
+  agenda: "before:bg-info",
+  history: "before:bg-muted-foreground",
 };
 
 const sizeStyles = {
@@ -58,22 +58,24 @@ export function DashboardCard({
     >
       <Card
         className={cn(
-          "shadow-card hover:shadow-lg transition-all duration-300 cursor-pointer group",
+          "group relative cursor-pointer overflow-hidden border-white/70 bg-card/90 shadow-card backdrop-blur-sm transition-all duration-300 before:absolute before:inset-x-0 before:top-0 before:h-1 hover:-translate-y-1 hover:shadow-xl dark:border-white/5",
           variantStyles[variant],
           sizeStyles[size],
           isCustomizing && "ring-2 ring-primary/20"
         )}
         onClick={() => !isCustomizing && navigate(href)}
       >
-        <CardHeader className="pb-2 flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between pb-3 pt-5">
           <div className="flex items-center gap-2">
             {isCustomizing && (
               <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 -ml-1">
                 <GripVertical className="w-4 h-4 text-muted-foreground" />
               </div>
             )}
-            <Icon className="w-4 h-4 text-muted-foreground" />
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted/70">
+              <Icon className="h-4 w-4 text-foreground/75" />
+            </div>
+            <CardTitle className="text-sm font-semibold">{title}</CardTitle>
           </div>
           {!isCustomizing && (
             <Button
