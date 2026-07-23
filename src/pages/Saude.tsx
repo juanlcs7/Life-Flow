@@ -22,6 +22,9 @@ import { HabitModal } from "@/components/modals/HabitModal";
 import { ContextActionMenu } from "@/components/ui/context-action-menu";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { format, isSameDay, parseISO, startOfDay, subDays } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const iconMap: Record<string, React.ElementType> = {
   Droplets,
@@ -37,7 +40,7 @@ const iconMap: Record<string, React.ElementType> = {
 export default function Saude() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
-  const { habits, isLoading, addHabit, incrementHabit, updateHabit, deleteHabit } = useHabits();
+  const { habits, habitLogs, isLoading, logsLoading, addHabit, incrementHabit, updateHabit, deleteHabit } = useHabits();
 
   // Calculate stats from real data
   const stats = useMemo(() => {
@@ -53,6 +56,39 @@ export default function Saude() {
     
     return { healthScore, maxStreak };
   }, [habits]);
+
+  const weeklyData = useMemo(() => {
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = startOfDay(subDays(new Date(), 6 - index));
+      const dayLogs = habitLogs.filter((log) => {
+        try {
+          return isSameDay(parseISO(log.completed_at), date);
+        } catch {
+          return false;
+        }
+      });
+
+      const progressByHabit = new Map<string, number>();
+      dayLogs.forEach((log) => progressByHabit.set(log.habit_id, log.progress));
+
+      const totalPercentage = habits.reduce((sum, habit) => {
+        const progress = progressByHabit.get(habit.id) || 0;
+        return sum + Math.min((progress / habit.daily_goal) * 100, 100);
+      }, 0);
+
+      return {
+        day: format(date, "EEE", { locale: ptBR }).replace(".", ""),
+        fullDate: format(date, "dd 'de' MMMM", { locale: ptBR }),
+        desempenho: habits.length > 0 ? Math.round(totalPercentage / habits.length) : 0,
+        concluidos: habits.filter((habit) => (progressByHabit.get(habit.id) || 0) >= habit.daily_goal).length,
+      };
+    });
+  }, [habitLogs, habits]);
+
+  const weeklyAverage = habits.length > 0
+    ? Math.round(weeklyData.reduce((sum, day) => sum + day.desempenho, 0) / weeklyData.length)
+    : 0;
+  const bestDay = weeklyData.reduce((best, day) => day.desempenho > best.desempenho ? day : best, weeklyData[0]);
 
   const handleAddHabit = async (data: {
     name: string;
@@ -335,13 +371,54 @@ export default function Saude() {
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-health">Consistência</p>
             <h3 className="mt-1 font-display text-base font-semibold sm:text-lg">Progresso Semanal</h3>
           </div>
-          {habits.length === 0 ? (
+          {isLoading || logsLoading ? (
+            <div className="flex h-40 items-center justify-center sm:h-64">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : habits.length === 0 ? (
             <div className="flex h-40 items-center justify-center rounded-xl border border-dashed border-border/70 bg-muted/15 text-sm text-muted-foreground sm:h-64">
               <p>Adicione hábitos para ver o progresso</p>
             </div>
           ) : (
-            <div className="flex h-40 items-center justify-center rounded-xl border border-dashed border-health/20 bg-health/[0.025] text-sm text-muted-foreground sm:h-64">
-              <p>Gráfico de progresso em desenvolvimento</p>
+            <div className="grid gap-5 lg:grid-cols-[1fr_220px]">
+              <div className="h-56 sm:h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={weeklyData} margin={{ top: 12, right: 8, left: -18, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="healthBar" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--health))" stopOpacity={1} />
+                        <stop offset="100%" stopColor="hsl(var(--health))" stopOpacity={0.45} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid vertical={false} strokeDasharray="4 6" stroke="hsl(var(--border))" opacity={0.7} />
+                    <XAxis dataKey="day" axisLine={false} tickLine={false} fontSize={11} stroke="hsl(var(--muted-foreground))" />
+                    <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} axisLine={false} tickLine={false} fontSize={10} stroke="hsl(var(--muted-foreground))" tickFormatter={(value) => `${value}%`} />
+                    <Tooltip
+                      cursor={{ fill: "hsl(var(--muted) / .35)" }}
+                      contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: "12px" }}
+                      formatter={(value: number, name: string, item) => [`${value}% • ${item.payload.concluidos} concluídos`, "Desempenho"]}
+                      labelFormatter={(_, payload) => payload?.[0]?.payload?.fullDate || ""}
+                    />
+                    <Bar dataKey="desempenho" fill="url(#healthBar)" radius={[8, 8, 3, 3]} maxBarSize={48} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+                <div className="rounded-xl border border-health/15 bg-health/[0.055] p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Média semanal</p>
+                  <p className="mt-1 text-2xl font-bold text-health">{weeklyAverage}%</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">dos objetivos diários</p>
+                </div>
+                <div className="rounded-xl border border-warning/15 bg-warning/[0.055] p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Melhor dia</p>
+                  <p className="mt-1 text-lg font-bold capitalize">{bestDay?.day || "—"}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">{bestDay?.desempenho || 0}% de desempenho</p>
+                </div>
+                <div className="col-span-2 rounded-xl border border-border/60 bg-muted/20 p-4 lg:col-span-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Conclusões na semana</p>
+                  <p className="mt-1 text-xl font-bold">{weeklyData.reduce((sum, day) => sum + day.concluidos, 0)}</p>
+                </div>
+              </div>
             </div>
           )}
         </Card>

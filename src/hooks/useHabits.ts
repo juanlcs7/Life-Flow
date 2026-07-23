@@ -17,6 +17,16 @@ export interface Habit {
   created_at: string;
 }
 
+export interface HabitLog {
+  id: string;
+  user_id: string;
+  habit_id: string;
+  progress: number;
+  goal_reached: boolean;
+  completed_at: string;
+  created_at: string;
+}
+
 export type NewHabit = Pick<Habit, "name" | "icon" | "color" | "unit" | "daily_goal">;
 
 // Helper to get today's date string
@@ -80,6 +90,26 @@ export function useHabits() {
     enabled: !!user,
   });
 
+  const logsQuery = useQuery({
+    queryKey: ["habit_logs", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 6);
+      startDate.setHours(0, 0, 0, 0);
+
+      const { data, error } = await supabase
+        .from("habit_logs")
+        .select("*")
+        .gte("completed_at", startDate.toISOString())
+        .order("completed_at", { ascending: true });
+
+      if (error) throw error;
+      return data as HabitLog[];
+    },
+    enabled: !!user,
+  });
+
   const addMutation = useMutation({
     mutationFn: async (habit: NewHabit) => {
       if (!user) throw new Error("User not authenticated");
@@ -128,6 +158,37 @@ export function useHabits() {
 
       if (error) throw error;
 
+      if (user) {
+        const dayStart = new Date();
+        dayStart.setHours(0, 0, 0, 0);
+        const { data: existingLog, error: logLookupError } = await supabase
+          .from("habit_logs")
+          .select("id")
+          .eq("habit_id", id)
+          .gte("completed_at", dayStart.toISOString())
+          .order("completed_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (logLookupError) throw logLookupError;
+
+        const logData = {
+          progress: newProgress,
+          goal_reached: newProgress >= daily_goal,
+          completed_at: new Date().toISOString(),
+        };
+
+        const { error: logError } = existingLog
+          ? await supabase.from("habit_logs").update(logData).eq("id", existingLog.id)
+          : await supabase.from("habit_logs").insert({
+              ...logData,
+              habit_id: id,
+              user_id: user.id,
+            });
+
+        if (logError) throw logError;
+      }
+
       // Log completion to history when goal is reached
       if (user && justCompleted) {
         const habit = (query.data || []).find(h => h.id === id);
@@ -147,6 +208,7 @@ export function useHabits() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["habits", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["habit_logs", user?.id] });
       queryClient.invalidateQueries({ queryKey: ["history_events", user?.id] });
     },
   });
@@ -176,7 +238,9 @@ export function useHabits() {
 
   return {
     habits: query.data ?? [],
+    habitLogs: logsQuery.data ?? [],
     isLoading: query.isLoading,
+    logsLoading: logsQuery.isLoading,
     error: query.error,
     addHabit: addMutation.mutateAsync,
     incrementHabit: incrementMutation.mutateAsync,
