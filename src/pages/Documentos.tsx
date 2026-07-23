@@ -30,11 +30,13 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { PageHeader } from "@/components/layout/PageHeader";
+import type { LucideIcon } from "lucide-react";
 
 const DEFAULT_FOLDERS = ["Geral", "Comprovantes", "Contratos", "Recibos", "Pessoal", "Trabalho", "Saúde"];
 
 type TypeKey = "pdf" | "image" | "doc" | "sheet" | "other";
-const TYPE_META: Record<TypeKey, { label: string; icon: any; color: string }> = {
+const TYPE_META: Record<TypeKey, { label: string; icon: LucideIcon; color: string }> = {
   pdf:   { label: "PDFs",       icon: FileText,  color: "bg-red-500/10 text-red-600 dark:text-red-400" },
   image: { label: "Imagens",    icon: ImageIcon, color: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
   doc:   { label: "Documentos", icon: FileText,  color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" },
@@ -168,8 +170,8 @@ export default function Documentos() {
       toast.success("Documento enviado!");
       setUploadOpen(false);
       setFile(null); setExpiry(""); setNotes(""); setUploadFolder("Geral"); setUploadTags([]); setTagInput("");
-    } catch (e: any) {
-      toast.error(e.message || "Falha ao enviar");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Falha ao enviar");
     }
   };
 
@@ -177,8 +179,8 @@ export default function Documentos() {
     try {
       const url = await getSignedUrl(doc.file_path);
       window.open(url, "_blank");
-    } catch (e: any) {
-      toast.error(e.message || "Erro");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Erro");
     }
   };
 
@@ -187,8 +189,8 @@ export default function Documentos() {
     try {
       await remove(doc);
       toast.success("Documento excluído");
-    } catch (e: any) {
-      toast.error(e.message || "Erro");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Erro");
     }
   };
 
@@ -285,23 +287,22 @@ export default function Documentos() {
         </DialogContent>
       </Dialog>
 
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-display font-bold">Documentos</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {documents.length} arquivo(s) • {fmtSize(totalSize)} armazenados
-          </p>
-        </div>
-        <Button onClick={() => setUploadOpen(true)} className="gradient-documents text-documents-foreground active:scale-95">
-          <Plus className="w-4 h-4 mr-2" />Enviar
-        </Button>
-      </motion.div>
+      <PageHeader
+        title="Documentos"
+        description={`${documents.length} arquivo(s) organizados • ${fmtSize(totalSize)} armazenados`}
+        eyebrow="Seu arquivo digital"
+        icon={FolderOpen}
+        variant="neutral"
+        actions={
+          <Button onClick={() => setUploadOpen(true)} className="gradient-documents h-10 text-documents-foreground active:scale-95">
+            <Plus className="mr-2 h-4 w-4" />Enviar documento
+          </Button>
+        }
+      />
 
       {/* Expiring alert */}
       {expiring.length > 0 && (
-        <Card className="p-4 border-warning bg-warning/5">
+        <Card className="border-warning/25 bg-gradient-to-r from-warning/[0.09] to-card p-4 shadow-sm">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
             <div className="min-w-0">
@@ -320,11 +321,11 @@ export default function Documentos() {
       )}
 
       {/* Grouping toggle */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-card/50 p-2.5">
         <h3 className="font-display font-semibold text-sm">
           {groupBy === "folder" ? "Pastas" : "Por tipo de arquivo"}
         </h3>
-        <div className="inline-flex rounded-lg border bg-card p-0.5 text-xs">
+        <div className="inline-flex rounded-lg border border-border/60 bg-background/50 p-0.5 text-xs">
           <button
             onClick={() => setGroupBy("folder")}
             className={cn(
@@ -422,9 +423,9 @@ export default function Documentos() {
       </div>
 
       {/* Search */}
-      <div className="relative">
+      <div className="relative rounded-xl border border-border/60 bg-card/60 p-2 shadow-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder="Buscar documentos..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <Input placeholder="Buscar documentos..." className="h-11 border-0 bg-muted/30 pl-9 shadow-none" value={search} onChange={(e) => setSearch(e.target.value)} />
         {search && (
           <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
             <X className="w-4 h-4" />
@@ -436,7 +437,7 @@ export default function Documentos() {
       {isLoading ? (
         <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin" /></div>
       ) : filtered.length === 0 ? (
-        <Card className="p-10 text-center text-muted-foreground">
+        <Card className="border-dashed border-border/70 bg-muted/15 p-10 text-center text-muted-foreground">
           <FolderOpen className="w-10 h-10 mx-auto mb-3 opacity-40" />
           <p className="text-sm font-medium">Nenhum documento</p>
           <p className="text-xs mt-1">Clique em "Enviar" para adicionar seu primeiro arquivo</p>
@@ -450,7 +451,7 @@ export default function Documentos() {
             return (
               <motion.div key={doc.id}
                 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-                <Card className="p-4 hover:shadow-md transition-all group">
+                <Card className="group relative h-full overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-primary/[0.025] p-4 shadow-sm transition-all before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-primary/60 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md">
                   <div className="flex items-start gap-3">
                     <button onClick={() => handleOpen(doc)} className={cn("w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 hover:opacity-80 transition", TYPE_META[tkey].color)}>
                       <Icon className="w-5 h-5" />
@@ -509,7 +510,7 @@ export default function Documentos() {
   );
 }
 
-function FolderChip({ label, count, active, onClick, icon: Icon = FolderOpen }: { label: string; count: number; active: boolean; onClick: () => void; icon?: any }) {
+function FolderChip({ label, count, active, onClick, icon: Icon = FolderOpen }: { label: string; count: number; active: boolean; onClick: () => void; icon?: LucideIcon }) {
   return (
     <button onClick={onClick}
       className={cn(

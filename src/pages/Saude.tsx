@@ -21,6 +21,7 @@ import { useHabits, Habit } from "@/hooks/useHabits";
 import { HabitModal } from "@/components/modals/HabitModal";
 import { ContextActionMenu } from "@/components/ui/context-action-menu";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const iconMap: Record<string, React.ElementType> = {
   Droplets,
@@ -104,29 +105,18 @@ export default function Saude() {
         editData={editingHabit}
       />
 
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-4"
-      >
-        <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-display font-bold text-foreground">
-            Saúde & Bem-Estar
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Acompanhe seus hábitos e cuide de você
-          </p>
-        </div>
-        <Button
-          className="gradient-health text-health-foreground h-10 sm:h-9 active:scale-95 transition-transform w-full sm:w-auto"
-          size="sm"
-          onClick={handleOpenModal}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Hábito
-        </Button>
-      </motion.div>
+      <PageHeader
+        title="Saúde & Bem-Estar"
+        description="Construa hábitos consistentes e acompanhe sua evolução diária com clareza."
+        eyebrow="Seu equilíbrio"
+        icon={Heart}
+        variant="health"
+        actions={
+          <Button className="gradient-health h-10 text-health-foreground active:scale-95" size="sm" onClick={handleOpenModal}>
+            <Plus className="mr-2 h-4 w-4" />Novo Hábito
+          </Button>
+        }
+      />
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
@@ -135,7 +125,7 @@ export default function Saude() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="p-3 sm:p-4 text-center">
+          <Card className="relative h-full overflow-hidden border-border/70 bg-gradient-to-br from-health/[0.08] via-card to-card p-3 text-center shadow-sm before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-health transition-all hover:-translate-y-0.5 hover:shadow-md sm:p-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-xl gradient-health flex items-center justify-center mb-2">
               <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-health-foreground" />
             </div>
@@ -152,7 +142,7 @@ export default function Saude() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
         >
-          <Card className="p-3 sm:p-4 text-center">
+          <Card className="relative h-full overflow-hidden border-border/70 bg-gradient-to-br from-info/[0.07] via-card to-card p-3 text-center shadow-sm before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-info transition-all hover:-translate-y-0.5 hover:shadow-md sm:p-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-xl bg-info/10 flex items-center justify-center mb-2">
               <Droplets className="w-5 h-5 sm:w-6 sm:h-6 text-info" />
             </div>
@@ -169,7 +159,7 @@ export default function Saude() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="p-3 sm:p-4 text-center">
+          <Card className="relative h-full overflow-hidden border-border/70 bg-gradient-to-br from-accent/[0.07] via-card to-card p-3 text-center shadow-sm before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-accent transition-all hover:-translate-y-0.5 hover:shadow-md sm:p-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-xl bg-accent/10 flex items-center justify-center mb-2">
               <Dumbbell className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
             </div>
@@ -188,7 +178,7 @@ export default function Saude() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
         >
-          <Card className="p-3 sm:p-4 text-center">
+          <Card className="relative h-full overflow-hidden border-border/70 bg-gradient-to-br from-tasks/[0.07] via-card to-card p-3 text-center shadow-sm before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-tasks transition-all hover:-translate-y-0.5 hover:shadow-md sm:p-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-xl bg-tasks/10 flex items-center justify-center mb-2">
               <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-tasks" />
             </div>
@@ -210,8 +200,11 @@ export default function Saude() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Card className="p-4 sm:p-5">
-              <h3 className="font-display font-semibold text-sm sm:text-base mb-4">Hábitos do Dia</h3>
+            <Card className="overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-health/[0.035] p-4 shadow-sm sm:p-5">
+              <div className="mb-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-health">Rotina de hoje</p>
+                <h3 className="mt-1 font-display text-base font-semibold sm:text-lg">Hábitos do Dia</h3>
+              </div>
               
               {isLoading ? (
                 <div className="flex items-center justify-center py-8">
@@ -240,7 +233,7 @@ export default function Saude() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.35 + index * 0.05 }}
-                        className="p-3 sm:p-4 rounded-xl border border-border hover:shadow-md transition-shadow group"
+                        className="group rounded-xl border border-border/60 bg-muted/20 p-3 transition-all hover:-translate-y-0.5 hover:border-health/20 hover:bg-health/[0.035] hover:shadow-md sm:p-4"
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -287,7 +280,7 @@ export default function Saude() {
                               {habit.current_progress}/{habit.daily_goal} {habit.unit}
                             </span>
                           </div>
-                          <Progress value={Math.min(percentage, 100)} className="h-1.5 sm:h-2" />
+                          <Progress value={Math.min(percentage, 100)} className="h-2 sm:h-2.5" />
                         </div>
                       </motion.div>
                     );
@@ -304,22 +297,23 @@ export default function Saude() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="p-4 sm:p-5">
-            <h3 className="font-display font-semibold text-sm sm:text-base mb-4">Dicas de Saúde</h3>
+          <Card className="h-full overflow-hidden border-health/15 bg-gradient-to-br from-card via-card to-health/[0.06] p-4 shadow-sm sm:p-5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-health">Bem-estar</p>
+            <h3 className="mb-4 mt-1 font-display text-base font-semibold sm:text-lg">Dicas de Saúde</h3>
             <div className="space-y-2 sm:space-y-3">
-              <div className="p-2.5 sm:p-3 rounded-lg bg-muted/50">
+              <div className="rounded-xl border border-border/50 bg-background/45 p-3">
                 <p className="text-xs sm:text-sm font-medium">💧 Hidratação</p>
                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
                   Beba água regularmente ao longo do dia
                 </p>
               </div>
-              <div className="p-2.5 sm:p-3 rounded-lg bg-muted/50">
+              <div className="rounded-xl border border-border/50 bg-background/45 p-3">
                 <p className="text-xs sm:text-sm font-medium">🧘 Pausas</p>
                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
                   Faça pausas para alongamento a cada hora
                 </p>
               </div>
-              <div className="p-2.5 sm:p-3 rounded-lg bg-muted/50">
+              <div className="rounded-xl border border-border/50 bg-background/45 p-3">
                 <p className="text-xs sm:text-sm font-medium">😴 Sono</p>
                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
                   Mantenha uma rotina de sono regular
@@ -336,14 +330,17 @@ export default function Saude() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
-        <Card className="p-4 sm:p-5">
-          <h3 className="font-display font-semibold text-sm sm:text-base mb-4">Progresso Semanal</h3>
+        <Card className="border-border/70 bg-card/80 p-4 shadow-sm sm:p-5">
+          <div className="mb-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-health">Consistência</p>
+            <h3 className="mt-1 font-display text-base font-semibold sm:text-lg">Progresso Semanal</h3>
+          </div>
           {habits.length === 0 ? (
-            <div className="h-32 sm:h-64 flex items-center justify-center text-muted-foreground text-sm">
+            <div className="flex h-40 items-center justify-center rounded-xl border border-dashed border-border/70 bg-muted/15 text-sm text-muted-foreground sm:h-64">
               <p>Adicione hábitos para ver o progresso</p>
             </div>
           ) : (
-            <div className="h-32 sm:h-64 flex items-center justify-center text-muted-foreground text-sm">
+            <div className="flex h-40 items-center justify-center rounded-xl border border-dashed border-health/20 bg-health/[0.025] text-sm text-muted-foreground sm:h-64">
               <p>Gráfico de progresso em desenvolvimento</p>
             </div>
           )}

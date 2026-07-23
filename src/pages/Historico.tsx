@@ -37,6 +37,7 @@ import {
 import { useHistoryEvents, HistoryEvent } from "@/hooks/useHistoryEvents";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Json } from "@/integrations/supabase/types";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 type PeriodFilter = "today" | "7days" | "30days" | "month";
 type EventTypeFilter = "finance" | "task" | "health";
@@ -164,22 +165,13 @@ export default function Historico() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-2"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <History className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">Histórico</h1>
-            <p className="text-sm text-muted-foreground">Linha do tempo das suas atividades</p>
-          </div>
-        </div>
-      </motion.div>
+      <PageHeader
+        title="Histórico"
+        description="Acompanhe sua linha do tempo e relembre cada avanço registrado no LifeFlow."
+        eyebrow="Sua jornada"
+        icon={History}
+        variant="neutral"
+      />
 
       {/* Today's Summary */}
       <motion.div
@@ -187,8 +179,8 @@ export default function Historico() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <Card>
-          <CardHeader className="pb-3">
+        <Card className="overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-primary/[0.035] shadow-sm">
+          <CardHeader className="border-b border-border/60 pb-3">
             <CardTitle className="text-base font-medium flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               Resumo de Hoje
@@ -196,7 +188,7 @@ export default function Historico() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-destructive/10">
+              <div className="flex items-center gap-3 rounded-xl border border-destructive/15 bg-destructive/[0.07] p-3">
                 <TrendingDown className="w-5 h-5 text-destructive" />
                 <div>
                   <p className="text-xs text-muted-foreground">Gastos</p>
@@ -205,7 +197,7 @@ export default function Historico() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-finance/10">
+              <div className="flex items-center gap-3 rounded-xl border border-finance/15 bg-finance/[0.07] p-3">
                 <TrendingUp className="w-5 h-5 text-finance" />
                 <div>
                   <p className="text-xs text-muted-foreground">Receitas</p>
@@ -214,7 +206,7 @@ export default function Historico() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-tasks/10">
+              <div className="flex items-center gap-3 rounded-xl border border-tasks/15 bg-tasks/[0.07] p-3">
                 <CheckSquare className="w-5 h-5 text-tasks" />
                 <div>
                   <p className="text-xs text-muted-foreground">Tarefas</p>
@@ -223,7 +215,7 @@ export default function Historico() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-health/10">
+              <div className="flex items-center gap-3 rounded-xl border border-health/15 bg-health/[0.07] p-3">
                 <Heart className="w-5 h-5 text-health" />
                 <div>
                   <p className="text-xs text-muted-foreground">Hábitos</p>
@@ -242,7 +234,7 @@ export default function Historico() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="flex flex-col sm:flex-row gap-3"
+        className="flex flex-col gap-3 rounded-xl border border-border/60 bg-card/60 p-3 shadow-sm sm:flex-row"
       >
         {/* Search */}
         <div className="relative flex-1">
@@ -251,7 +243,7 @@ export default function Historico() {
             placeholder="Buscar no histórico..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="h-10 border-0 bg-muted/30 pl-9 shadow-none"
           />
           {searchQuery && (
             <button
@@ -265,7 +257,7 @@ export default function Historico() {
 
         {/* Period Filter */}
         <Select value={periodFilter} onValueChange={(v) => setPeriodFilter(v as PeriodFilter)}>
-          <SelectTrigger className="w-full sm:w-40">
+          <SelectTrigger className="h-10 w-full border-border/60 bg-background/50 sm:w-40">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -378,11 +370,11 @@ export default function Historico() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.03 }}
               >
-                <Card className="hover:shadow-md transition-shadow active:scale-[0.99]">
+                <Card className="group overflow-hidden border-border/70 bg-card/75 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/15 hover:shadow-md active:scale-[0.99]">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${
                           event.event_type === "finance"
                             ? "bg-finance/10"
                             : event.event_type === "task"
