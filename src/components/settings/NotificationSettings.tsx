@@ -66,8 +66,8 @@ export function NotificationSettings() {
 
   if (!isNativePlatform && !isWebNotificationSupported) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="overflow-hidden border-border/70 bg-card/80 shadow-sm">
+        <CardHeader className="border-b border-border/60 bg-gradient-to-r from-muted/30 to-transparent">
           <CardTitle className="flex items-center gap-2">
             <Bell className="w-5 h-5" />
             Notificações
@@ -77,7 +77,7 @@ export function NotificationSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/30 p-4">
             <BellOff className="w-8 h-8 text-muted-foreground" />
             <div>
               <p className="text-sm font-medium">Notificações indisponíveis</p>
@@ -92,11 +92,11 @@ export function NotificationSettings() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bell className="w-5 h-5" />
-          Notificações
+    <Card className="overflow-hidden border-border/70 bg-card/80 shadow-sm">
+      <CardHeader className="border-b border-border/60 bg-gradient-to-r from-primary/[0.06] to-transparent">
+        <CardTitle className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10"><Bell className="h-5 w-5 text-primary" /></span>
+          <span>Notificações</span>
         </CardTitle>
         <CardDescription>
           Configure os lembretes para tarefas, metas e assinaturas.
@@ -106,7 +106,7 @@ export function NotificationSettings() {
       <CardContent className="space-y-6">
         {!permissionGranted ? (
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/20 rounded-lg">
+            <div className="flex items-center gap-3 rounded-xl border border-warning/20 bg-warning/[0.08] p-4">
               <BellOff className="w-8 h-8 text-warning" />
               <div className="flex-1">
                 <p className="text-sm font-medium">Permissão Necessária</p>
@@ -133,7 +133,7 @@ export function NotificationSettings() {
             </Button>
 
             {/* Master toggle */}
-            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+            <div className="flex items-center justify-between rounded-xl border border-primary/15 bg-primary/[0.045] p-4">
               <div className="flex items-center gap-3">
                 <Bell className="w-5 h-5 text-primary" />
                 <div>
@@ -150,7 +150,7 @@ export function NotificationSettings() {
             {settings.enabled && (
               <>
                 {/* Reminder time */}
-                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/25 p-4">
                   <div className="flex items-center gap-3">
                     <Clock className="w-5 h-5 text-muted-foreground" />
                     <div>
@@ -167,7 +167,7 @@ export function NotificationSettings() {
                 </div>
 
                 {/* Task reminders */}
-                <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div className="flex items-center justify-between rounded-xl border border-border/60 p-4 transition-colors hover:bg-muted/20">
                   <div className="flex items-center gap-3">
                     <CheckSquare className="w-5 h-5 text-tasks" />
                     <div>
@@ -182,7 +182,7 @@ export function NotificationSettings() {
                 </div>
 
                 {/* Goal reminders */}
-                <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div className="flex items-center justify-between rounded-xl border border-border/60 p-4 transition-colors hover:bg-muted/20">
                   <div className="flex items-center gap-3">
                     <Target className="w-5 h-5 text-primary" />
                     <div>
@@ -197,7 +197,7 @@ export function NotificationSettings() {
                 </div>
 
                 {/* Subscription reminders */}
-                <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div className="flex items-center justify-between rounded-xl border border-border/60 p-4 transition-colors hover:bg-muted/20">
                   <div className="flex items-center gap-3">
                     <CreditCard className="w-5 h-5 text-finance" />
                     <div>
@@ -212,7 +212,7 @@ export function NotificationSettings() {
                 </div>
 
                 {/* Installment reminders + frequency */}
-                <div className="p-4 rounded-lg border space-y-3">
+                <div className="space-y-3 rounded-xl border border-border/60 p-4 transition-colors hover:bg-muted/20">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <CreditCard className="w-5 h-5 text-finance" />
@@ -244,7 +244,7 @@ export function NotificationSettings() {
                 </div>
 
                 {/* Investment tips + frequency */}
-                <div className="p-4 rounded-lg border space-y-3">
+                <div className="space-y-3 rounded-xl border border-border/60 p-4 transition-colors hover:bg-muted/20">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Target className="w-5 h-5 text-accent" />
@@ -261,7 +261,7 @@ export function NotificationSettings() {
                   {settings.investmentTips && (
                     <div className="flex items-center justify-between pl-8">
                       <Label className="text-xs text-muted-foreground">Frequência</Label>
-                      <Select value={settings.investmentTipsFrequency} onValueChange={(v) => handleTipsFrequency(v as any)}>
+                      <Select value={settings.investmentTipsFrequency} onValueChange={(v) => handleTipsFrequency(v as "daily" | "weekly" | "off")}>
                         <SelectTrigger className="w-32 h-9"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="daily">Diária</SelectItem>
