@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://life-flow-flax.vercel.app/sitemap.xml
