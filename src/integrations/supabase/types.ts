@@ -94,6 +94,63 @@ export type Database = {
         }
         Relationships: []
       }
+      contacts: {
+        Row: {
+          birthday: string | null
+          company: string | null
+          created_at: string
+          email: string | null
+          favorite: boolean
+          follow_up_date: string | null
+          follow_up_note: string | null
+          id: string
+          last_contact_date: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          role: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          birthday?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          favorite?: boolean
+          follow_up_date?: string | null
+          follow_up_note?: string | null
+          id?: string
+          last_contact_date?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          role?: string | null
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          birthday?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          favorite?: boolean
+          follow_up_date?: string | null
+          follow_up_note?: string | null
+          id?: string
+          last_contact_date?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          role?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       dashboard_preferences: {
         Row: {
           card_order: Json | null
