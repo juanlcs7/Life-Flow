@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Bell,
@@ -52,11 +53,19 @@ function nextBirthday(date: string) {
 }
 
 export default function Contatos() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { contacts, isLoading, addContact, updateContact, deleteContact, isSaving } = useContacts();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<ContactFilter>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Contact | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("new") !== "contact") return;
+    setEditing(null);
+    setModalOpen(true);
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const filteredContacts = useMemo(() => {
     const query = search.trim().toLowerCase();

@@ -23,6 +23,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GlobalSearchButton } from "@/components/search/GlobalSearch";
 
 const navItems = [
   {
@@ -109,16 +110,18 @@ export function MobileNav() {
           </div>
         </div>
 
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-md text-foreground hover:bg-muted"
-            >
-              <Menu className="w-6 h-6" />
-            </Button>
-          </SheetTrigger>
+        <div className="flex items-center gap-1">
+          <GlobalSearchButton mobile />
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-md text-foreground hover:bg-muted"
+              >
+                <Menu className="w-6 h-6" />
+              </Button>
+            </SheetTrigger>
           <SheetContent
             side="right"
             className="w-[300px] border-slate-800 bg-slate-900 p-0"
@@ -204,7 +207,8 @@ export function MobileNav() {
               </div>
             </div>
           </SheetContent>
-        </Sheet>
+          </Sheet>
+        </div>
       </div>
     </header>
   );

@@ -23,6 +23,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GlobalSearchButton } from "@/components/search/GlobalSearch";
 
 const navItems = [
   {
@@ -153,6 +154,10 @@ export function AppSidebar() {
             )}
           </AnimatePresence>
         </div>
+      </div>
+
+      <div className="border-b border-white/10 p-3">
+        <GlobalSearchButton compact={collapsed} />
       </div>
 
       {/* Navigation */}

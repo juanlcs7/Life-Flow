@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -56,11 +57,19 @@ const priorityColors = {
 };
 
 export default function Agenda() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedDate, setSelectedDate] = useState(currentDate);
   const [calendarMonth, setCalendarMonth] = useState(startOfMonth(currentDate));
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [goalModalOpen, setGoalModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("new") !== "task") return;
+    setEditingTask(null);
+    setTaskModalOpen(true);
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
   
   const { tasks, isLoading: tasksLoading, addTask, toggleTask, updateTask, deleteTask } = useTasks();
   const { goals, isLoading: goalsLoading, addGoal } = useGoals();

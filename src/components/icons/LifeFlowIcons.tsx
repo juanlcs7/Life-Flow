@@ -162,3 +162,13 @@ export function TaskFlowIcon(props: LifeFlowIconProps) {
     </IconBase>
   );
 }
+
+export function SearchFlowIcon(props: LifeFlowIconProps) {
+  return (
+    <IconBase {...props}>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="m15.5 15.5 5 5" />
+      <path d="M7.5 10.5h6M10.5 7.5v6" opacity=".45" />
+    </IconBase>
+  );
+}
