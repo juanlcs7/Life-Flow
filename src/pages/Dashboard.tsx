@@ -13,6 +13,7 @@ import { useAccounts } from "@/hooks/useAccounts";
 import { useNotifications } from "@/hooks/useNotifications";
 import { CustomizeDashboard } from "@/components/dashboard/CustomizeDashboard";
 import { QuickActionsWidget } from "@/components/dashboard/QuickActionsWidget";
+import { DailyHub } from "@/components/dashboard/DailyHub";
 import { FinancesCard } from "@/components/dashboard/cards/FinancesCard";
 import { TasksCard } from "@/components/dashboard/cards/TasksCard";
 import { GoalsCard } from "@/components/dashboard/cards/GoalsCard";
@@ -190,6 +191,9 @@ export default function Dashboard() {
 
       {/* Customization Panel */}
       <CustomizeDashboard isOpen={isCustomizing} onClose={() => setIsCustomizing(false)} />
+
+      {/* Daily command center */}
+      <DailyHub />
 
       {/* Quick Actions Widget */}
       <QuickActionsWidget
