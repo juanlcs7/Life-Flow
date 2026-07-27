@@ -887,6 +887,8 @@ export type Database = {
           goal_id: string | null
           id: string
           priority: string
+          recurrence: string
+          recurrence_generated: boolean
           title: string
           updated_at: string
           user_id: string
@@ -900,6 +902,8 @@ export type Database = {
           goal_id?: string | null
           id?: string
           priority?: string
+          recurrence?: string
+          recurrence_generated?: boolean
           title: string
           updated_at?: string
           user_id: string
@@ -913,6 +917,8 @@ export type Database = {
           goal_id?: string | null
           id?: string
           priority?: string
+          recurrence?: string
+          recurrence_generated?: boolean
           title?: string
           updated_at?: string
           user_id?: string

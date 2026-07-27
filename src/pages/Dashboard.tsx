@@ -7,6 +7,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useDashboardPreferences, type CardId } from "@/hooks/useDashboardPreferences";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useTasks } from "@/hooks/useTasks";
+import type { TaskRecurrence } from "@/hooks/useTasks";
 import { useHabits } from "@/hooks/useHabits";
 import { useAccounts } from "@/hooks/useAccounts";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -110,6 +111,7 @@ export default function Dashboard() {
     due_time: string | null;
     priority: string;
     category: string;
+    recurrence: TaskRecurrence;
   }) => {
     await addTask({
       title: data.title,
@@ -117,6 +119,7 @@ export default function Dashboard() {
       due_time: data.due_time,
       priority: data.priority as "low" | "medium" | "high",
       category: data.category,
+      recurrence: data.recurrence,
     });
     toast.success("Tarefa adicionada!");
   };

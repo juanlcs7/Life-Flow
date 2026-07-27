@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { logHistoryEvent } from "./useHistoryEvents";
+import { addDays, addMonths, addWeeks, format, parseISO } from "date-fns";
+
+export type TaskRecurrence = "none" | "daily" | "weekly" | "monthly";
 
 export interface Task {
   id: string;
@@ -9,6 +12,8 @@ export interface Task {
   title: string;
   category: string;
   priority: "low" | "medium" | "high";
+  recurrence: TaskRecurrence;
+  recurrence_generated: boolean;
   due_time: string | null;
   due_date: string;
   completed: boolean;
@@ -17,9 +22,20 @@ export interface Task {
   updated_at: string;
 }
 
-export type NewTask = Pick<Task, "title" | "category" | "priority" | "due_time" | "due_date"> & {
+export type NewTask = Pick<Task, "title" | "category" | "priority" | "due_time" | "due_date" | "recurrence"> & {
   goal_id?: string | null;
 };
+
+function getNextDueDate(dueDate: string, recurrence: TaskRecurrence) {
+  const date = parseISO(dueDate);
+  const nextDate =
+    recurrence === "daily"
+      ? addDays(date, 1)
+      : recurrence === "weekly"
+        ? addWeeks(date, 1)
+        : addMonths(date, 1);
+  return format(nextDate, "yyyy-MM-dd");
+}
 
 export function useTasks() {
   const { user } = useAuth();
@@ -74,16 +90,47 @@ export function useTasks() {
 
   const toggleMutation = useMutation({
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
+      const task = query.data?.find((item) => item.id === id);
+      const shouldGenerateNext =
+        completed &&
+        task &&
+        task.recurrence !== "none" &&
+        !task.recurrence_generated;
+
       const { error } = await supabase
         .from("tasks")
-        .update({ completed })
+        .update({
+          completed,
+          ...(shouldGenerateNext ? { recurrence_generated: true } : {}),
+        })
         .eq("id", id);
 
       if (error) throw error;
 
+      if (user && shouldGenerateNext && task) {
+        const { error: recurrenceError } = await supabase.from("tasks").insert({
+          user_id: user.id,
+          title: task.title,
+          category: task.category,
+          priority: task.priority,
+          due_date: getNextDueDate(task.due_date, task.recurrence),
+          due_time: task.due_time,
+          goal_id: task.goal_id,
+          recurrence: task.recurrence,
+          recurrence_generated: false,
+        });
+
+        if (recurrenceError) {
+          await supabase
+            .from("tasks")
+            .update({ completed: false, recurrence_generated: false })
+            .eq("id", id);
+          throw recurrenceError;
+        }
+      }
+
       // Log completion to history
       if (user && completed) {
-        const task = query.data?.find(t => t.id === id);
         if (task) {
           await logHistoryEvent(user.id, {
             event_type: "task",
@@ -93,7 +140,7 @@ export function useTasks() {
             category: task.category,
             reference_id: id,
             reference_type: "task",
-            metadata: { priority: task.priority },
+            metadata: { priority: task.priority, recurrence: task.recurrence },
           });
         }
       }

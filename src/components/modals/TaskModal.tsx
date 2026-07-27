@@ -16,6 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Repeat2 } from "lucide-react";
+import type { TaskRecurrence } from "@/hooks/useTasks";
 
 interface TaskModalProps {
   open: boolean;
@@ -26,6 +28,7 @@ interface TaskModalProps {
     due_time: string | null;
     priority: string;
     category: string;
+    recurrence: TaskRecurrence;
   }) => Promise<void>;
   editData?: {
     id: string;
@@ -34,6 +37,7 @@ interface TaskModalProps {
     due_time: string | null;
     priority: string;
     category: string;
+    recurrence: TaskRecurrence;
   } | null;
 }
 
@@ -59,6 +63,7 @@ export function TaskModal({ open, onOpenChange, onSubmit, editData }: TaskModalP
   const [dueTime, setDueTime] = useState("");
   const [priority, setPriority] = useState("medium");
   const [category, setCategory] = useState("");
+  const [recurrence, setRecurrence] = useState<TaskRecurrence>("none");
 
   useEffect(() => {
     if (editData) {
@@ -67,12 +72,14 @@ export function TaskModal({ open, onOpenChange, onSubmit, editData }: TaskModalP
       setDueTime(editData.due_time || "");
       setPriority(editData.priority);
       setCategory(editData.category);
+      setRecurrence(editData.recurrence || "none");
     } else {
       setTitle("");
       setDueDate(new Date().toISOString().split("T")[0]);
       setDueTime("");
       setPriority("medium");
       setCategory("");
+      setRecurrence("none");
     }
   }, [editData, open]);
 
@@ -88,12 +95,14 @@ export function TaskModal({ open, onOpenChange, onSubmit, editData }: TaskModalP
         due_time: dueTime || null,
         priority,
         category,
+        recurrence,
       });
       setTitle("");
       setDueDate(new Date().toISOString().split("T")[0]);
       setDueTime("");
       setPriority("medium");
       setCategory("");
+      setRecurrence("none");
       onOpenChange(false);
     } finally {
       setLoading(false);
@@ -173,6 +182,27 @@ export function TaskModal({ open, onOpenChange, onSubmit, editData }: TaskModalP
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="recurrence" className="flex items-center gap-2">
+              <Repeat2 className="h-4 w-4 text-tasks" />
+              Repetição
+            </Label>
+            <Select value={recurrence} onValueChange={(value) => setRecurrence(value as TaskRecurrence)}>
+              <SelectTrigger className="h-12 text-base">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover">
+                <SelectItem value="none" className="py-3">Não repetir</SelectItem>
+                <SelectItem value="daily" className="py-3">Todos os dias</SelectItem>
+                <SelectItem value="weekly" className="py-3">Toda semana</SelectItem>
+                <SelectItem value="monthly" className="py-3">Todo mês</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-muted-foreground">
+              A próxima ocorrência será criada quando esta tarefa for concluída.
+            </p>
           </div>
 
           <div className="flex gap-2 pt-4">

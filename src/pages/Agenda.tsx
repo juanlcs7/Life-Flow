@@ -11,6 +11,7 @@ import {
   Flag,
   Loader2,
   CalendarPlus,
+  Repeat2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -39,6 +40,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { downloadIcs, IcsEvent } from "@/lib/icsExport";
 import { PageHeader } from "@/components/layout/PageHeader";
+import type { TaskRecurrence } from "@/hooks/useTasks";
 
 const days = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const currentDate = new Date();
@@ -95,6 +97,7 @@ export default function Agenda() {
     due_time: string | null;
     priority: string;
     category: string;
+    recurrence: TaskRecurrence;
   }) => {
     if (editingTask) {
       await updateTask({ id: editingTask.id, ...data, priority: data.priority as "low" | "medium" | "high" });
@@ -280,6 +283,9 @@ export default function Agenda() {
                           </div>
                           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                             <Flag className={cn("w-3 h-3", priorityColors[task.priority as keyof typeof priorityColors])} />
+                            {task.recurrence !== "none" && (
+                              <Repeat2 className="h-3.5 w-3.5 text-tasks" />
+                            )}
                             {task.due_time && (
                               <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
                                 <Clock className="w-3 h-3" />
@@ -401,7 +407,10 @@ export default function Agenda() {
                           <div key={task.id} className={cn(
                             "truncate rounded px-1.5 py-0.5 text-[9px] sm:text-[10px]",
                             task.completed ? "bg-success/10 text-success line-through" : "bg-tasks/10 text-tasks",
-                          )}>{task.title}</div>
+                          )}>
+                            {task.recurrence !== "none" && <Repeat2 className="mr-1 inline h-2.5 w-2.5" />}
+                            {task.title}
+                          </div>
                         ))}
                         {dayTasks.length > 2 && <p className="px-1 text-[9px] text-muted-foreground">+{dayTasks.length - 2} tarefas</p>}
                       </div>
@@ -432,6 +441,7 @@ export default function Agenda() {
                     <button onClick={() => handleEditTask(task)} className={cn("min-w-0 flex-1 truncate text-left text-xs font-medium", task.completed && "text-muted-foreground line-through")}>
                       {task.title}
                     </button>
+                    {task.recurrence !== "none" && <Repeat2 className="h-3.5 w-3.5 text-tasks" />}
                     {task.due_time && <span className="text-[10px] text-muted-foreground">{task.due_time}</span>}
                   </div>
                 ))}
