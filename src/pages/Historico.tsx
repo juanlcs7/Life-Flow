@@ -38,6 +38,7 @@ import { useHistoryEvents, HistoryEvent } from "@/hooks/useHistoryEvents";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Json } from "@/integrations/supabase/types";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { HistoryFlowIcon } from "@/components/icons/LifeFlowIcons";
 
 type PeriodFilter = "today" | "7days" | "30days" | "month";
 type EventTypeFilter = "finance" | "task" | "health";
@@ -167,9 +168,9 @@ export default function Historico() {
     <div className="space-y-6">
       <PageHeader
         title="Histórico"
-        description="Acompanhe sua linha do tempo e relembre cada avanço registrado no LifeFlow."
-        eyebrow="Sua jornada"
-        icon={History}
+        description="Tudo que você registrou recentemente no LifeFlow."
+        eyebrow="Atividade"
+        icon={HistoryFlowIcon}
         variant="neutral"
       />
 

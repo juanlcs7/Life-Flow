@@ -1,4 +1,5 @@
-import { CheckSquare, Clock, AlertCircle } from "lucide-react";
+import { Clock, AlertCircle } from "lucide-react";
+import { TaskFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { DashboardCard } from "../DashboardCard";
 import { useTasks } from "@/hooks/useTasks";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +35,7 @@ export function TasksCard({ size = "medium", delay = 0, isCustomizing, dragHandl
   return (
     <DashboardCard
       title="Tarefas"
-      icon={CheckSquare}
+      icon={TaskFlowIcon}
       href="/agenda"
       variant="tasks"
       size={size}

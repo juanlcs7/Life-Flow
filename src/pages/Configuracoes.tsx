@@ -21,6 +21,7 @@ import { PremiumModal } from "@/components/premium/PremiumModal";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { SlidersFlowIcon } from "@/components/icons/LifeFlowIcons";
 
 export default function Configuracoes() {
   const { signOut, user } = useAuth();
@@ -91,9 +92,9 @@ export default function Configuracoes() {
 
       <PageHeader
         title="Configurações"
-        description="Personalize sua conta, aparência e a forma como o LifeFlow acompanha sua rotina."
-        eyebrow="Sua experiência"
-        icon={Settings}
+        description="Atualize seus dados, preferências e notificações."
+        eyebrow="Conta"
+        icon={SlidersFlowIcon}
         variant="neutral"
       />
 

@@ -1,4 +1,5 @@
-import { Wallet, TrendingUp, TrendingDown, PiggyBank } from "lucide-react";
+import { TrendingUp, TrendingDown, PiggyBank } from "lucide-react";
+import { MoneyFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { DashboardCard } from "../DashboardCard";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useAccounts } from "@/hooks/useAccounts";
@@ -36,7 +37,7 @@ export function FinancesCard({ size = "medium", delay = 0, isCustomizing, dragHa
   return (
     <DashboardCard
       title="Finanças"
-      icon={Wallet}
+      icon={MoneyFlowIcon}
       href="/financas"
       variant="finance"
       size={size}

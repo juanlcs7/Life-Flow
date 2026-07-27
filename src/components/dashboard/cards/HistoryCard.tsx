@@ -1,4 +1,5 @@
-import { History, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { HistoryFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DashboardCard } from "../DashboardCard";
@@ -34,7 +35,7 @@ export function HistoryCard({ size = "medium", delay = 0, isCustomizing, dragHan
   return (
     <DashboardCard
       title="Histórico"
-      icon={History}
+      icon={HistoryFlowIcon}
       href="/historico"
       variant="history"
       size={size}

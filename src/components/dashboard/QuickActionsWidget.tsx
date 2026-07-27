@@ -2,17 +2,18 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
-  Wallet,
-  CheckSquare,
-  Target,
-  Heart,
   Settings2,
   X,
   GripVertical,
-  ArrowUpRight,
-  ArrowDownRight,
-  Calendar,
 } from "lucide-react";
+import {
+  AgendaFlowIcon,
+  ExpenseFlowIcon,
+  GoalFlowIcon,
+  HealthFlowIcon,
+  IncomeFlowIcon,
+  TaskFlowIcon,
+} from "@/components/icons/LifeFlowIcons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -65,7 +66,7 @@ export function QuickActionsWidget({
     {
       id: "add_income",
       label: "Receita",
-      icon: ArrowUpRight,
+      icon: IncomeFlowIcon,
       color: "text-health",
       bgColor: "bg-health/10 hover:bg-health/20",
       action: onAddIncome,
@@ -73,7 +74,7 @@ export function QuickActionsWidget({
     {
       id: "add_expense",
       label: "Despesa",
-      icon: ArrowDownRight,
+      icon: ExpenseFlowIcon,
       color: "text-destructive",
       bgColor: "bg-destructive/10 hover:bg-destructive/20",
       action: onAddExpense,
@@ -81,7 +82,7 @@ export function QuickActionsWidget({
     {
       id: "add_task",
       label: "Tarefa",
-      icon: CheckSquare,
+      icon: TaskFlowIcon,
       color: "text-tasks",
       bgColor: "bg-tasks/10 hover:bg-tasks/20",
       action: onAddTask,
@@ -89,7 +90,7 @@ export function QuickActionsWidget({
     {
       id: "add_goal",
       label: "Meta",
-      icon: Target,
+      icon: GoalFlowIcon,
       color: "text-primary",
       bgColor: "bg-primary/10 hover:bg-primary/20",
       action: onAddGoal,
@@ -97,7 +98,7 @@ export function QuickActionsWidget({
     {
       id: "add_habit",
       label: "Hábito",
-      icon: Heart,
+      icon: HealthFlowIcon,
       color: "text-health",
       bgColor: "bg-health/10 hover:bg-health/20",
       action: onAddHabit,
@@ -105,7 +106,7 @@ export function QuickActionsWidget({
     {
       id: "view_calendar",
       label: "Agenda",
-      icon: Calendar,
+      icon: AgendaFlowIcon,
       color: "text-info",
       bgColor: "bg-info/10 hover:bg-info/20",
       action: onViewCalendar,
@@ -136,7 +137,7 @@ export function QuickActionsWidget({
             </div>
             <div>
               <CardTitle className="text-sm font-semibold">Ações rápidas</CardTitle>
-              <p className="mt-0.5 text-xs text-muted-foreground">Registre algo em poucos segundos</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Os atalhos que você mais usa</p>
             </div>
           </div>
           <Button
@@ -159,7 +160,7 @@ export function QuickActionsWidget({
                 className="space-y-2"
               >
                 <p className="text-xs text-muted-foreground mb-3">
-                  Escolha quais ações exibir:
+                  Escolha os atalhos que quer deixar aqui:
                 </p>
                 {allActions.map((action) => (
                   <div

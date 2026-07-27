@@ -1,4 +1,5 @@
-import { Heart, Flame, Check } from "lucide-react";
+import { Flame, Check } from "lucide-react";
+import { HealthFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { DashboardCard } from "../DashboardCard";
 import { useHabits } from "@/hooks/useHabits";
 import { Progress } from "@/components/ui/progress";
@@ -23,7 +24,7 @@ export function HealthCard({ size = "medium", delay = 0, isCustomizing, dragHand
   return (
     <DashboardCard
       title="Saúde"
-      icon={Heart}
+      icon={HealthFlowIcon}
       href="/saude"
       variant="health"
       size={size}

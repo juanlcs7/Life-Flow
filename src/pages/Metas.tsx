@@ -47,6 +47,7 @@ import { cn } from "@/lib/utils";
 import { usePlan } from "@/hooks/usePlan";
 import { PremiumModal } from "@/components/premium/PremiumModal";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { GoalFlowIcon } from "@/components/icons/LifeFlowIcons";
 
 const priorityColors = {
   high: "text-destructive bg-destructive/10",
@@ -212,10 +213,10 @@ export default function Metas() {
       />
 
       <PageHeader
-        title="Metas Inteligentes"
-        description="Transforme objetivos em etapas visíveis e acompanhe cada avanço até a conquista."
-        eyebrow="Evolução pessoal"
-        icon={Target}
+        title="Metas"
+        description="Defina o que quer alcançar e acompanhe o que falta."
+        eyebrow="Objetivos"
+        icon={GoalFlowIcon}
         variant="goals"
       />
 

@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { FilesFlowIcon } from "@/components/icons/LifeFlowIcons";
 import type { LucideIcon } from "lucide-react";
 
 const DEFAULT_FOLDERS = ["Geral", "Comprovantes", "Contratos", "Recibos", "Pessoal", "Trabalho", "Saúde"];
@@ -290,8 +291,8 @@ export default function Documentos() {
       <PageHeader
         title="Documentos"
         description={`${documents.length} arquivo(s) organizados • ${fmtSize(totalSize)} armazenados`}
-        eyebrow="Seu arquivo digital"
-        icon={FolderOpen}
+        eyebrow="Arquivos"
+        icon={FilesFlowIcon}
         variant="neutral"
         actions={
           <Button onClick={() => setUploadOpen(true)} className="gradient-documents h-10 text-documents-foreground active:scale-95">

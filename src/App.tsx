@@ -11,6 +11,7 @@ import { RouteMeta } from "@/components/RouteMeta";
 import Dashboard from "./pages/Dashboard";
 import Financas from "./pages/Financas";
 import Agenda from "./pages/Agenda";
+import Planejamento from "./pages/Planejamento";
 import Saude from "./pages/Saude";
 import Metas from "./pages/Metas";
 import Historico from "./pages/Historico";
@@ -42,6 +43,7 @@ const App = () => (
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/financas" element={<Financas />} />
                         <Route path="/agenda" element={<Agenda />} />
+                        <Route path="/planejamento" element={<Planejamento />} />
                         <Route path="/saude" element={<Saude />} />
                         <Route path="/metas" element={<Metas />} />
                         <Route path="/historico" element={<Historico />} />

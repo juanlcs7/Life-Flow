@@ -1,6 +1,5 @@
-import { ReactNode } from "react";
+import { type ComponentType, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type HeaderVariant = "finance" | "tasks" | "goals" | "health" | "neutral";
@@ -9,7 +8,7 @@ interface PageHeaderProps {
   title: string;
   description: string;
   eyebrow: string;
-  icon: LucideIcon;
+  icon: ComponentType<{ className?: string }>;
   variant?: HeaderVariant;
   actions?: ReactNode;
 }

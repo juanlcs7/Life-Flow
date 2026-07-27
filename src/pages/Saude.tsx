@@ -22,6 +22,7 @@ import { HabitModal } from "@/components/modals/HabitModal";
 import { ContextActionMenu } from "@/components/ui/context-action-menu";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { HealthFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { format, isSameDay, parseISO, startOfDay, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -142,10 +143,10 @@ export default function Saude() {
       />
 
       <PageHeader
-        title="Saúde & Bem-Estar"
-        description="Construa hábitos consistentes e acompanhe sua evolução diária com clareza."
-        eyebrow="Seu equilíbrio"
-        icon={Heart}
+        title="Saúde e hábitos"
+        description="Registre seus hábitos e veja como foi sua semana."
+        eyebrow="Rotina"
+        icon={HealthFlowIcon}
         variant="health"
         actions={
           <Button className="gradient-health h-10 text-health-foreground active:scale-95" size="sm" onClick={handleOpenModal}>

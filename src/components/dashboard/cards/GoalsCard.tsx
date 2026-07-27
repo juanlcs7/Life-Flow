@@ -1,4 +1,5 @@
-import { Target, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
+import { GoalFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { DashboardCard } from "../DashboardCard";
 import { useFinancialGoals } from "@/hooks/useFinancialGoals";
 import { usePersonalGoals } from "@/hooks/usePersonalGoals";
@@ -45,7 +46,7 @@ export function GoalsCard({ size = "medium", delay = 0, isCustomizing, dragHandl
   return (
     <DashboardCard
       title="Metas"
-      icon={Target}
+      icon={GoalFlowIcon}
       href="/metas"
       variant="goals"
       size={size}

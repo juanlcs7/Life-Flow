@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { usePlan } from "@/hooks/usePlan";
 import { PremiumModal } from "@/components/premium/PremiumModal";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { MoneyFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { UpgradeBanner } from "@/components/premium/UpgradeBanner";
 import { Lock } from "lucide-react";
 
@@ -192,9 +193,9 @@ export default function Financas() {
 
       <PageHeader
         title="Finanças"
-        description="Gerencie receitas, despesas e patrimônio com uma visão clara do seu mês."
-        eyebrow="Vida financeira"
-        icon={Wallet}
+        description="Veja quanto entrou, quanto saiu e onde seu dinheiro está."
+        eyebrow="Dinheiro"
+        icon={MoneyFlowIcon}
         variant="finance"
         actions={
           <Button className="gradient-finance text-finance-foreground h-10 px-4 active:scale-95 transition-transform" size="sm" onClick={() => { setEditingTransaction(null); setTransactionModalOpen(true); }}>

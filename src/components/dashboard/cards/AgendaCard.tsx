@@ -1,4 +1,5 @@
-import { CalendarDays, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
+import { AgendaFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { format, isToday, isTomorrow, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DashboardCard } from "../DashboardCard";
@@ -43,7 +44,7 @@ export function AgendaCard({ size = "medium", delay = 0, isCustomizing, dragHand
   return (
     <DashboardCard
       title="Agenda"
-      icon={CalendarDays}
+      icon={AgendaFlowIcon}
       href="/agenda"
       variant="agenda"
       size={size}

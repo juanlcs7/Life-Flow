@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { CalendarDays, Settings2, Bell, Sparkles } from "lucide-react";
+import { Settings2, Bell, Check } from "lucide-react";
+import { AgendaFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
@@ -153,14 +154,14 @@ export default function Dashboard() {
         <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-medium text-cyan-100 backdrop-blur">
-              <CalendarDays className="h-3.5 w-3.5" />
+              <AgendaFlowIcon className="h-3.5 w-3.5" />
               <span className="capitalize">{formattedDate}</span>
             </div>
             <h1 className="font-display text-3xl font-bold tracking-[-0.03em] text-white lg:text-4xl">
               {greeting}, {displayName}.
             </h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
-              Seu dia começa com clareza. Acompanhe o que importa e avance no seu ritmo.
+              Veja o que está pendente e organize o restante do dia.
             </p>
           </div>
 
@@ -182,7 +183,7 @@ export default function Dashboard() {
               onClick={() => setIsCustomizing(!isCustomizing)}
               className="gap-2 border-white/15 bg-white/[0.07] text-white hover:bg-white/15 hover:text-white"
             >
-              {isCustomizing ? <Sparkles className="h-4 w-4" /> : <Settings2 className="h-4 w-4" />}
+              {isCustomizing ? <Check className="h-4 w-4" /> : <Settings2 className="h-4 w-4" />}
               {isCustomizing ? "Concluir" : "Personalizar"}
             </Button>
           </div>

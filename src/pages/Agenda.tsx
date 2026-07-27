@@ -42,6 +42,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { downloadIcs, IcsEvent } from "@/lib/icsExport";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { AgendaFlowIcon } from "@/components/icons/LifeFlowIcons";
 import type { TaskRecurrence } from "@/hooks/useTasks";
 import { useContacts } from "@/hooks/useContacts";
 
@@ -184,9 +185,9 @@ export default function Agenda() {
 
       <PageHeader
         title="Agenda & Tarefas"
-        description="Organize seu tempo, priorize o dia e mantenha seus compromissos em movimento."
-        eyebrow="Planejamento"
-        icon={Calendar}
+        description="Suas tarefas, compromissos e datas importantes."
+        eyebrow="Agenda"
+        icon={AgendaFlowIcon}
         variant="tasks"
         actions={
           <>

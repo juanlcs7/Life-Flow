@@ -152,17 +152,17 @@ export default function Auth() {
           >
             <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-sm font-medium text-cyan-100">
               <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,.9)]" />
-              Sua vida em um só fluxo
+              Organização sem complicação
             </div>
             <h1 className="font-display text-5xl font-bold leading-[1.08] tracking-[-0.04em] text-white xl:text-6xl">
-              Mais clareza para cuidar do que{" "}
+              Sua rotina, suas contas e seus planos{" "}
               <span className="bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent">
-                realmente importa.
+                no mesmo lugar.
               </span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
-              Planeje sua rotina, acompanhe suas finanças e transforme objetivos em progresso
-              visível — todos os dias.
+              O LifeFlow ajuda você a lembrar do que precisa fazer e acompanhar o que mudou
+              durante a semana.
             </p>
 
             <div className="mt-10 grid gap-3 sm:grid-cols-3">
@@ -181,7 +181,7 @@ export default function Auth() {
             </div>
           </motion.div>
 
-          <p className="text-sm text-slate-500">Organize hoje. Evolua todos os dias.</p>
+          <p className="text-sm text-slate-500">Feito para o dia a dia.</p>
         </section>
 
         <section className="flex min-h-screen items-center justify-center p-4 sm:p-8 lg:p-12">
@@ -198,15 +198,15 @@ export default function Auth() {
 
             <div className="mb-7">
               <p className="mb-2 text-sm font-semibold text-teal-600">
-                {isLogin ? "Que bom ter você de volta" : "Comece sua jornada"}
+                {isLogin ? "Área pessoal" : "Novo por aqui?"}
               </p>
               <h2 className="font-display text-3xl font-bold tracking-tight text-slate-950">
                 {isLogin ? "Entre na sua conta" : "Crie sua conta"}
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">
                 {isLogin
-                  ? "Continue de onde parou e veja o progresso do seu dia."
-                  : "Leva menos de um minuto para começar."}
+                  ? "Digite seus dados para continuar."
+                  : "Preencha os dados abaixo para começar a usar."}
               </p>
             </div>
 

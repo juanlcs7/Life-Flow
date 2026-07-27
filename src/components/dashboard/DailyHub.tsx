@@ -20,10 +20,10 @@ import {
   HeartPulse,
   Loader2,
   Moon,
-  Sparkles,
   Users,
   type LucideIcon,
 } from "lucide-react";
+import { DayFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { differenceInCalendarDays, format, parseISO, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Link } from "react-router-dom";
@@ -198,53 +198,52 @@ export function DailyHub() {
 
   if (isLoading) {
     return (
-      <div className="h-[420px] animate-pulse rounded-[1.5rem] border bg-card/60 sm:h-[360px]" />
+      <div className="h-[420px] animate-pulse rounded-lg border bg-card sm:h-[360px]" />
     );
   }
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: 18 }}
+      initial={{ opacity: 0 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.08 }}
-      className="overflow-hidden rounded-[1.5rem] border border-white/70 bg-card/90 shadow-card backdrop-blur-sm dark:border-white/5"
+      transition={{ duration: 0.2, delay: 0.05 }}
+      className="overflow-hidden rounded-lg border bg-card shadow-sm"
     >
-      <div className="border-b bg-gradient-to-r from-primary/[0.08] via-transparent to-cyan-400/[0.07] px-5 py-5 sm:px-6">
+      <div className="border-b bg-muted/20 px-5 py-4">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-              <Sparkles className="h-5 w-5" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <DayFlowIcon className="h-5 w-5" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-display text-lg font-bold tracking-tight">Central do Dia</h2>
-                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
+                <h2 className="font-display text-lg font-bold tracking-tight">Resumo de hoje</h2>
+                <span className="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
                   Hoje
                 </span>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
                 {completedEverything
-                  ? "Tudo em dia. Aproveite o restante do seu dia."
-                  : `${completedDailyItems} de ${totalDailyItems || 0} itens diários concluídos`}
+                  ? "Você terminou tudo que estava planejado para hoje."
+                  : `${completedDailyItems} de ${totalDailyItems || 0} itens concluídos hoje`}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 rounded-2xl border bg-background/70 px-4 py-3">
-            <div
-              className="grid h-14 w-14 shrink-0 place-items-center rounded-full p-[5px]"
-              style={{
-                background: `conic-gradient(hsl(var(--primary)) ${progress}%, hsl(var(--muted)) ${progress}% 100%)`,
-              }}
-            >
-              <div className="grid h-full w-full place-items-center rounded-full bg-background text-xs font-bold">
-                {progress}%
-              </div>
-            </div>
+          <div className="flex min-w-48 items-center gap-3 rounded-md border bg-background px-4 py-3">
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">Progresso geral</p>
-              <p className="mt-0.5 text-sm font-semibold">
-                {progress === 100 ? "Dia concluído" : progress >= 50 ? "Bom ritmo" : "Vamos começar"}
+              <p className="text-xs text-muted-foreground">Feito hoje</p>
+              <p className="mt-0.5 text-lg font-semibold">
+                {progress}%
+                <span className="ml-2 text-xs font-normal text-muted-foreground">
+                {progress === 100
+                  ? "Tudo pronto"
+                  : progress >= 50
+                    ? "Mais da metade feita"
+                    : progress > 0
+                      ? "Você já começou"
+                      : "Nenhum item concluído"}
+                </span>
               </p>
             </div>
           </div>
@@ -257,9 +256,9 @@ export function DailyHub() {
           <div>
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-semibold">Seu foco agora</h3>
+                <h3 className="text-sm font-semibold">Tarefas pendentes</h3>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Conclua sem precisar sair do Dashboard
+                  Marque uma tarefa quando terminar
                 </p>
               </div>
               <Button asChild variant="ghost" size="sm" className="h-8 gap-1 text-xs">
@@ -287,14 +286,14 @@ export function DailyHub() {
                   return (
                     <div
                       key={task.id}
-                      className="group flex items-center gap-3 rounded-xl border bg-background/55 p-3 transition-colors hover:border-primary/25"
+                      className="group flex items-center gap-3 rounded-md border bg-background p-3 transition-colors hover:bg-muted/20"
                     >
                       <button
                         type="button"
                         onClick={() => handleTaskToggle(task.id)}
                         disabled={isPending}
                         aria-label={`Concluir ${task.title}`}
-                        className="grid h-8 w-8 shrink-0 place-items-center rounded-full border text-muted-foreground transition-all hover:border-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-60"
+                        className="grid h-8 w-8 shrink-0 place-items-center rounded-md border text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
                       >
                         {isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -378,11 +377,11 @@ export function DailyHub() {
                       type="button"
                       onClick={() => handleHabitIncrement(habit)}
                       disabled={isPending}
-                      className="group rounded-xl border bg-background/55 p-3 text-left transition-all hover:-translate-y-0.5 hover:border-health/35 hover:shadow-sm disabled:opacity-60"
+                      className="group rounded-md border bg-background p-3 text-left transition-colors hover:border-health/35 disabled:opacity-60"
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
+                          className="grid h-9 w-9 shrink-0 place-items-center rounded-md"
                           style={{ backgroundColor: `${habit.color}18`, color: habit.color }}
                         >
                           {isPending ? (
@@ -415,14 +414,18 @@ export function DailyHub() {
           </div>
         </div>
 
-        <div className="space-y-5 bg-muted/[0.12] p-5 sm:p-6">
+        <div className="space-y-5 bg-muted/10 p-5 sm:p-6">
           <div>
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold">Próximos 7 dias</h3>
                 <p className="mt-0.5 text-xs text-muted-foreground">O que merece sua atenção</p>
               </div>
-              <CalendarDays className="h-4 w-4 text-primary" />
+              <Button asChild variant="ghost" size="sm" className="h-8 gap-1 px-2 text-xs">
+                <Link to="/planejamento">
+                  Planejar <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
             </div>
 
             <div className="space-y-2">
@@ -430,9 +433,9 @@ export function DailyHub() {
                 <Link
                   key={item.id}
                   to="/financas"
-                  className="flex items-center gap-3 rounded-xl border bg-background/70 p-3 transition-colors hover:border-finance/30"
+                  className="flex items-center gap-3 rounded-md border bg-background p-3 transition-colors hover:bg-muted/20"
                 >
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-finance/10 text-finance">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-finance/10 text-finance">
                     <CreditCard className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -451,9 +454,9 @@ export function DailyHub() {
                 <Link
                   key={contact.id}
                   to="/contatos"
-                  className="flex items-center gap-3 rounded-xl border bg-background/70 p-3 transition-colors hover:border-contacts/30"
+                  className="flex items-center gap-3 rounded-md border bg-background p-3 transition-colors hover:bg-muted/20"
                 >
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-contacts/10 text-contacts">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-contacts/10 text-contacts">
                     <Gift className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -468,7 +471,7 @@ export function DailyHub() {
               {upcomingFinancialItems.length === 0 && upcomingBirthdays.length === 0 && (
                 <div className="rounded-xl border border-dashed bg-background/45 p-4 text-center">
                   <CalendarDays className="mx-auto h-5 w-5 text-muted-foreground" />
-                  <p className="mt-2 text-sm font-medium">Semana tranquila</p>
+                    <p className="mt-2 text-sm font-medium">Nada marcado por aqui</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     Nenhum vencimento ou aniversário próximo.
                   </p>

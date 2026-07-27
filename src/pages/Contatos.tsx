@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContextActionMenu } from "@/components/ui/context-action-menu";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { PeopleFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { ContactModal } from "@/components/contacts/ContactModal";
 import { Contact, ContactInput, ContactType, useContacts } from "@/hooks/useContacts";
 import { cn } from "@/lib/utils";
@@ -140,10 +141,10 @@ export default function Contatos() {
       />
 
       <PageHeader
-        title="Contatos & Networking"
-        description="Organize seus relacionamentos, acompanhe conversas e não perca datas importantes."
-        eyebrow="Sua rede"
-        icon={Users}
+        title="Contatos"
+        description="Telefones, datas importantes e lembretes de conversa."
+        eyebrow="Pessoas"
+        icon={PeopleFlowIcon}
         variant="neutral"
         actions={
           <Button

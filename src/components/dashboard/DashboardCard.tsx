@@ -1,7 +1,7 @@
-import { ReactNode } from "react";
+import { type ComponentType, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { LucideIcon, ExternalLink, GripVertical } from "lucide-react";
+import { ExternalLink, GripVertical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,7 @@ import type { CardSize } from "@/hooks/useDashboardPreferences";
 
 interface DashboardCardProps {
   title: string;
-  icon: LucideIcon;
+  icon: ComponentType<{ className?: string }>;
   href: string;
   children: ReactNode;
   variant?: "finance" | "tasks" | "goals" | "health" | "agenda" | "history";

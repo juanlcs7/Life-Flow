@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Wallet,
-  CalendarDays,
-  Heart,
-  FolderOpen,
-  Users,
-  Settings,
   LogOut,
   Menu,
-  History,
-  Target,
 } from "lucide-react";
+import {
+  AgendaFlowIcon,
+  FilesFlowIcon,
+  GoalFlowIcon,
+  HealthFlowIcon,
+  HistoryFlowIcon,
+  HomeFlowIcon,
+  MoneyFlowIcon,
+  PeopleFlowIcon,
+  SlidersFlowIcon,
+  WeekFlowIcon,
+} from "@/components/icons/LifeFlowIcons";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -24,49 +27,55 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 const navItems = [
   {
     label: "Dashboard",
-    icon: LayoutDashboard,
+    icon: HomeFlowIcon,
     href: "/",
     color: "text-primary",
   },
   {
     label: "Finanças",
-    icon: Wallet,
+    icon: MoneyFlowIcon,
     href: "/financas",
     color: "text-finance",
   },
   {
     label: "Agenda",
-    icon: CalendarDays,
+    icon: AgendaFlowIcon,
     href: "/agenda",
     color: "text-tasks",
   },
   {
+    label: "Planejamento",
+    icon: WeekFlowIcon,
+    href: "/planejamento",
+    color: "text-info",
+  },
+  {
     label: "Metas",
-    icon: Target,
+    icon: GoalFlowIcon,
     href: "/metas",
     color: "text-primary",
   },
   {
     label: "Saúde",
-    icon: Heart,
+    icon: HealthFlowIcon,
     href: "/saude",
     color: "text-health",
   },
   {
     label: "Histórico",
-    icon: History,
+    icon: HistoryFlowIcon,
     href: "/historico",
     color: "text-muted-foreground",
   },
   {
     label: "Documentos",
-    icon: FolderOpen,
+    icon: FilesFlowIcon,
     href: "/documentos",
     color: "text-documents",
   },
   {
     label: "Contatos",
-    icon: Users,
+    icon: PeopleFlowIcon,
     href: "/contatos",
     color: "text-contacts",
   },
@@ -89,15 +98,14 @@ export function MobileNav() {
   const initials = displayName.substring(0, 2).toUpperCase();
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl lg:hidden">
+    <header className="fixed inset-x-0 top-0 z-50 border-b bg-background lg:hidden">
       <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/70 bg-card shadow-sm">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md border bg-card">
             <img src="/lifeflow-logo.png" alt="" className="h-8 w-8 object-contain" />
           </div>
           <div>
             <h1 className="font-display font-bold tracking-tight text-foreground">LifeFlow</h1>
-            <p className="text-[10px] font-medium text-muted-foreground">Seu dia em movimento</p>
           </div>
         </div>
 
@@ -106,14 +114,14 @@ export function MobileNav() {
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-xl text-foreground hover:bg-muted active:scale-95"
+              className="rounded-md text-foreground hover:bg-muted"
             >
               <Menu className="w-6 h-6" />
             </Button>
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="w-[310px] border-white/10 bg-[linear-gradient(180deg,#07111f_0%,#091827_100%)] p-0"
+            className="w-[300px] border-slate-800 bg-slate-900 p-0"
           >
             <div className="flex flex-col h-full">
               {/* User Info */}
@@ -122,7 +130,7 @@ export function MobileNav() {
                   <img src="/lifeflow-logo.png" alt="" className="h-9 w-9 object-contain" />
                   <span className="font-display text-lg font-bold text-white">LifeFlow</span>
                 </div>
-                <div className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.045] p-3">
+                <div className="flex items-center gap-3 rounded-md bg-slate-800 p-3">
                   <Avatar className="h-10 w-10">
                     <AvatarFallback className="bg-cyan-300/10 text-sm font-semibold text-cyan-200">
                       {initials}
@@ -141,8 +149,8 @@ export function MobileNav() {
 
               {/* Navigation */}
               <nav className="flex-1 space-y-1 overflow-auto p-3">
-                <p className="mb-2 px-4 pt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-600">
-                  Navegação
+                <p className="mb-2 px-4 pt-2 text-xs font-medium text-slate-500">
+                  Menu
                 </p>
                 {navItems.map((item) => {
                   const isActive = location.pathname === item.href;
@@ -152,7 +160,7 @@ export function MobileNav() {
                       to={item.href}
                       onClick={() => setOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 active:scale-95",
+                        "flex items-center gap-3 rounded-md px-4 py-3 transition-colors",
                         isActive
                           ? "bg-white/[0.09] text-white"
                           : "text-slate-400 hover:bg-white/[0.055] hover:text-white"
@@ -182,7 +190,7 @@ export function MobileNav() {
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-white/[0.055] hover:text-white active:scale-95"
                 >
-                  <Settings className="w-5 h-5" />
+                  <SlidersFlowIcon className="h-5 w-5" />
                   <span className="font-medium">Configurações</span>
                 </Link>
 
