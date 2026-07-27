@@ -17,6 +17,8 @@ export interface Task {
   due_time: string | null;
   due_date: string;
   completed: boolean;
+  contact_id: string | null;
+  source: "manual" | "contact_follow_up";
   goal_id: string | null;
   created_at: string;
   updated_at: string;
@@ -24,6 +26,7 @@ export interface Task {
 
 export type NewTask = Pick<Task, "title" | "category" | "priority" | "due_time" | "due_date" | "recurrence"> & {
   goal_id?: string | null;
+  contact_id?: string | null;
 };
 
 function getNextDueDate(dueDate: string, recurrence: TaskRecurrence) {
@@ -116,6 +119,8 @@ export function useTasks() {
           due_date: getNextDueDate(task.due_date, task.recurrence),
           due_time: task.due_time,
           goal_id: task.goal_id,
+          contact_id: task.contact_id,
+          source: task.source,
           recurrence: task.recurrence,
           recurrence_generated: false,
         });

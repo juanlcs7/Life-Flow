@@ -46,6 +46,46 @@ export function useContacts() {
     enabled: !!user,
   });
 
+  const syncFollowUpTask = async (contact: Contact) => {
+    if (!user) return;
+    const { data: existing, error: lookupError } = await supabase
+      .from("tasks")
+      .select("id")
+      .eq("contact_id", contact.id)
+      .eq("source", "contact_follow_up")
+      .eq("completed", false)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (lookupError) throw lookupError;
+
+    if (!contact.follow_up_date) {
+      if (existing) {
+        const { error } = await supabase.from("tasks").delete().eq("id", existing.id);
+        if (error) throw error;
+      }
+      return;
+    }
+
+    const task = {
+      user_id: user.id,
+      title: `Follow-up: ${contact.name}`,
+      category: "Networking",
+      priority: "medium",
+      due_date: contact.follow_up_date,
+      due_time: null,
+      recurrence: "none",
+      recurrence_generated: false,
+      contact_id: contact.id,
+      source: "contact_follow_up",
+    };
+
+    const { error } = existing
+      ? await supabase.from("tasks").update(task).eq("id", existing.id)
+      : await supabase.from("tasks").insert(task);
+    if (error) throw error;
+  };
+
   const addMutation = useMutation({
     mutationFn: async (contact: ContactInput) => {
       if (!user) throw new Error("Usuário não autenticado");
@@ -55,28 +95,48 @@ export function useContacts() {
         .select()
         .single();
       if (error) throw error;
-      return data as Contact;
+      const saved = data as Contact;
+      await syncFollowUpTask(saved);
+      return saved;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["contacts", user?.id] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", user?.id] });
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<ContactInput> & { id: string }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("contacts")
         .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq("id", id);
+        .eq("id", id)
+        .select()
+        .single();
       if (error) throw error;
+      await syncFollowUpTask(data as Contact);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["contacts", user?.id] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", user?.id] });
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      const { error: taskError } = await supabase
+        .from("tasks")
+        .delete()
+        .eq("contact_id", id)
+        .eq("source", "contact_follow_up");
+      if (taskError) throw taskError;
       const { error } = await supabase.from("contacts").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["contacts", user?.id] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", user?.id] });
+    },
   });
 
   return {

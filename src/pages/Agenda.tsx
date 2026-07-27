@@ -12,6 +12,8 @@ import {
   Loader2,
   CalendarPlus,
   Repeat2,
+  Gift,
+  UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -41,6 +43,7 @@ import { toast } from "sonner";
 import { downloadIcs, IcsEvent } from "@/lib/icsExport";
 import { PageHeader } from "@/components/layout/PageHeader";
 import type { TaskRecurrence } from "@/hooks/useTasks";
+import { useContacts } from "@/hooks/useContacts";
 
 const days = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const currentDate = new Date();
@@ -60,6 +63,8 @@ export default function Agenda() {
   
   const { tasks, isLoading: tasksLoading, addTask, toggleTask, updateTask, deleteTask } = useTasks();
   const { goals, isLoading: goalsLoading, addGoal } = useGoals();
+  const { contacts } = useContacts();
+  const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
 
   const todayTasks = tasks.filter((task) => {
     try {
@@ -83,6 +88,13 @@ export default function Agenda() {
       }
     });
 
+  const birthdaysForDate = (date: Date) =>
+    contacts.filter((contact) => {
+      if (!contact.birthday) return false;
+      const birthday = parseISO(contact.birthday);
+      return birthday.getMonth() === date.getMonth() && birthday.getDate() === date.getDate();
+    });
+
   const selectedDayTasks = tasksForDate(selectedDate);
 
   const changeMonth = (direction: "previous" | "next") => {
@@ -98,6 +110,7 @@ export default function Agenda() {
     priority: string;
     category: string;
     recurrence: TaskRecurrence;
+    contact_id: string | null;
   }) => {
     if (editingTask) {
       await updateTask({ id: editingTask.id, ...data, priority: data.priority as "low" | "medium" | "high" });
@@ -279,6 +292,11 @@ export default function Agenda() {
                               <span className="text-[10px] sm:text-xs text-muted-foreground bg-muted px-1.5 sm:px-2 py-0.5 rounded">
                                 {task.category}
                               </span>
+                              {task.contact_id && contactsById.get(task.contact_id) && (
+                                <span className="flex items-center gap-1 text-[10px] text-contacts">
+                                  <UserRound className="h-3 w-3" />{contactsById.get(task.contact_id)?.name}
+                                </span>
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
@@ -344,7 +362,7 @@ export default function Agenda() {
                       )}
                     >
                       {format(day, "d")}
-                      {tasksForDate(day).length > 0 && (
+                      {(tasksForDate(day).length > 0 || birthdaysForDate(day).length > 0) && (
                         <span className={cn("absolute bottom-1 h-1 w-1 rounded-full bg-tasks", isSameDay(day, selectedDate) && "bg-tasks-foreground")} />
                       )}
                     </button>
@@ -384,6 +402,7 @@ export default function Agenda() {
               <div className="mt-2 grid grid-cols-7 gap-1 sm:gap-2">
                 {calendarDays.map((day) => {
                   const dayTasks = tasksForDate(day);
+                  const dayBirthdays = birthdaysForDate(day);
                   const completed = dayTasks.filter((task) => task.completed).length;
                   return (
                     <button
@@ -412,6 +431,11 @@ export default function Agenda() {
                             {task.title}
                           </div>
                         ))}
+                        {dayBirthdays.slice(0, 1).map((contact) => (
+                          <div key={contact.id} className="truncate rounded bg-accent/10 px-1.5 py-0.5 text-[9px] text-accent sm:text-[10px]">
+                            <Gift className="mr-1 inline h-2.5 w-2.5" />{contact.name}
+                          </div>
+                        ))}
                         {dayTasks.length > 2 && <p className="px-1 text-[9px] text-muted-foreground">+{dayTasks.length - 2} tarefas</p>}
                       </div>
                     </button>
@@ -428,7 +452,7 @@ export default function Agenda() {
               <p className="mt-0.5 text-xs text-muted-foreground">{selectedDayTasks.length} tarefa{selectedDayTasks.length === 1 ? "" : "s"}</p>
 
               <div className="mt-4 space-y-2">
-                {selectedDayTasks.length === 0 ? (
+                {selectedDayTasks.length === 0 && birthdaysForDate(selectedDate).length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/70 bg-muted/15 p-5 text-center">
                     <Calendar className="mx-auto mb-2 h-7 w-7 text-muted-foreground/40" />
                     <p className="text-xs text-muted-foreground">Nenhuma tarefa neste dia</p>
@@ -442,7 +466,19 @@ export default function Agenda() {
                       {task.title}
                     </button>
                     {task.recurrence !== "none" && <Repeat2 className="h-3.5 w-3.5 text-tasks" />}
+                    {task.contact_id && contactsById.get(task.contact_id) && (
+                      <span className="max-w-20 truncate text-[10px] text-contacts">{contactsById.get(task.contact_id)?.name}</span>
+                    )}
                     {task.due_time && <span className="text-[10px] text-muted-foreground">{task.due_time}</span>}
+                  </div>
+                ))}
+                {birthdaysForDate(selectedDate).map((contact) => (
+                  <div key={contact.id} className="flex items-center gap-2 rounded-xl border border-accent/15 bg-accent/[0.055] p-2.5">
+                    <Gift className="h-4 w-4 text-accent" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-medium">Aniversário de {contact.name}</p>
+                      <p className="text-[10px] text-muted-foreground">Data importante</p>
+                    </div>
                   </div>
                 ))}
               </div>

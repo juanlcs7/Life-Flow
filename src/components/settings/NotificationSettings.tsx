@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Bell, BellOff, Clock, CheckSquare, Target, CreditCard } from "lucide-react";
+import { Bell, BellOff, Clock, CheckSquare, Target, CreditCard, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -208,6 +208,20 @@ export function NotificationSettings() {
                   <Switch
                     checked={settings.subscriptionReminders}
                     onCheckedChange={(checked) => handleToggle("subscriptionReminders", checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between rounded-xl border border-border/60 p-4 transition-colors hover:bg-muted/20">
+                  <div className="flex items-center gap-3">
+                    <Users className="h-5 w-5 text-contacts" />
+                    <div>
+                      <Label className="text-sm font-medium">Contatos</Label>
+                      <p className="text-xs text-muted-foreground">Follow-ups e aniversários</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.contactReminders}
+                    onCheckedChange={(checked) => handleToggle("contactReminders", checked)}
                   />
                 </div>
 

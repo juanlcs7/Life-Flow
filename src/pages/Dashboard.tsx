@@ -112,6 +112,7 @@ export default function Dashboard() {
     priority: string;
     category: string;
     recurrence: TaskRecurrence;
+    contact_id: string | null;
   }) => {
     await addTask({
       title: data.title,
@@ -120,6 +121,7 @@ export default function Dashboard() {
       priority: data.priority as "low" | "medium" | "high",
       category: data.category,
       recurrence: data.recurrence,
+      contact_id: data.contact_id,
     });
     toast.success("Tarefa adicionada!");
   };

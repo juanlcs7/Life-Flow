@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Repeat2 } from "lucide-react";
 import type { TaskRecurrence } from "@/hooks/useTasks";
+import { useContacts } from "@/hooks/useContacts";
 
 interface TaskModalProps {
   open: boolean;
@@ -29,6 +30,7 @@ interface TaskModalProps {
     priority: string;
     category: string;
     recurrence: TaskRecurrence;
+    contact_id: string | null;
   }) => Promise<void>;
   editData?: {
     id: string;
@@ -38,6 +40,7 @@ interface TaskModalProps {
     priority: string;
     category: string;
     recurrence: TaskRecurrence;
+    contact_id: string | null;
   } | null;
 }
 
@@ -64,6 +67,8 @@ export function TaskModal({ open, onOpenChange, onSubmit, editData }: TaskModalP
   const [priority, setPriority] = useState("medium");
   const [category, setCategory] = useState("");
   const [recurrence, setRecurrence] = useState<TaskRecurrence>("none");
+  const [contactId, setContactId] = useState("none");
+  const { contacts } = useContacts();
 
   useEffect(() => {
     if (editData) {
@@ -73,6 +78,7 @@ export function TaskModal({ open, onOpenChange, onSubmit, editData }: TaskModalP
       setPriority(editData.priority);
       setCategory(editData.category);
       setRecurrence(editData.recurrence || "none");
+      setContactId(editData.contact_id || "none");
     } else {
       setTitle("");
       setDueDate(new Date().toISOString().split("T")[0]);
@@ -80,6 +86,7 @@ export function TaskModal({ open, onOpenChange, onSubmit, editData }: TaskModalP
       setPriority("medium");
       setCategory("");
       setRecurrence("none");
+      setContactId("none");
     }
   }, [editData, open]);
 
@@ -96,6 +103,7 @@ export function TaskModal({ open, onOpenChange, onSubmit, editData }: TaskModalP
         priority,
         category,
         recurrence,
+        contact_id: contactId === "none" ? null : contactId,
       });
       setTitle("");
       setDueDate(new Date().toISOString().split("T")[0]);
@@ -103,6 +111,7 @@ export function TaskModal({ open, onOpenChange, onSubmit, editData }: TaskModalP
       setPriority("medium");
       setCategory("");
       setRecurrence("none");
+      setContactId("none");
       onOpenChange(false);
     } finally {
       setLoading(false);
@@ -203,6 +212,19 @@ export function TaskModal({ open, onOpenChange, onSubmit, editData }: TaskModalP
             <p className="text-[11px] text-muted-foreground">
               A próxima ocorrência será criada quando esta tarefa for concluída.
             </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Contato vinculado</Label>
+            <Select value={contactId} onValueChange={setContactId}>
+              <SelectTrigger className="h-12 text-base"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-popover">
+                <SelectItem value="none">Nenhum contato</SelectItem>
+                {contacts.map((contact) => (
+                  <SelectItem key={contact.id} value={contact.id}>{contact.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex gap-2 pt-4">

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { LocalNotifications, ScheduleOptions } from "@capacitor/local-notifications";
 import { useAuth } from "./useAuth";
@@ -8,6 +8,7 @@ import { usePersonalGoals } from "./usePersonalGoals";
 import { useSubscriptions } from "./useSubscriptions";
 import { useInstallments } from "./useInstallments";
 import { useMarketRates } from "./useMarketRates";
+import { useContacts } from "./useContacts";
 import { addDays, parseISO, differenceInDays, format, isToday, isTomorrow } from "date-fns";
 
 export interface NotificationSettings {
@@ -17,6 +18,7 @@ export interface NotificationSettings {
   subscriptionReminders: boolean;
   installmentReminders: boolean;
   investmentTips: boolean;
+  contactReminders: boolean;
   reminderTime: string; // HH:mm format
   installmentDaysBefore: number; // days before due to alert (1-7)
   investmentTipsFrequency: "daily" | "weekly" | "off";
@@ -29,6 +31,7 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   subscriptionReminders: true,
   installmentReminders: true,
   investmentTips: true,
+  contactReminders: true,
   reminderTime: "09:00",
   installmentDaysBefore: 3,
   investmentTipsFrequency: "daily",
@@ -47,7 +50,8 @@ export function useNotifications() {
   const { subscriptions } = useSubscriptions();
   const { payments: installmentPayments, installments } = useInstallments();
   const marketRatesQuery = useMarketRates();
-  const marketRates = marketRatesQuery.data ?? [];
+  const marketRates = useMemo(() => marketRatesQuery.data ?? [], [marketRatesQuery.data]);
+  const { contacts } = useContacts();
 
   useEffect(() => {
     const platform = Capacitor.getPlatform();
@@ -63,7 +67,7 @@ export function useNotifications() {
     // Load settings from localStorage
     const saved = localStorage.getItem(`notification_settings_${user?.id}`);
     if (saved) {
-      setSettings(JSON.parse(saved));
+      setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(saved) });
     }
   }, [user?.id]);
 
@@ -202,8 +206,28 @@ export function useNotifications() {
 
         // Only schedule if in the future
         if (scheduleDate > new Date()) {
-          push("📋 Tarefa pendente", task.title, scheduleDate, { type: "task", taskId: task.id });
+          push(
+            task.source === "contact_follow_up" ? "🤝 Follow-up de contato" : "📋 Tarefa pendente",
+            task.title,
+            scheduleDate,
+            { type: task.source === "contact_follow_up" ? "contact_follow_up" : "task", taskId: task.id, contactId: task.contact_id },
+          );
         }
+      });
+    }
+
+    if (settings.contactReminders) {
+      const now = new Date();
+      contacts.filter((contact) => contact.birthday).forEach((contact) => {
+        const birthday = parseISO(contact.birthday!);
+        let nextBirthday = new Date(now.getFullYear(), birthday.getMonth(), birthday.getDate(), hours, minutes, 0, 0);
+        if (nextBirthday <= now) {
+          nextBirthday = new Date(now.getFullYear() + 1, birthday.getMonth(), birthday.getDate(), hours, minutes, 0, 0);
+        }
+        push("🎂 Aniversário", `Hoje é aniversário de ${contact.name}. Que tal enviar uma mensagem?`, nextBirthday, {
+          type: "contact_birthday",
+          contactId: contact.id,
+        });
       });
     }
 
@@ -308,6 +332,7 @@ export function useNotifications() {
     isWebNotificationSupported,
     permissionGranted,
     tasks,
+    contacts,
     financialGoals,
     personalGoals,
     subscriptions,
@@ -324,7 +349,7 @@ export function useNotifications() {
     if (settings.enabled && permissionGranted && (isNativePlatform || isWebNotificationSupported)) {
       scheduleAllReminders();
     }
-  }, [tasks, financialGoals, personalGoals, subscriptions, installmentPayments, installments, marketRates, scheduleAllReminders, settings.enabled, permissionGranted, isNativePlatform, isWebNotificationSupported]);
+  }, [tasks, contacts, financialGoals, personalGoals, subscriptions, installmentPayments, installments, marketRates, scheduleAllReminders, settings.enabled, permissionGranted, isNativePlatform, isWebNotificationSupported]);
 
   return {
     settings,

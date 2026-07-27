@@ -938,6 +938,7 @@ export type Database = {
         Row: {
           category: string
           completed: boolean
+          contact_id: string | null
           created_at: string
           due_date: string
           due_time: string | null
@@ -946,6 +947,7 @@ export type Database = {
           priority: string
           recurrence: string
           recurrence_generated: boolean
+          source: string
           title: string
           updated_at: string
           user_id: string
@@ -953,6 +955,7 @@ export type Database = {
         Insert: {
           category?: string
           completed?: boolean
+          contact_id?: string | null
           created_at?: string
           due_date?: string
           due_time?: string | null
@@ -961,6 +964,7 @@ export type Database = {
           priority?: string
           recurrence?: string
           recurrence_generated?: boolean
+          source?: string
           title: string
           updated_at?: string
           user_id: string
@@ -968,6 +972,7 @@ export type Database = {
         Update: {
           category?: string
           completed?: boolean
+          contact_id?: string | null
           created_at?: string
           due_date?: string
           due_time?: string | null
@@ -976,11 +981,19 @@ export type Database = {
           priority?: string
           recurrence?: string
           recurrence_generated?: boolean
+          source?: string
           title?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_goal_id_fkey"
             columns: ["goal_id"]
