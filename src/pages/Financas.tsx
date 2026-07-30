@@ -1,14 +1,14 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Plus, TrendingUp, TrendingDown, Wallet, PiggyBank, Filter, Download, Loader2, CreditCard, BarChart3 } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Wallet, PiggyBank, Filter, Download, Loader2, CreditCard, BarChart3, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTransactions, Transaction } from "@/hooks/useTransactions";
-import { useAccounts, Account } from "@/hooks/useAccounts";
-import { useFinancialGoals, FinancialGoal } from "@/hooks/useFinancialGoals";
+import { useAccounts, Account, type NewAccount } from "@/hooks/useAccounts";
+import { useFinancialGoals, FinancialGoal, type NewFinancialGoal } from "@/hooks/useFinancialGoals";
 import { useInstallments } from "@/hooks/useInstallments";
-import { useSubscriptions, Subscription } from "@/hooks/useSubscriptions";
+import { useSubscriptions, Subscription, type NewSubscription } from "@/hooks/useSubscriptions";
 import { useInvestments } from "@/hooks/useInvestments";
 import { TransactionModal } from "@/components/modals/TransactionModal";
 import { AccountModal } from "@/components/finance/AccountModal";
@@ -38,6 +38,10 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { MoneyFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { UpgradeBanner } from "@/components/premium/UpgradeBanner";
 import { Lock } from "lucide-react";
+import { ImportTransactionsModal } from "@/components/finance/ImportTransactionsModal";
+import type { NewTransaction } from "@/hooks/useTransactions";
+
+type TransactionFormData = Omit<NewTransaction, "date">;
 
 export default function Financas() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -54,6 +58,7 @@ export default function Financas() {
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const [transferModalOpen, setTransferModalOpen] = useState(false);
   const [addToGoalModalOpen, setAddToGoalModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   
   // Edit states
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -131,7 +136,7 @@ export default function Financas() {
   const categories = [...new Set(transactions.map(t => t.category))];
 
   // Handlers
-  const handleAddTransaction = async (data: any) => {
+  const handleAddTransaction = async (data: TransactionFormData) => {
     if (!editingTransaction && !canAddTransaction) {
       setPremiumReason(`Plano gratuito permite ${limits.transactionsPerMonth} transações por mês. Você já registrou ${usage.transactionsThisMonth}.`);
       setPremiumOpen(true);
@@ -147,7 +152,7 @@ export default function Financas() {
     setEditingTransaction(null);
   };
 
-  const handleAddAccount = async (data: any) => {
+  const handleAddAccount = async (data: NewAccount) => {
     if (editingAccount) {
       await updateAccount({ id: editingAccount.id, ...data });
       toast.success("Conta atualizada!");
@@ -158,7 +163,7 @@ export default function Financas() {
     setEditingAccount(null);
   };
 
-  const handleAddGoal = async (data: any) => {
+  const handleAddGoal = async (data: NewFinancialGoal) => {
     if (editingGoal) {
       await updateGoal({ id: editingGoal.id, ...data });
       toast.success("Meta atualizada!");
@@ -169,7 +174,7 @@ export default function Financas() {
     setEditingGoal(null);
   };
 
-  const handleAddSubscription = async (data: any) => {
+  const handleAddSubscription = async (data: NewSubscription) => {
     if (editingSubscription) {
       await updateSubscription({ id: editingSubscription.id, ...data });
       toast.success("Assinatura atualizada!");
@@ -178,6 +183,13 @@ export default function Financas() {
       toast.success("Assinatura cadastrada!");
     }
     setEditingSubscription(null);
+  };
+
+  const handleImportTransactions = async (items: NewTransaction[]) => {
+    for (const item of items) {
+      await addTransaction(item);
+    }
+    toast.success(`${items.length} transações importadas!`);
   };
 
   return (
@@ -191,6 +203,13 @@ export default function Financas() {
       <SubscriptionModal open={subscriptionModalOpen} onOpenChange={setSubscriptionModalOpen} onSubmit={handleAddSubscription} editData={editingSubscription} accounts={accounts} />
       <TransferModal open={transferModalOpen} onOpenChange={setTransferModalOpen} onSubmit={async (data) => { await transfer(data); toast.success("Transferência realizada!"); }} accounts={accounts} />
       <AddToGoalModal open={addToGoalModalOpen} onOpenChange={setAddToGoalModalOpen} onSubmit={async (data) => { await addToGoal(data); toast.success("Valor adicionado!"); }} goal={selectedGoalForAdd} accounts={accounts} />
+      <ImportTransactionsModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        accounts={accounts}
+        maxRows={isPremium ? undefined : Math.max(0, limits.transactionsPerMonth - usage.transactionsThisMonth)}
+        onImport={handleImportTransactions}
+      />
 
       <PageHeader
         title="Finanças"
@@ -199,9 +218,14 @@ export default function Financas() {
         icon={MoneyFlowIcon}
         variant="finance"
         actions={
-          <Button className="gradient-finance text-finance-foreground h-10 px-4 active:scale-95 transition-transform" size="sm" onClick={() => { setEditingTransaction(null); setTransactionModalOpen(true); }}>
-            <Plus className="w-4 h-4 mr-2" />Nova Transação
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" className="h-10 px-3" size="sm" onClick={() => setImportModalOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" />Importar CSV
+            </Button>
+            <Button className="gradient-finance text-finance-foreground h-10 px-4 active:scale-95 transition-transform" size="sm" onClick={() => { setEditingTransaction(null); setTransactionModalOpen(true); }}>
+              <Plus className="w-4 h-4 mr-2" />Nova Transação
+            </Button>
+          </div>
         }
       />
 
@@ -346,7 +370,7 @@ export default function Financas() {
             <AccountsSection accounts={accounts} totalBalance={totalBalance} isLoading={accountsLoading} onAdd={() => { setEditingAccount(null); setAccountModalOpen(true); }} onEdit={(a) => { setEditingAccount(a); setAccountModalOpen(true); }} onDelete={(id) => { deleteAccount(id); toast.success("Conta excluída!"); }} onTransfer={() => setTransferModalOpen(true)} />
             <FinancialGoalsSection goals={goals} isLoading={goalsLoading} onAdd={() => { setEditingGoal(null); setGoalModalOpen(true); }} onEdit={(g) => { setEditingGoal(g); setGoalModalOpen(true); }} onDelete={(id) => { deleteGoal(id); toast.success("Meta excluída!"); }} onAddToGoal={(g) => { setSelectedGoalForAdd(g); setAddToGoalModalOpen(true); }} onWithdraw={async (id, amount, accountId) => { await withdrawFromGoal({ id, amount, accountId }); toast.success("Valor resgatado!"); }} accounts={accounts} />
             <InstallmentsSection installments={installments} payments={payments} monthlyImpact={monthlyImpact} isLoading={installmentsLoading} onAdd={() => setInstallmentModalOpen(true)} onDelete={(id) => { deleteInstallment(id); toast.success("Parcelamento excluído!"); }} onMarkPaid={(id, paid) => { markPaymentPaid({ paymentId: id, paid }); toast.success(paid ? "Parcela paga!" : "Parcela desmarcada!"); }} />
-            <SubscriptionsSection subscriptions={subscriptions} monthlyCost={monthlyCost} upcomingRenewals={upcomingRenewals} isLoading={subscriptionsLoading} onAdd={() => { setEditingSubscription(null); setSubscriptionModalOpen(true); }} onEdit={(s) => { setEditingSubscription(s); setSubscriptionModalOpen(true); }} onDelete={(id) => { deleteSubscription(id); toast.success("Assinatura excluída!"); }} onPay={async (id) => { setPayingSubscriptionId(id); try { await paySubscription(id); toast.success("Assinatura paga e debitada da conta!"); } catch (e: any) { toast.error(e.message || "Falha ao pagar"); } finally { setPayingSubscriptionId(null); } }} payingId={payingSubscriptionId} />
+            <SubscriptionsSection subscriptions={subscriptions} monthlyCost={monthlyCost} upcomingRenewals={upcomingRenewals} isLoading={subscriptionsLoading} onAdd={() => { setEditingSubscription(null); setSubscriptionModalOpen(true); }} onEdit={(s) => { setEditingSubscription(s); setSubscriptionModalOpen(true); }} onDelete={(id) => { deleteSubscription(id); toast.success("Assinatura excluída!"); }} onPay={async (id) => { setPayingSubscriptionId(id); try { await paySubscription(id); toast.success("Assinatura paga e debitada da conta!"); } catch (error) { toast.error(error instanceof Error ? error.message : "Falha ao pagar"); } finally { setPayingSubscriptionId(null); } }} payingId={payingSubscriptionId} />
             <InvestmentsSection accounts={accounts} />
             <InvestmentTips patrimony={patrimony} />
           </div>

@@ -5,6 +5,12 @@ interface BeforeInstallPromptEvent extends Event {
 
 let installPrompt: BeforeInstallPromptEvent | null = null;
 let initialized = false;
+let updateAvailable = false;
+
+function announceUpdate() {
+  updateAvailable = true;
+  window.dispatchEvent(new Event("lifeflow-update-state"));
+}
 
 export function isLifeFlowInstalled() {
   return (
@@ -16,6 +22,14 @@ export function isLifeFlowInstalled() {
 
 export function canInstallLifeFlow() {
   return installPrompt !== null;
+}
+
+export function hasLifeFlowUpdate() {
+  return updateAvailable;
+}
+
+export function applyLifeFlowUpdate() {
+  window.location.reload();
 }
 
 export function registerLifeFlowPwa() {
@@ -35,9 +49,29 @@ export function registerLifeFlowPwa() {
 
   if ("serviceWorker" in navigator && import.meta.env.PROD) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/sw.js").catch((error) => {
-        console.error("Não foi possível registrar o modo aplicativo", error);
-      });
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((registration) => {
+          if (registration.waiting && navigator.serviceWorker.controller) {
+            announceUpdate();
+          }
+
+          registration.addEventListener("updatefound", () => {
+            const installingWorker = registration.installing;
+            const isUpdate = Boolean(
+              registration.active || navigator.serviceWorker.controller,
+            );
+
+            installingWorker?.addEventListener("statechange", () => {
+              if (installingWorker.state === "installed" && isUpdate) {
+                announceUpdate();
+              }
+            });
+          });
+        })
+        .catch((error) => {
+          console.error("Não foi possível registrar o modo aplicativo", error);
+        });
     });
   }
 }

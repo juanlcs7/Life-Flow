@@ -12,6 +12,7 @@ import { RouteMeta } from "@/components/RouteMeta";
 import { Loader2 } from "lucide-react";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import { ConnectionStatus } from "@/components/ConnectionStatus";
+import { PwaUpdatePrompt } from "@/components/PwaUpdatePrompt";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
 const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"), "dashboard");
@@ -51,6 +52,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <ConnectionStatus />
+            <PwaUpdatePrompt />
             <BrowserRouter>
               <RouteMeta />
               <Suspense fallback={<PageLoading fullScreen />}>
