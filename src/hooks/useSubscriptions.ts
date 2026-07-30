@@ -23,7 +23,11 @@ export interface Subscription {
 
 export type NewSubscription = Omit<Subscription, "id" | "user_id" | "created_at" | "updated_at">;
 
-export function useSubscriptions() {
+export function useSubscriptions({
+  processAutoDebit = true,
+}: {
+  processAutoDebit?: boolean;
+} = {}) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -155,6 +159,7 @@ export function useSubscriptions() {
   // next_billing_date <= today, charges it automatically.
   const processedRef = useRef(false);
   useEffect(() => {
+    if (!processAutoDebit) return;
     if (!user || !query.data || processedRef.current) return;
     processedRef.current = true;
     (async () => {
@@ -162,7 +167,7 @@ export function useSubscriptions() {
       const due = query.data.filter(
         (s) =>
           s.active &&
-          (s as any).auto_debit &&
+          s.auto_debit &&
           s.account_id &&
           !isBefore(today, parseISO(s.next_billing_date)),
       );
@@ -175,7 +180,7 @@ export function useSubscriptions() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, query.data]);
+  }, [user?.id, query.data, processAutoDebit]);
 
   // Calculate monthly cost (normalize all to monthly)
   const monthlyCost = (query.data || [])

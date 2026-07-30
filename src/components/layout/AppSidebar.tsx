@@ -24,6 +24,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlobalSearchButton } from "@/components/search/GlobalSearch";
+import { NotificationCenterButton } from "@/components/notifications/NotificationCenter";
 
 const navItems = [
   {
@@ -156,8 +157,9 @@ export function AppSidebar() {
         </div>
       </div>
 
-      <div className="border-b border-white/10 p-3">
+      <div className="space-y-1 border-b border-white/10 p-3">
         <GlobalSearchButton compact={collapsed} />
+        <NotificationCenterButton compact={collapsed} />
       </div>
 
       {/* Navigation */}

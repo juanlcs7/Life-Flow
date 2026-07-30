@@ -172,3 +172,13 @@ export function SearchFlowIcon(props: LifeFlowIconProps) {
     </IconBase>
   );
 }
+
+export function NotificationFlowIcon(props: LifeFlowIconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M6.5 10a5.5 5.5 0 0 1 11 0v3.2c0 1.3.5 2.5 1.4 3.4H5.1c.9-.9 1.4-2.1 1.4-3.4Z" />
+      <path d="M9.5 19a2.8 2.8 0 0 0 5 0" />
+      <path d="M12 3V1.8" />
+    </IconBase>
+  );
+}

@@ -34,7 +34,11 @@ export interface InstallmentPayment {
 
 export type NewInstallment = Omit<Installment, "id" | "user_id" | "created_at">;
 
-export function useInstallments() {
+export function useInstallments({
+  processAutoDebit = true,
+}: {
+  processAutoDebit?: boolean;
+} = {}) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -282,6 +286,7 @@ export function useInstallments() {
   // unpaid. Runs once per session.
   const processedRef = useRef(false);
   useEffect(() => {
+    if (!processAutoDebit) return;
     if (!user || !query.data || !paymentsQuery.data || processedRef.current)
       return;
     processedRef.current = true;
@@ -289,7 +294,7 @@ export function useInstallments() {
       const today = startOfDay(new Date());
       const autoDebitInstallmentIds = new Set(
         query.data
-          .filter((i) => (i as any).auto_debit && i.account_id)
+          .filter((i) => i.auto_debit && i.account_id)
           .map((i) => i.id),
       );
       const due = paymentsQuery.data.filter(
@@ -310,7 +315,7 @@ export function useInstallments() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, query.data, paymentsQuery.data]);
+  }, [user?.id, query.data, paymentsQuery.data, processAutoDebit]);
 
   // Calculate monthly impact
   const monthlyImpact = (query.data || []).reduce((sum, inst) => sum + inst.installment_amount, 0);

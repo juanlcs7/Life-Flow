@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlobalSearchButton } from "@/components/search/GlobalSearch";
+import { NotificationCenterButton } from "@/components/notifications/NotificationCenter";
 
 const navItems = [
   {
@@ -112,6 +113,7 @@ export function MobileNav() {
 
         <div className="flex items-center gap-1">
           <GlobalSearchButton mobile />
+          <NotificationCenterButton mobile />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button
