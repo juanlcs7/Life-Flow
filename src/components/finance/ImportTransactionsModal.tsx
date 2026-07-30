@@ -154,6 +154,7 @@ export function ImportTransactionsModal({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground">
               Compatível com formatos comuns de Nubank, Inter, BB, Itaú, Bradesco, Santander, Caixa e C6.
+              Categorias ausentes são sugeridas pela descrição.
             </p>
             <Button type="button" variant="ghost" size="sm" onClick={downloadTransactionsCsvTemplate}>
               <Download className="mr-2 h-4 w-4" />

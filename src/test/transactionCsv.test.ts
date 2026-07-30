@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { parseTransactionsCsv, transactionFingerprint } from "@/lib/transactionCsv";
+import {
+  inferTransactionCategory,
+  parseTransactionsCsv,
+  transactionFingerprint,
+} from "@/lib/transactionCsv";
 
 describe("parseTransactionsCsv", () => {
   it("lê CSV brasileiro com ponto e vírgula", () => {
@@ -101,5 +105,29 @@ describe("transactionFingerprint", () => {
     expect(transactionFingerprint(base)).not.toBe(
       transactionFingerprint({ ...base, amount: 101 }),
     );
+  });
+});
+
+describe("inferTransactionCategory", () => {
+  it("categoriza despesas comuns sem diferenciar acentos e maiúsculas", () => {
+    expect(inferTransactionCategory("IFOOD *RESTAURANTE", "expense")).toBe("Alimentação");
+    expect(inferTransactionCategory("UBER TRIP", "expense")).toBe("Transporte");
+    expect(inferTransactionCategory("Drogaria São Paulo", "expense")).toBe("Saúde");
+    expect(inferTransactionCategory("Mensalidade Faculdade", "expense")).toBe("Educação");
+    expect(inferTransactionCategory("NETFLIX.COM", "expense")).toBe("Lazer");
+    expect(inferTransactionCategory("CONTA LIGHT", "expense")).toBe("Moradia");
+  });
+
+  it("classifica entradas como receita e mantém desconhecidos em Outros", () => {
+    expect(inferTransactionCategory("Pix recebido", "income")).toBe("Receita");
+    expect(inferTransactionCategory("Compra desconhecida", "expense")).toBe("Outros");
+  });
+
+  it("preserva a categoria informada pelo CSV", () => {
+    const result = parseTransactionsCsv(
+      "data;descricao;valor;tipo;categoria\n30/07/2026;Netflix;59,90;despesa;Assinaturas",
+    );
+
+    expect(result.transactions[0].category).toBe("Assinaturas");
   });
 });

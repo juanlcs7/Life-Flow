@@ -33,6 +33,65 @@ const normalizeHeader = (value: string) =>
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
+const categoryRules: Array<{ category: string; keywords: string[] }> = [
+  {
+    category: "Alimentação",
+    keywords: [
+      "ifood", "mercado", "supermercado", "atacadao", "assai", "padaria",
+      "restaurante", "lanchonete", "mcdonald", "burger king", "hortifruti",
+    ],
+  },
+  {
+    category: "Transporte",
+    keywords: [
+      "uber", "99app", "99 pop", "99 taxi", "posto", "gasolina",
+      "combustivel", "estacionamento", "pedagio", "metro", "onibus",
+    ],
+  },
+  {
+    category: "Moradia",
+    keywords: [
+      "aluguel", "condominio", "energia", "light", "enel", "cedae",
+      "conta de agua", "internet", "claro", "vivo fibra", "gas", "iptu",
+    ],
+  },
+  {
+    category: "Saúde",
+    keywords: [
+      "farmacia", "drogaria", "hospital", "clinica", "laboratorio",
+      "medico", "dentista", "odont", "academia", "plano de saude",
+    ],
+  },
+  {
+    category: "Educação",
+    keywords: [
+      "escola", "faculdade", "universidade", "curso", "udemy",
+      "alura", "livraria", "papelaria", "material escolar",
+    ],
+  },
+  {
+    category: "Lazer",
+    keywords: [
+      "netflix", "spotify", "cinema", "steam", "playstation", "xbox",
+      "ingresso", "show", "parque", "hotel", "viagem",
+    ],
+  },
+];
+
+export function inferTransactionCategory(
+  description: string,
+  type: "income" | "expense",
+) {
+  if (type === "income") return "Receita";
+
+  const normalizedDescription = normalize(description);
+  const match = categoryRules.find((rule) =>
+    rule.keywords.some((keyword) => normalizedDescription.includes(keyword)),
+  );
+
+  return match?.category || "Outros";
+}
+
 export function transactionFingerprint(transaction: TransactionFingerprintInput) {
   const description = normalize(transaction.description).replace(/\s+/g, " ");
   const amountInCents = Math.round(transaction.amount * 100);
@@ -204,12 +263,19 @@ export function parseTransactionsCsv(content: string): CsvParseResult {
     const isIncome = ["receita", "income", "entrada", "credito", "recebimento", "c", "cr"].includes(rawType);
     const isExpense = ["despesa", "expense", "saida", "debito", "pagamento", "d", "db"].includes(rawType);
 
+    const type = isIncome ? "income" : isExpense ? "expense" : signedAmount < 0 ? "expense" : "income";
+    const csvCategory =
+      columns.category >= 0 ? (cells[columns.category] || "").trim() : "";
+
     transactions.push({
       date: parsedDate || new Date().toISOString().slice(0, 10),
       description,
       amount: Math.abs(signedAmount),
-      type: isIncome ? "income" : isExpense ? "expense" : signedAmount < 0 ? "expense" : "income",
-      category: columns.category >= 0 ? (cells[columns.category] || "").trim() || "Outros" : "Outros",
+      type,
+      category:
+        csvCategory && normalize(csvCategory) !== "outros"
+          ? csvCategory
+          : inferTransactionCategory(description, type),
       accountName: columns.account >= 0 ? (cells[columns.account] || "").trim() : "",
     });
   });
