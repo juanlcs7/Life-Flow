@@ -31,6 +31,17 @@ interface ImportTransactionsModalProps {
 const normalize = (value: string) =>
   value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
 
+const defaultCategories = [
+  "Alimentação",
+  "Transporte",
+  "Moradia",
+  "Saúde",
+  "Educação",
+  "Lazer",
+  "Receita",
+  "Outros",
+];
+
 export function ImportTransactionsModal({
   open,
   onOpenChange,
@@ -86,6 +97,10 @@ export function ImportTransactionsModal({
   const importableRows = preparedRows.filter((item) => !item.duplicate);
   const duplicateCount = preparedRows.length - importableRows.length;
   const exceedsLimit = maxRows !== undefined && importableRows.length > maxRows;
+  const categoryOptions = useMemo(
+    () => [...new Set([...defaultCategories, ...rows.map((row) => row.category)])],
+    [rows],
+  );
 
   const handleFile = async (file?: File) => {
     if (!file) return;
@@ -116,6 +131,14 @@ export function ImportTransactionsModal({
     } finally {
       setImporting(false);
     }
+  };
+
+  const updateCategory = (index: number, category: string) => {
+    setRows((current) =>
+      current.map((row, rowIndex) =>
+        rowIndex === index ? { ...row, category } : row,
+      ),
+    );
   };
 
   return (
@@ -189,17 +212,31 @@ export function ImportTransactionsModal({
                       .join(" · ") || "Arquivo pronto"}
                   </span>
                 </div>
-                <div className="divide-y">
-                  {preparedRows.slice(0, 5).map(({ row, duplicate }, index) => (
-                    <div key={`${row.date}-${row.description}-${index}`} className={`flex items-center justify-between gap-3 px-3 py-2.5 text-xs ${duplicate ? "opacity-50" : ""}`}>
+                <div className="max-h-72 divide-y overflow-y-auto">
+                  {preparedRows.map(({ row, duplicate }, index) => (
+                    <div
+                      key={`${row.date}-${row.description}-${index}`}
+                      className={`grid gap-2 px-3 py-2.5 text-xs sm:grid-cols-[minmax(0,1fr)_140px_100px] sm:items-center ${duplicate ? "opacity-50" : ""}`}
+                    >
                       <div className="min-w-0">
                         <p className="flex items-center gap-1.5 truncate font-medium">
                           {row.description}
                           {duplicate && <span className="rounded bg-muted px-1.5 py-0.5 text-[9px] uppercase tracking-wide">Já existe</span>}
                         </p>
-                        <p className="text-[11px] text-muted-foreground">{row.date} · {row.category}</p>
+                        <p className="text-[11px] text-muted-foreground">{row.date}</p>
                       </div>
-                      <span className={row.type === "income" ? "font-semibold text-success" : "font-semibold text-destructive"}>
+                      <select
+                        aria-label={`Categoria de ${row.description}`}
+                        value={row.category}
+                        disabled={duplicate}
+                        onChange={(event) => updateCategory(index, event.target.value)}
+                        className="h-8 min-w-0 rounded-md border border-input bg-background px-2 text-xs outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed"
+                      >
+                        {categoryOptions.map((category) => (
+                          <option key={category} value={category}>{category}</option>
+                        ))}
+                      </select>
+                      <span className={`text-right ${row.type === "income" ? "font-semibold text-success" : "font-semibold text-destructive"}`}>
                         {row.type === "income" ? "+" : "-"}
                         {row.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                       </span>
