@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, Download, FileSpreadsheet, Loader2, Upload } from "lucide-react";
+import { Check, Download, FileSpreadsheet, Loader2, TrendingDown, TrendingUp, Upload, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,6 +17,7 @@ import {
   findPersonalTransactionCategory,
   normalizeTransactionDescription,
   parseTransactionsFile,
+  summarizeTransactions,
   TRANSACTION_CATEGORIES,
   transactionFingerprint,
   type ParsedCsvTransaction,
@@ -102,6 +103,10 @@ export function ImportTransactionsModal({
   const duplicateCount = preparedRows.length - selectableRows.length;
   const excludedCount = selectableRows.length - importableRows.length;
   const allSelected = selectableRows.length > 0 && excludedCount === 0;
+  const importSummary = useMemo(
+    () => summarizeTransactions(importableRows.map((item) => item.transaction)),
+    [importableRows],
+  );
   const exceedsLimit = maxRows !== undefined && importableRows.length > maxRows;
   const categoryOptions = useMemo(
     () => [...new Set([...TRANSACTION_CATEGORIES, ...rows.map((row) => row.category)])],
@@ -284,6 +289,44 @@ export function ImportTransactionsModal({
                 <p className="text-[11px] text-muted-foreground">
                   A conta informada no arquivo tem prioridade quando o nome corresponder.
                 </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  {
+                    label: "Receitas",
+                    value: importSummary.income,
+                    icon: TrendingUp,
+                    color: "text-success",
+                    background: "bg-success/10",
+                  },
+                  {
+                    label: "Despesas",
+                    value: importSummary.expenses,
+                    icon: TrendingDown,
+                    color: "text-destructive",
+                    background: "bg-destructive/10",
+                  },
+                  {
+                    label: "Saldo",
+                    value: importSummary.balance,
+                    icon: Wallet,
+                    color: importSummary.balance >= 0 ? "text-success" : "text-destructive",
+                    background: "bg-primary/10",
+                  },
+                ].map((item) => (
+                  <div key={item.label} className="min-w-0 rounded-xl border border-border/70 bg-muted/15 p-2.5 sm:p-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${item.background}`}>
+                        <item.icon className={`h-3.5 w-3.5 ${item.color}`} />
+                      </span>
+                      <span className="truncate text-[10px] text-muted-foreground sm:text-xs">{item.label}</span>
+                    </div>
+                    <p className={`mt-2 truncate text-xs font-semibold sm:text-sm ${item.color}`}>
+                      {item.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    </p>
+                  </div>
+                ))}
               </div>
 
               <div className="overflow-hidden rounded-xl border">

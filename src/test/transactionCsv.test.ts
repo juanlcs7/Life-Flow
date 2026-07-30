@@ -6,6 +6,7 @@ import {
   parseTransactionsCsv,
   parseTransactionsFile,
   parseTransactionsOfx,
+  summarizeTransactions,
   transactionFingerprint,
 } from "@/lib/transactionCsv";
 
@@ -77,6 +78,29 @@ describe("parseTransactionsCsv", () => {
 
   it("rejeita arquivos sem as colunas necessárias", () => {
     expect(() => parseTransactionsCsv("data;categoria\n30/07/2026;Outros")).toThrow("colunas");
+  });
+});
+
+describe("summarizeTransactions", () => {
+  it("calcula receitas, despesas e saldo das linhas selecionadas", () => {
+    expect(summarizeTransactions([
+      { type: "income", amount: 1500 },
+      { type: "income", amount: 250 },
+      { type: "expense", amount: 420.5 },
+      { type: "expense", amount: 79.5 },
+    ])).toEqual({
+      income: 1750,
+      expenses: 500,
+      balance: 1250,
+    });
+  });
+
+  it("retorna valores zerados quando nada está selecionado", () => {
+    expect(summarizeTransactions([])).toEqual({
+      income: 0,
+      expenses: 0,
+      balance: 0,
+    });
   });
 });
 

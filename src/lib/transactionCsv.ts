@@ -31,6 +31,11 @@ interface TransactionFingerprintInput {
   account_id: string | null;
 }
 
+interface TransactionSummaryInput {
+  amount: number;
+  type: "income" | "expense";
+}
+
 const normalize = (value: string) =>
   value
     .normalize("NFD")
@@ -129,6 +134,17 @@ export function transactionFingerprint(transaction: TransactionFingerprintInput)
     transaction.type,
     transaction.account_id || "sem-conta",
   ].join("|");
+}
+
+export function summarizeTransactions(transactions: TransactionSummaryInput[]) {
+  const income = transactions
+    .filter((transaction) => transaction.type === "income")
+    .reduce((total, transaction) => total + transaction.amount, 0);
+  const expenses = transactions
+    .filter((transaction) => transaction.type === "expense")
+    .reduce((total, transaction) => total + transaction.amount, 0);
+
+  return { income, expenses, balance: income - expenses };
 }
 
 function parseLine(line: string, delimiter: string) {
