@@ -1,0 +1,41 @@
+{
+  "name": "LifeFlow — Vida organizada",
+  "short_name": "LifeFlow",
+  "description": "Finanças, hábitos, metas, agenda e rotina em um só lugar.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#020617",
+  "theme_color": "#0891b2",
+  "lang": "pt-BR",
+  "categories": ["productivity", "finance", "lifestyle"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/lifeflow-logo.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Agenda",
+      "short_name": "Agenda",
+      "url": "/agenda",
+      "icons": [{ "src": "/favicon.png", "sizes": "512x512" }]
+    },
+    {
+      "name": "Finanças",
+      "short_name": "Finanças",
+      "url": "/financas",
+      "icons": [{ "src": "/favicon.png", "sizes": "512x512" }]
+    }
+  ]
+}
