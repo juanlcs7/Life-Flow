@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useNavigate } from "react-router-dom";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
+import { DataExport } from "@/components/settings/DataExport";
 import { useTheme } from "next-themes";
 import { usePlan, PLAN_LIMITS, PREMIUM_PRICE } from "@/hooks/usePlan";
 import { PremiumModal } from "@/components/premium/PremiumModal";
@@ -226,6 +227,9 @@ export default function Configuracoes() {
 
       {/* Notifications */}
       <NotificationSettings />
+
+      {/* Data portability */}
+      <DataExport />
 
       {/* Logout */}
       <Card className="flex flex-col gap-3 border-destructive/15 bg-destructive/[0.035] p-4 sm:flex-row sm:items-center sm:justify-between">
