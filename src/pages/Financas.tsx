@@ -207,6 +207,7 @@ export default function Financas() {
         open={importModalOpen}
         onOpenChange={setImportModalOpen}
         accounts={accounts}
+        transactions={transactions}
         maxRows={isPremium ? undefined : Math.max(0, limits.transactionsPerMonth - usage.transactionsThisMonth)}
         onImport={handleImportTransactions}
       />

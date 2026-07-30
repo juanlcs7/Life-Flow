@@ -12,6 +12,14 @@ export interface CsvParseResult {
   skipped: number;
 }
 
+interface TransactionFingerprintInput {
+  date: string;
+  description: string;
+  amount: number;
+  type: "income" | "expense";
+  account_id: string | null;
+}
+
 const normalize = (value: string) =>
   value
     .normalize("NFD")
@@ -24,6 +32,19 @@ const normalizeHeader = (value: string) =>
     .replace(/\([^)]*\)/g, "")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+
+export function transactionFingerprint(transaction: TransactionFingerprintInput) {
+  const description = normalize(transaction.description).replace(/\s+/g, " ");
+  const amountInCents = Math.round(transaction.amount * 100);
+
+  return [
+    transaction.date.slice(0, 10),
+    description,
+    amountInCents,
+    transaction.type,
+    transaction.account_id || "sem-conta",
+  ].join("|");
+}
 
 function parseLine(line: string, delimiter: string) {
   const cells: string[] = [];

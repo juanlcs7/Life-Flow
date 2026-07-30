@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Download, FileSpreadsheet, Loader2, Upload } from "lucide-react";
+import { Check, Download, FileSpreadsheet, Loader2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,10 +11,11 @@ import {
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Account } from "@/hooks/useAccounts";
-import type { NewTransaction } from "@/hooks/useTransactions";
+import type { NewTransaction, Transaction } from "@/hooks/useTransactions";
 import {
   downloadTransactionsCsvTemplate,
   parseTransactionsCsv,
+  transactionFingerprint,
   type ParsedCsvTransaction,
 } from "@/lib/transactionCsv";
 
@@ -22,6 +23,7 @@ interface ImportTransactionsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   accounts: Account[];
+  transactions: Transaction[];
   maxRows?: number;
   onImport: (transactions: NewTransaction[]) => Promise<void>;
 }
@@ -33,6 +35,7 @@ export function ImportTransactionsModal({
   open,
   onOpenChange,
   accounts,
+  transactions,
   maxRows,
   onImport,
 }: ImportTransactionsModalProps) {
@@ -54,11 +57,35 @@ export function ImportTransactionsModal({
     setDefaultAccount("none");
   }, [open]);
 
-  const exceedsLimit = maxRows !== undefined && rows.length > maxRows;
   const accountByName = useMemo(
     () => new Map(accounts.map((account) => [normalize(account.name), account.id])),
     [accounts],
   );
+  const preparedRows = useMemo(() => {
+    const existingKeys = new Set(transactions.map(transactionFingerprint));
+    const fileKeys = new Set<string>();
+
+    return rows.map((row) => {
+      const transaction: NewTransaction = {
+        date: row.date,
+        description: row.description,
+        amount: row.amount,
+        type: row.type,
+        category: row.category,
+        account_id:
+          accountByName.get(normalize(row.accountName)) ||
+          (defaultAccount === "none" ? null : defaultAccount),
+      };
+      const key = transactionFingerprint(transaction);
+      const duplicate = existingKeys.has(key) || fileKeys.has(key);
+      fileKeys.add(key);
+
+      return { row, transaction, duplicate };
+    });
+  }, [accountByName, defaultAccount, rows, transactions]);
+  const importableRows = preparedRows.filter((item) => !item.duplicate);
+  const duplicateCount = preparedRows.length - importableRows.length;
+  const exceedsLimit = maxRows !== undefined && importableRows.length > maxRows;
 
   const handleFile = async (file?: File) => {
     if (!file) return;
@@ -77,23 +104,12 @@ export function ImportTransactionsModal({
   };
 
   const handleImport = async () => {
-    if (!rows.length || exceedsLimit) return;
+    if (!importableRows.length || exceedsLimit) return;
     setImporting(true);
     setError("");
 
     try {
-      await onImport(
-        rows.map((row) => ({
-          date: row.date,
-          description: row.description,
-          amount: row.amount,
-          type: row.type,
-          category: row.category,
-          account_id:
-            accountByName.get(normalize(row.accountName)) ||
-            (defaultAccount === "none" ? null : defaultAccount),
-        })),
-      );
+      await onImport(importableRows.map((item) => item.transaction));
       onOpenChange(false);
     } catch (importError) {
       setError(importError instanceof Error ? importError.message : "Não foi possível importar.");
@@ -165,14 +181,21 @@ export function ImportTransactionsModal({
 
               <div className="overflow-hidden rounded-xl border">
                 <div className="flex items-center justify-between bg-muted/35 px-3 py-2 text-xs">
-                  <span className="font-medium">{rows.length} transações encontradas</span>
-                  {skipped > 0 && <span className="text-muted-foreground">{skipped} linhas ignoradas</span>}
+                  <span className="font-medium">{importableRows.length} novas de {rows.length}</span>
+                  <span className="text-muted-foreground">
+                    {[duplicateCount && `${duplicateCount} repetidas`, skipped && `${skipped} inválidas`]
+                      .filter(Boolean)
+                      .join(" · ") || "Arquivo pronto"}
+                  </span>
                 </div>
                 <div className="divide-y">
-                  {rows.slice(0, 5).map((row, index) => (
-                    <div key={`${row.date}-${row.description}-${index}`} className="flex items-center justify-between gap-3 px-3 py-2.5 text-xs">
+                  {preparedRows.slice(0, 5).map(({ row, duplicate }, index) => (
+                    <div key={`${row.date}-${row.description}-${index}`} className={`flex items-center justify-between gap-3 px-3 py-2.5 text-xs ${duplicate ? "opacity-50" : ""}`}>
                       <div className="min-w-0">
-                        <p className="truncate font-medium">{row.description}</p>
+                        <p className="flex items-center gap-1.5 truncate font-medium">
+                          {row.description}
+                          {duplicate && <span className="rounded bg-muted px-1.5 py-0.5 text-[9px] uppercase tracking-wide">Já existe</span>}
+                        </p>
                         <p className="text-[11px] text-muted-foreground">{row.date} · {row.category}</p>
                       </div>
                       <span className={row.type === "income" ? "font-semibold text-success" : "font-semibold text-destructive"}>
@@ -183,6 +206,12 @@ export function ImportTransactionsModal({
                   ))}
                 </div>
               </div>
+              {duplicateCount > 0 && (
+                <p className="flex items-center gap-2 rounded-lg border border-success/20 bg-success/10 px-3 py-2 text-xs text-success">
+                  <Check className="h-4 w-4 shrink-0" />
+                  {duplicateCount} lançamento{duplicateCount === 1 ? "" : "s"} já existente{duplicateCount === 1 ? "" : "s"} será{duplicateCount === 1 ? "" : "ão"} ignorado{duplicateCount === 1 ? "" : "s"}.
+                </p>
+              )}
             </>
           )}
 
@@ -197,9 +226,9 @@ export function ImportTransactionsModal({
             <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="button" className="flex-1" disabled={!rows.length || exceedsLimit || importing} onClick={handleImport}>
+            <Button type="button" className="flex-1" disabled={!importableRows.length || exceedsLimit || importing} onClick={handleImport}>
               {importing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-              {importing ? "Importando..." : `Importar${rows.length ? ` ${rows.length}` : ""}`}
+              {importing ? "Importando..." : importableRows.length ? `Importar ${importableRows.length}` : "Nada novo"}
             </Button>
           </div>
         </div>

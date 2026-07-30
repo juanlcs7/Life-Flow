@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseTransactionsCsv } from "@/lib/transactionCsv";
+import { parseTransactionsCsv, transactionFingerprint } from "@/lib/transactionCsv";
 
 describe("parseTransactionsCsv", () => {
   it("lê CSV brasileiro com ponto e vírgula", () => {
@@ -69,5 +69,37 @@ describe("parseTransactionsCsv", () => {
 
   it("rejeita arquivos sem as colunas necessárias", () => {
     expect(() => parseTransactionsCsv("data;categoria\n30/07/2026;Outros")).toThrow("colunas");
+  });
+});
+
+describe("transactionFingerprint", () => {
+  it("considera descrições equivalentes apesar de espaços e acentos", () => {
+    const base = {
+      date: "2026-07-30",
+      amount: 49.9,
+      type: "expense" as const,
+      account_id: "nubank",
+    };
+
+    expect(transactionFingerprint({ ...base, description: "  Pão   de Açúcar " })).toBe(
+      transactionFingerprint({ ...base, description: "pao de acucar" }),
+    );
+  });
+
+  it("diferencia conta, tipo, data e valor", () => {
+    const base = {
+      date: "2026-07-30",
+      description: "Pix",
+      amount: 100,
+      type: "income" as const,
+      account_id: "nubank",
+    };
+
+    expect(transactionFingerprint(base)).not.toBe(
+      transactionFingerprint({ ...base, account_id: "inter" }),
+    );
+    expect(transactionFingerprint(base)).not.toBe(
+      transactionFingerprint({ ...base, amount: 101 }),
+    );
   });
 });
