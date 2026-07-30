@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, Eye, EyeOff, KeyRound, Loader2, Mail, MailCheck, Send, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Clock3, Eye, EyeOff, KeyRound, Laptop, Loader2, LogOut, Mail, MailCheck, Send, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,9 +8,19 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export function AccountSecurity() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
@@ -20,6 +30,8 @@ export function AccountSecurity() {
   const [newEmail, setNewEmail] = useState("");
   const [savingEmail, setSavingEmail] = useState(false);
   const [resending, setResending] = useState(false);
+  const [sessionsOpen, setSessionsOpen] = useState(false);
+  const [revokingSessions, setRevokingSessions] = useState(false);
 
   const emailVerified = Boolean(user?.email_confirmed_at);
   const lastAccess = user?.last_sign_in_at
@@ -30,6 +42,14 @@ export function AccountSecurity() {
         minute: "2-digit",
       })
     : "Sessão atual";
+  const sessionExpires = session?.expires_at
+    ? new Date(session.expires_at * 1000).toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Renovação automática";
 
   const resetForm = () => {
     setPassword("");
@@ -111,6 +131,18 @@ export function AccountSecurity() {
     toast.success("E-mail de confirmação reenviado");
   };
 
+  const handleRevokeOtherSessions = async () => {
+    setRevokingSessions(true);
+    const { error } = await supabase.auth.signOut({ scope: "others" });
+    setRevokingSessions(false);
+    if (error) {
+      toast.error(error.message || "Não foi possível encerrar os outros acessos");
+      return;
+    }
+    setSessionsOpen(false);
+    toast.success("Outros dispositivos foram desconectados");
+  };
+
   return (
     <>
       <Card className="overflow-hidden border-border/70 bg-card/80 p-5 shadow-sm sm:p-6">
@@ -182,6 +214,29 @@ export function AccountSecurity() {
               <Mail className="mr-2 h-4 w-4" />
               Alterar e-mail
             </Button>
+          </div>
+        </div>
+
+        <div className="mt-3 rounded-xl border border-border/60 bg-background/40 p-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-medium">Sessão ativa</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Este dispositivo continuará conectado.</p>
+            </div>
+            <Button variant="outline" size="sm" className="shrink-0 border-destructive/25 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => setSessionsOpen(true)}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sair dos outros dispositivos
+            </Button>
+          </div>
+          <div className="mt-3 grid gap-2 border-t border-border/60 pt-3 sm:grid-cols-2">
+            <span className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Laptop className="h-3.5 w-3.5 text-cyan-500" />
+              Navegador atual
+            </span>
+            <span className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Clock3 className="h-3.5 w-3.5 text-cyan-500" />
+              Sessão até {sessionExpires}
+            </span>
           </div>
         </div>
       </Card>
@@ -260,6 +315,24 @@ export function AccountSecurity() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={sessionsOpen} onOpenChange={setSessionsOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Encerrar outros acessos?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Celulares, computadores e navegadores que já acessaram esta conta precisarão entrar novamente. Sua sessão atual será mantida.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={revokingSessions}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={(event) => { event.preventDefault(); handleRevokeOtherSessions(); }} disabled={revokingSessions} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {revokingSessions && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Encerrar outros acessos
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
