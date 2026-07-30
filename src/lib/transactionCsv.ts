@@ -12,6 +12,17 @@ export interface CsvParseResult {
   skipped: number;
 }
 
+export const TRANSACTION_CATEGORIES = [
+  "Alimentação",
+  "Transporte",
+  "Moradia",
+  "Saúde",
+  "Educação",
+  "Lazer",
+  "Receita",
+  "Outros",
+] as const;
+
 interface TransactionFingerprintInput {
   date: string;
   description: string;

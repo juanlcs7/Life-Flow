@@ -18,6 +18,7 @@ import { NotificationSettings } from "@/components/settings/NotificationSettings
 import { DataExport } from "@/components/settings/DataExport";
 import { InstallApp } from "@/components/settings/InstallApp";
 import { AccountSecurity } from "@/components/settings/AccountSecurity";
+import { CategoryRulesSettings } from "@/components/settings/CategoryRulesSettings";
 import { useTheme } from "next-themes";
 import { usePlan, PLAN_LIMITS, PREMIUM_PRICE } from "@/hooks/usePlan";
 import { PremiumModal } from "@/components/premium/PremiumModal";
@@ -238,6 +239,9 @@ export default function Configuracoes() {
 
       {/* Data portability */}
       <DataExport />
+
+      {/* CSV category preferences */}
+      <CategoryRulesSettings />
 
       {/* Logout */}
       <Card className="flex flex-col gap-3 border-destructive/15 bg-destructive/[0.035] p-4 sm:flex-row sm:items-center sm:justify-between">

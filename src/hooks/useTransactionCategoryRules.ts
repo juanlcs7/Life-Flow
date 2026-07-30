@@ -8,6 +8,10 @@ export interface CategoryRuleDraft {
   category: string;
 }
 
+export interface TransactionCategoryRule extends CategoryRuleDraft {
+  updated_at: string;
+}
+
 export function useTransactionCategoryRules() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -19,7 +23,7 @@ export function useTransactionCategoryRules() {
 
       const { data, error } = await supabase
         .from("transaction_category_rules")
-        .select("keyword, category")
+        .select("keyword, category, updated_at")
         .eq("user_id", user.id)
         .order("updated_at", { ascending: false });
 
@@ -53,9 +57,29 @@ export function useTransactionCategoryRules() {
     [query.data],
   );
 
+  const deleteMutation = useMutation({
+    mutationFn: async (keyword: string) => {
+      if (!user) throw new Error("Usuário não autenticado.");
+
+      const { error } = await supabase
+        .from("transaction_category_rules")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("keyword", keyword);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transaction_category_rules", user?.id] });
+    },
+  });
+
   return {
+    rules: (query.data ?? []) as TransactionCategoryRule[],
     categoryRules,
     saveCategoryRules: saveMutation.mutateAsync,
+    deleteCategoryRule: deleteMutation.mutateAsync,
     isLoading: query.isLoading,
+    isSaving: saveMutation.isPending || deleteMutation.isPending,
   };
 }

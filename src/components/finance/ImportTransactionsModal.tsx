@@ -16,6 +16,7 @@ import {
   downloadTransactionsCsvTemplate,
   normalizeTransactionDescription,
   parseTransactionsCsv,
+  TRANSACTION_CATEGORIES,
   transactionFingerprint,
   type ParsedCsvTransaction,
 } from "@/lib/transactionCsv";
@@ -35,17 +36,6 @@ interface ImportTransactionsModalProps {
 
 const normalize = (value: string) =>
   value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
-
-const defaultCategories = [
-  "Alimentação",
-  "Transporte",
-  "Moradia",
-  "Saúde",
-  "Educação",
-  "Lazer",
-  "Receita",
-  "Outros",
-];
 
 export function ImportTransactionsModal({
   open,
@@ -106,7 +96,7 @@ export function ImportTransactionsModal({
   const duplicateCount = preparedRows.length - importableRows.length;
   const exceedsLimit = maxRows !== undefined && importableRows.length > maxRows;
   const categoryOptions = useMemo(
-    () => [...new Set([...defaultCategories, ...rows.map((row) => row.category)])],
+    () => [...new Set([...TRANSACTION_CATEGORIES, ...rows.map((row) => row.category)])],
     [rows],
   );
 
