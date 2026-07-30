@@ -42,6 +42,10 @@ const META: Record<string, { title: string; description: string }> = {
     title: "Entrar — LifeFlow",
     description: "Acesse sua conta LifeFlow para organizar finanças, hábitos, metas e agenda.",
   },
+  "/reset-password": {
+    title: "Nova senha — LifeFlow",
+    description: "Defina uma nova senha para recuperar o acesso à sua conta LifeFlow.",
+  },
 };
 
 const DEFAULT = {

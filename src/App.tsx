@@ -19,6 +19,7 @@ import Documentos from "./pages/Documentos";
 import Contatos from "./pages/Contatos";
 import Configuracoes from "./pages/Configuracoes";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <RouteMeta />
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route
                 path="/*"
                 element={

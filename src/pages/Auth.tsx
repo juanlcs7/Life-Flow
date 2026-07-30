@@ -15,10 +15,12 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -45,6 +47,10 @@ export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [recoveryOpen, setRecoveryOpen] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [sendingRecovery, setSendingRecovery] = useState(false);
+  const [recoverySent, setRecoverySent] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -124,8 +130,49 @@ export default function Auth() {
     setFormData({ email: "", password: "", name: "", confirmPassword: "" });
   };
 
+  const handleRecovery = async () => {
+    const result = z.string().email().safeParse(recoveryEmail);
+    if (!result.success) {
+      toast({ title: "Digite um e-mail válido", variant: "destructive" });
+      return;
+    }
+    setSendingRecovery(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(recoveryEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setSendingRecovery(false);
+    if (error) {
+      toast({ title: "Não foi possível enviar o e-mail", description: error.message, variant: "destructive" });
+      return;
+    }
+    setRecoverySent(true);
+  };
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#07111f]">
+      <Dialog open={recoveryOpen} onOpenChange={(next) => { setRecoveryOpen(next); if (!next) { setRecoverySent(false); setRecoveryEmail(""); } }}>
+        <DialogContent className="border-slate-200 bg-white text-slate-950 sm:max-w-md">
+          <DialogHeader><DialogTitle>{recoverySent ? "Confira seu e-mail" : "Recuperar acesso"}</DialogTitle></DialogHeader>
+          {recoverySent ? (
+            <div className="space-y-4">
+              <p className="text-sm leading-6 text-slate-500">Enviamos um link para <strong className="text-slate-700">{recoveryEmail}</strong>. Abra o e-mail para criar uma nova senha.</p>
+              <Button className="w-full bg-teal-600 text-white hover:bg-teal-700" onClick={() => setRecoveryOpen(false)}>Entendi</Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm leading-6 text-slate-500">Informe o e-mail usado no LifeFlow. Você receberá um link de recuperação.</p>
+              <div className="space-y-2">
+                <Label htmlFor="recovery-email" className="text-slate-700">E-mail</Label>
+                <Input id="recovery-email" type="email" value={recoveryEmail} onChange={(event) => setRecoveryEmail(event.target.value)} className="h-11 border-slate-200 text-slate-950" onKeyDown={(event) => { if (event.key === "Enter") handleRecovery(); }} />
+              </div>
+              <Button className="w-full bg-teal-600 text-white hover:bg-teal-700" onClick={handleRecovery} disabled={sendingRecovery}>
+                {sendingRecovery && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Enviar link
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
       <div className="absolute inset-0 auth-grid opacity-30" />
       <div className="absolute -left-32 top-[-12rem] h-[34rem] w-[34rem] rounded-full bg-cyan-400/20 blur-[120px]" />
       <div className="absolute -right-36 bottom-[-16rem] h-[38rem] w-[38rem] rounded-full bg-emerald-400/20 blur-[130px]" />
@@ -235,7 +282,14 @@ export default function Auth() {
               />
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-slate-700">Senha</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-slate-700">Senha</Label>
+                  {isLogin && (
+                    <button type="button" onClick={() => { setRecoveryEmail(formData.email); setRecoveryOpen(true); }} className="text-xs font-medium text-teal-600 hover:text-teal-700">
+                      Esqueci minha senha
+                    </button>
+                  )}
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
