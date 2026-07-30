@@ -1,14 +1,31 @@
-import { Loader2, Tags, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Loader2, Plus, Search, Tags, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
   useTransactionCategoryRules,
   type TransactionCategoryRule,
 } from "@/hooks/useTransactionCategoryRules";
-import { TRANSACTION_CATEGORIES } from "@/lib/transactionCsv";
+import {
+  normalizeTransactionDescription,
+  TRANSACTION_CATEGORIES,
+} from "@/lib/transactionCsv";
 
 export function CategoryRulesSettings() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<string>("Outros");
+  const [search, setSearch] = useState("");
   const {
     rules,
     isLoading,
@@ -16,6 +33,32 @@ export function CategoryRulesSettings() {
     saveCategoryRules,
     deleteCategoryRule,
   } = useTransactionCategoryRules();
+  const filteredRules = useMemo(() => {
+    const term = normalizeTransactionDescription(search);
+    return term
+      ? rules.filter((rule) =>
+          rule.keyword.includes(term) || normalizeTransactionDescription(rule.category).includes(term),
+        )
+      : rules;
+  }, [rules, search]);
+
+  const createRule = async () => {
+    const keyword = normalizeTransactionDescription(description);
+    if (!keyword) {
+      toast.error("Informe a descrição que deve ser reconhecida.");
+      return;
+    }
+
+    try {
+      await saveCategoryRules([{ keyword, category }]);
+      toast.success("Regra criada.");
+      setDescription("");
+      setCategory("Outros");
+      setDialogOpen(false);
+    } catch {
+      toast.error("Não foi possível criar a regra.");
+    }
+  };
 
   const updateRule = async (rule: TransactionCategoryRule, category: string) => {
     try {
@@ -36,24 +79,88 @@ export function CategoryRulesSettings() {
   };
 
   return (
-    <Card className="overflow-hidden border-border/70 bg-card/80 p-5 shadow-sm sm:p-6">
-      <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <Tags className="h-5 w-5" />
-        </div>
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
-            Finanças
-          </p>
-          <h3 className="mt-0.5 font-display text-lg font-semibold">Categorias aprendidas</h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Preferências salvas quando você corrige uma categoria durante a importação CSV.
-          </p>
-        </div>
-      </div>
+    <>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Nova regra de categoria</DialogTitle>
+            <DialogDescription>
+              Use a descrição exatamente como ela costuma aparecer no extrato do banco.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="rule-description">Descrição do lançamento</Label>
+              <Input
+                id="rule-description"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Ex.: POSTO SHELL"
+                autoFocus
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="rule-category">Categoria</Label>
+              <select
+                id="rule-category"
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+              >
+                {TRANSACTION_CATEGORIES.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex gap-2 pt-1">
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="button" className="flex-1" disabled={isSaving} onClick={createRule}>
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Salvar regra
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-      <div className="mt-4">
-        {isLoading ? (
+      <Card className="overflow-hidden border-border/70 bg-card/80 p-5 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Tags className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+                Finanças
+              </p>
+              <h3 className="mt-0.5 font-display text-lg font-semibold">Categorias aprendidas</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Preferências usadas automaticamente durante a importação CSV.
+              </p>
+            </div>
+          </div>
+          <Button type="button" size="sm" className="shrink-0" onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-1.5 h-4 w-4" />
+            Nova regra
+          </Button>
+        </div>
+
+        <div className="mt-4">
+          {!isLoading && rules.length > 0 && (
+            <div className="relative mb-3">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar descrição ou categoria..."
+                className="pl-9"
+              />
+            </div>
+          )}
+
+          {isLoading ? (
           <div className="flex items-center justify-center py-8 text-muted-foreground">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             <span className="text-xs">Carregando regras...</span>
@@ -65,9 +172,14 @@ export function CategoryRulesSettings() {
               Corrija uma categoria ao importar um CSV e ela aparecerá aqui.
             </p>
           </div>
-        ) : (
+          ) : filteredRules.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-7 text-center">
+              <p className="text-sm font-medium">Nenhuma regra encontrada</p>
+              <p className="mt-1 text-xs text-muted-foreground">Tente buscar por outro termo.</p>
+            </div>
+          ) : (
           <div className="divide-y overflow-hidden rounded-xl border border-border/70">
-            {rules.map((rule) => (
+            {filteredRules.map((rule) => (
               <div
                 key={rule.keyword}
                 className="flex flex-col gap-2 bg-muted/10 px-3 py-3 sm:flex-row sm:items-center"
@@ -103,8 +215,9 @@ export function CategoryRulesSettings() {
               </div>
             ))}
           </div>
-        )}
-      </div>
-    </Card>
+          )}
+        </div>
+      </Card>
+    </>
   );
 }
