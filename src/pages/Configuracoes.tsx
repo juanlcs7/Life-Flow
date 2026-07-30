@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { DataExport } from "@/components/settings/DataExport";
 import { InstallApp } from "@/components/settings/InstallApp";
+import { AccountSecurity } from "@/components/settings/AccountSecurity";
 import { useTheme } from "next-themes";
 import { usePlan, PLAN_LIMITS, PREMIUM_PRICE } from "@/hooks/usePlan";
 import { PremiumModal } from "@/components/premium/PremiumModal";
@@ -228,6 +229,9 @@ export default function Configuracoes() {
 
       {/* Notifications */}
       <NotificationSettings />
+
+      {/* Account security */}
+      <AccountSecurity />
 
       {/* Installable app */}
       <InstallApp />
