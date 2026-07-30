@@ -178,6 +178,9 @@ function parseAmount(rawValue: string) {
 
 function parseDate(rawValue: string) {
   const value = rawValue.trim();
+  const ofxMatch = value.match(/^(\d{4})(\d{2})(\d{2})/);
+  if (ofxMatch) return `${ofxMatch[1]}-${ofxMatch[2]}-${ofxMatch[3]}`;
+
   const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
 
@@ -311,6 +314,75 @@ export function parseTransactionsCsv(content: string): CsvParseResult {
   }
 
   return { transactions, skipped };
+}
+
+function decodeOfxText(value: string) {
+  return value
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .trim();
+}
+
+function readOfxField(block: string, field: string) {
+  const match = block.match(new RegExp(`<${field}>\\s*([^<\\r\\n]+)`, "i"));
+  return match ? decodeOfxText(match[1]) : "";
+}
+
+export function parseTransactionsOfx(content: string): CsvParseResult {
+  const transactions: ParsedCsvTransaction[] = [];
+  let skipped = 0;
+  const blocks = [...content.matchAll(
+    /<STMTTRN>\s*([\s\S]*?)(?:<\/STMTTRN>|(?=<STMTTRN>)|(?=<\/BANKTRANLIST>)|$)/gi,
+  )];
+
+  if (blocks.length === 0) {
+    throw new Error("Nenhum lançamento foi encontrado no arquivo OFX.");
+  }
+
+  blocks.slice(0, 500).forEach((match) => {
+    const block = match[1];
+    const signedAmount = parseAmount(readOfxField(block, "TRNAMT"));
+    const date = parseDate(readOfxField(block, "DTPOSTED"));
+    const name = readOfxField(block, "NAME");
+    const memo = readOfxField(block, "MEMO");
+    const description =
+      name && memo && normalize(name) !== normalize(memo)
+        ? `${name} — ${memo}`
+        : name || memo || readOfxField(block, "FITID");
+
+    if (!description || !date || !Number.isFinite(signedAmount) || signedAmount === 0) {
+      skipped += 1;
+      return;
+    }
+
+    const type = signedAmount < 0 ? "expense" : "income";
+    transactions.push({
+      date,
+      description,
+      amount: Math.abs(signedAmount),
+      type,
+      category: inferTransactionCategory(description, type),
+      accountName: "",
+    });
+  });
+
+  if (blocks.length > 500) skipped += blocks.length - 500;
+  if (transactions.length === 0) {
+    throw new Error("Nenhuma transação válida foi encontrada no arquivo OFX.");
+  }
+
+  return { transactions, skipped };
+}
+
+export function parseTransactionsFile(content: string, fileName: string): CsvParseResult {
+  const isOfx =
+    fileName.toLowerCase().endsWith(".ofx") ||
+    /<(?:OFX|STMTTRN)>/i.test(content);
+
+  return isOfx ? parseTransactionsOfx(content) : parseTransactionsCsv(content);
 }
 
 export function downloadTransactionsCsvTemplate() {

@@ -4,6 +4,8 @@ import {
   findPersonalTransactionCategory,
   normalizeTransactionDescription,
   parseTransactionsCsv,
+  parseTransactionsFile,
+  parseTransactionsOfx,
   transactionFingerprint,
 } from "@/lib/transactionCsv";
 
@@ -75,6 +77,69 @@ describe("parseTransactionsCsv", () => {
 
   it("rejeita arquivos sem as colunas necessárias", () => {
     expect(() => parseTransactionsCsv("data;categoria\n30/07/2026;Outros")).toThrow("colunas");
+  });
+});
+
+describe("parseTransactionsOfx", () => {
+  it("lê OFX no formato SGML usado por bancos", () => {
+    const timezone = "[" + "-3:BRT]";
+    const result = parseTransactionsOfx(`
+      OFXHEADER:100
+      DATA:OFXSGML
+      <OFX>
+      <BANKTRANLIST>
+      <STMTTRN>
+      <TRNTYPE>DEBIT
+      <DTPOSTED>20260729120000${timezone}
+      <TRNAMT>-42.90
+      <FITID>123
+      <NAME>POSTO SHELL
+      <MEMO>COMPRA CARTAO
+      <STMTTRN>
+      <TRNTYPE>CREDIT
+      <DTPOSTED>20260730120000${timezone}
+      <TRNAMT>1500.00
+      <FITID>124
+      <MEMO>PIX RECEBIDO
+      </BANKTRANLIST>
+      </OFX>
+    `);
+
+    expect(result.transactions).toHaveLength(2);
+    expect(result.transactions[0]).toMatchObject({
+      date: "2026-07-29",
+      description: "POSTO SHELL — COMPRA CARTAO",
+      amount: 42.9,
+      type: "expense",
+      category: "Transporte",
+    });
+    expect(result.transactions[1]).toMatchObject({
+      date: "2026-07-30",
+      description: "PIX RECEBIDO",
+      amount: 1500,
+      type: "income",
+    });
+  });
+
+  it("lê OFX XML e decodifica caracteres especiais", () => {
+    const result = parseTransactionsOfx(`
+      <?xml version="1.0"?>
+      <OFX><BANKTRANLIST><STMTTRN>
+        <DTPOSTED>20260728</DTPOSTED>
+        <TRNAMT>-89.50</TRNAMT>
+        <FITID>abc</FITID>
+        <NAME>Mercado &amp; Padaria</NAME>
+      </STMTTRN></BANKTRANLIST></OFX>
+    `);
+
+    expect(result.transactions[0].description).toBe("Mercado & Padaria");
+    expect(result.transactions[0].amount).toBe(89.5);
+  });
+
+  it("detecta OFX pela extensão ou pelo conteúdo", () => {
+    const content = "<OFX><STMTTRN><DTPOSTED>20260730<TRNAMT>-10<NAME>Teste</STMTTRN></OFX>";
+    expect(parseTransactionsFile(content, "extrato.ofx").transactions).toHaveLength(1);
+    expect(parseTransactionsFile(content, "extrato.txt").transactions).toHaveLength(1);
   });
 });
 

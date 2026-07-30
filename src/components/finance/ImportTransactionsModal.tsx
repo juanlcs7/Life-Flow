@@ -16,7 +16,7 @@ import {
   downloadTransactionsCsvTemplate,
   findPersonalTransactionCategory,
   normalizeTransactionDescription,
-  parseTransactionsCsv,
+  parseTransactionsFile,
   TRANSACTION_CATEGORIES,
   transactionFingerprint,
   type ParsedCsvTransaction,
@@ -106,7 +106,7 @@ export function ImportTransactionsModal({
     setError("");
 
     try {
-      const result = parseTransactionsCsv(await file.text());
+      const result = parseTransactionsFile(await file.text(), file.name);
       setRows(result.transactions.map((row) => ({
         ...row,
         category: findPersonalTransactionCategory(row.description, categoryRules) || row.category,
@@ -155,7 +155,7 @@ export function ImportTransactionsModal({
         <DialogHeader>
           <DialogTitle>Importar transações</DialogTitle>
           <DialogDescription>
-            Envie um CSV do seu banco ou use o modelo do LifeFlow.
+            Envie um arquivo CSV ou OFX do seu banco.
           </DialogDescription>
         </DialogHeader>
 
@@ -163,7 +163,7 @@ export function ImportTransactionsModal({
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv,text/csv"
+            accept=".csv,.ofx,text/csv,application/x-ofx"
             className="hidden"
             onChange={(event) => handleFile(event.target.files?.[0])}
           />
@@ -175,7 +175,7 @@ export function ImportTransactionsModal({
           >
             <FileSpreadsheet className="mb-3 h-7 w-7 text-primary" />
             <span className="text-sm font-medium">
-              {fileName || "Selecionar arquivo CSV"}
+              {fileName || "Selecionar arquivo CSV ou OFX"}
             </span>
             <span className="mt-1 text-xs text-muted-foreground">
               Até 500 lançamentos por arquivo
@@ -184,7 +184,7 @@ export function ImportTransactionsModal({
 
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground">
-              Compatível com formatos comuns de Nubank, Inter, BB, Itaú, Bradesco, Santander, Caixa e C6.
+              Compatível com OFX e formatos CSV comuns de Nubank, Inter, BB, Itaú, Bradesco, Santander, Caixa e C6.
               Categorias ausentes são sugeridas pela descrição e suas correções ficam salvas.
             </p>
             <Button type="button" variant="ghost" size="sm" onClick={downloadTransactionsCsvTemplate}>
