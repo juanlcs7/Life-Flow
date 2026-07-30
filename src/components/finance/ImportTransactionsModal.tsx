@@ -14,6 +14,7 @@ import type { Account } from "@/hooks/useAccounts";
 import type { NewTransaction, Transaction } from "@/hooks/useTransactions";
 import {
   downloadTransactionsCsvTemplate,
+  normalizeTransactionDescription,
   parseTransactionsCsv,
   transactionFingerprint,
   type ParsedCsvTransaction,
@@ -25,7 +26,11 @@ interface ImportTransactionsModalProps {
   accounts: Account[];
   transactions: Transaction[];
   maxRows?: number;
-  onImport: (transactions: NewTransaction[]) => Promise<void>;
+  categoryRules: Record<string, string>;
+  onImport: (
+    transactions: NewTransaction[],
+    rules: Array<{ keyword: string; category: string }>,
+  ) => Promise<void>;
 }
 
 const normalize = (value: string) =>
@@ -48,6 +53,7 @@ export function ImportTransactionsModal({
   accounts,
   transactions,
   maxRows,
+  categoryRules,
   onImport,
 }: ImportTransactionsModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +63,7 @@ export function ImportTransactionsModal({
   const [skipped, setSkipped] = useState(0);
   const [error, setError] = useState("");
   const [importing, setImporting] = useState(false);
+  const [pendingRules, setPendingRules] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!open) return;
@@ -66,6 +73,7 @@ export function ImportTransactionsModal({
     setError("");
     setImporting(false);
     setDefaultAccount("none");
+    setPendingRules({});
   }, [open]);
 
   const accountByName = useMemo(
@@ -108,7 +116,11 @@ export function ImportTransactionsModal({
 
     try {
       const result = parseTransactionsCsv(await file.text());
-      setRows(result.transactions);
+      setRows(result.transactions.map((row) => ({
+        ...row,
+        category: categoryRules[normalizeTransactionDescription(row.description)] || row.category,
+      })));
+      setPendingRules({});
       setSkipped(result.skipped);
       setFileName(file.name);
     } catch (parseError) {
@@ -124,7 +136,10 @@ export function ImportTransactionsModal({
     setError("");
 
     try {
-      await onImport(importableRows.map((item) => item.transaction));
+      await onImport(
+        importableRows.map((item) => item.transaction),
+        Object.entries(pendingRules).map(([keyword, category]) => ({ keyword, category })),
+      );
       onOpenChange(false);
     } catch (importError) {
       setError(importError instanceof Error ? importError.message : "Não foi possível importar.");
@@ -134,11 +149,13 @@ export function ImportTransactionsModal({
   };
 
   const updateCategory = (index: number, category: string) => {
+    const keyword = normalizeTransactionDescription(rows[index].description);
     setRows((current) =>
       current.map((row, rowIndex) =>
         rowIndex === index ? { ...row, category } : row,
       ),
     );
+    setPendingRules((current) => ({ ...current, [keyword]: category }));
   };
 
   return (
@@ -177,7 +194,7 @@ export function ImportTransactionsModal({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground">
               Compatível com formatos comuns de Nubank, Inter, BB, Itaú, Bradesco, Santander, Caixa e C6.
-              Categorias ausentes são sugeridas pela descrição.
+              Categorias ausentes são sugeridas pela descrição e suas correções ficam salvas.
             </p>
             <Button type="button" variant="ghost" size="sm" onClick={downloadTransactionsCsvTemplate}>
               <Download className="mr-2 h-4 w-4" />

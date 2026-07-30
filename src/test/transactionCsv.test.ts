@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   inferTransactionCategory,
+  normalizeTransactionDescription,
   parseTransactionsCsv,
   transactionFingerprint,
 } from "@/lib/transactionCsv";
@@ -73,6 +74,12 @@ describe("parseTransactionsCsv", () => {
 
   it("rejeita arquivos sem as colunas necessárias", () => {
     expect(() => parseTransactionsCsv("data;categoria\n30/07/2026;Outros")).toThrow("colunas");
+  });
+});
+
+describe("normalizeTransactionDescription", () => {
+  it("gera uma chave estável para as preferências do usuário", () => {
+    expect(normalizeTransactionDescription("  Pão   de Açúcar  ")).toBe("pao de acucar");
   });
 });
 

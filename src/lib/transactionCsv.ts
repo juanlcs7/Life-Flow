@@ -27,6 +27,9 @@ const normalize = (value: string) =>
     .trim()
     .toLowerCase();
 
+export const normalizeTransactionDescription = (value: string) =>
+  normalize(value).replace(/\s+/g, " ");
+
 const normalizeHeader = (value: string) =>
   normalize(value)
     .replace(/\([^)]*\)/g, "")
@@ -93,7 +96,7 @@ export function inferTransactionCategory(
 }
 
 export function transactionFingerprint(transaction: TransactionFingerprintInput) {
-  const description = normalize(transaction.description).replace(/\s+/g, " ");
+  const description = normalizeTransactionDescription(transaction.description);
   const amountInCents = Math.round(transaction.amount * 100);
 
   return [

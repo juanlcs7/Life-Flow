@@ -40,6 +40,7 @@ import { UpgradeBanner } from "@/components/premium/UpgradeBanner";
 import { Lock } from "lucide-react";
 import { ImportTransactionsModal } from "@/components/finance/ImportTransactionsModal";
 import type { NewTransaction } from "@/hooks/useTransactions";
+import { useTransactionCategoryRules, type CategoryRuleDraft } from "@/hooks/useTransactionCategoryRules";
 
 type TransactionFormData = Omit<NewTransaction, "date">;
 
@@ -74,6 +75,7 @@ export default function Financas() {
 
   // Hooks
   const { transactions, isLoading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
+  const { categoryRules, saveCategoryRules } = useTransactionCategoryRules();
   const { accounts, totalBalance, isLoading: accountsLoading, addAccount, updateAccount, deleteAccount, transfer } = useAccounts();
   const { goals, totalSavings, isLoading: goalsLoading, addGoal, updateGoal, deleteGoal, addToGoal, withdrawFromGoal } = useFinancialGoals();
   const { installments, payments, monthlyImpact, isLoading: installmentsLoading, addInstallment, markPaymentPaid, deleteInstallment } = useInstallments();
@@ -185,9 +187,16 @@ export default function Financas() {
     setEditingSubscription(null);
   };
 
-  const handleImportTransactions = async (items: NewTransaction[]) => {
+  const handleImportTransactions = async (items: NewTransaction[], rules: CategoryRuleDraft[]) => {
     for (const item of items) {
       await addTransaction(item);
+    }
+    if (rules.length > 0) {
+      try {
+        await saveCategoryRules(rules);
+      } catch {
+        toast.info("As transações foram importadas, mas não foi possível salvar as novas regras de categoria.");
+      }
     }
     toast.success(`${items.length} transações importadas!`);
   };
@@ -208,6 +217,7 @@ export default function Financas() {
         onOpenChange={setImportModalOpen}
         accounts={accounts}
         transactions={transactions}
+        categoryRules={categoryRules}
         maxRows={isPremium ? undefined : Math.max(0, limits.transactionsPerMonth - usage.transactionsThisMonth)}
         onImport={handleImportTransactions}
       />
