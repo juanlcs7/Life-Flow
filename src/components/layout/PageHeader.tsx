@@ -79,5 +79,6 @@ export function PageHeader({
         {actions && <div className="flex flex-wrap items-center gap-2 sm:justify-end">{actions}</div>}
       </div>
     </motion.header>
+    
   );
 }
