@@ -25,6 +25,7 @@ import { SubscriptionsSection } from "@/components/finance/SubscriptionsSection"
 import { InvestmentsSection } from "@/components/finance/InvestmentsSection";
 import { InvestmentTips } from "@/components/finance/InvestmentTips";
 import { AdvancedReports } from "@/components/finance/AdvancedReports";
+import { BudgetsSection } from "@/components/finance/BudgetsSection";
 import { MonthSelector } from "@/components/finance/MonthSelector";
 import { ContextActionMenu } from "@/components/ui/context-action-menu";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -260,6 +261,7 @@ export default function Financas() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
+          <BudgetsSection selectedMonth={selectedMonth} transactions={monthTransactions} />
           {/* Chart */}
           <Card className="overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-primary/[0.025] p-4 shadow-sm sm:p-5">
             <div className="mb-5 flex flex-wrap items-start justify-between gap-3">

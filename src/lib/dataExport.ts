@@ -58,6 +58,7 @@ export async function downloadLifeFlowBackup(userId: string, email?: string) {
     supabase.from("documents").select("*").eq("user_id", userId),
     supabase.from("history_events").select("*").eq("user_id", userId),
     supabase.from("dashboard_preferences").select("*").eq("user_id", userId),
+    supabase.from("monthly_budgets").select("*").eq("user_id", userId),
   ]);
 
   const names = [
@@ -79,6 +80,7 @@ export async function downloadLifeFlowBackup(userId: string, email?: string) {
     "documentos",
     "historico",
     "preferencias_do_dashboard",
+    "orcamentos_mensais",
   ];
 
   const data = ensureResults(
