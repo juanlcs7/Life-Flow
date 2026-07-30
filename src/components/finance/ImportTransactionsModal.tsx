@@ -55,6 +55,7 @@ export function ImportTransactionsModal({
   const [error, setError] = useState("");
   const [importing, setImporting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [excludedRows, setExcludedRows] = useState<Set<number>>(new Set());
   const [pendingRules, setPendingRules] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -65,6 +66,7 @@ export function ImportTransactionsModal({
     setError("");
     setImporting(false);
     setIsDragging(false);
+    setExcludedRows(new Set());
     setDefaultAccount("none");
     setPendingRules({});
   }, [open]);
@@ -95,8 +97,11 @@ export function ImportTransactionsModal({
       return { row, transaction, duplicate };
     });
   }, [accountByName, defaultAccount, rows, transactions]);
-  const importableRows = preparedRows.filter((item) => !item.duplicate);
-  const duplicateCount = preparedRows.length - importableRows.length;
+  const selectableRows = preparedRows.filter((item) => !item.duplicate);
+  const importableRows = preparedRows.filter((item, index) => !item.duplicate && !excludedRows.has(index));
+  const duplicateCount = preparedRows.length - selectableRows.length;
+  const excludedCount = selectableRows.length - importableRows.length;
+  const allSelected = selectableRows.length > 0 && excludedCount === 0;
   const exceedsLimit = maxRows !== undefined && importableRows.length > maxRows;
   const categoryOptions = useMemo(
     () => [...new Set([...TRANSACTION_CATEGORIES, ...rows.map((row) => row.category)])],
@@ -106,6 +111,7 @@ export function ImportTransactionsModal({
   const handleFile = async (file?: File) => {
     if (!file) return;
     setError("");
+    setExcludedRows(new Set());
     const extension = file.name.split(".").pop()?.toLowerCase();
 
     if (!["csv", "ofx"].includes(extension || "")) {
@@ -153,7 +159,13 @@ export function ImportTransactionsModal({
     try {
       await onImport(
         importableRows.map((item) => item.transaction),
-        Object.entries(pendingRules).map(([keyword, category]) => ({ keyword, category })),
+        Object.entries(pendingRules)
+          .filter(([keyword]) =>
+            importableRows.some(({ row }) =>
+              normalizeTransactionDescription(row.description) === keyword,
+            ),
+          )
+          .map(([keyword, category]) => ({ keyword, category })),
       );
       onOpenChange(false);
     } catch (importError) {
@@ -171,6 +183,25 @@ export function ImportTransactionsModal({
       ),
     );
     setPendingRules((current) => ({ ...current, [keyword]: category }));
+  };
+
+  const toggleRow = (index: number) => {
+    setExcludedRows((current) => {
+      const next = new Set(current);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
+
+  const toggleAllRows = () => {
+    if (allSelected) {
+      setExcludedRows(new Set(
+        preparedRows.flatMap((item, index) => item.duplicate ? [] : [index]),
+      ));
+    } else {
+      setExcludedRows(new Set());
+    }
   };
 
   return (
@@ -251,25 +282,40 @@ export function ImportTransactionsModal({
                   </SelectContent>
                 </Select>
                 <p className="text-[11px] text-muted-foreground">
-                  A conta escrita no CSV tem prioridade quando o nome corresponder.
+                  A conta informada no arquivo tem prioridade quando o nome corresponder.
                 </p>
               </div>
 
               <div className="overflow-hidden rounded-xl border">
-                <div className="flex items-center justify-between bg-muted/35 px-3 py-2 text-xs">
-                  <span className="font-medium">{importableRows.length} novas de {rows.length}</span>
-                  <span className="text-muted-foreground">
-                    {[duplicateCount && `${duplicateCount} repetidas`, skipped && `${skipped} inválidas`]
-                      .filter(Boolean)
-                      .join(" · ") || "Arquivo pronto"}
-                  </span>
+                <div className="flex flex-wrap items-center justify-between gap-2 bg-muted/35 px-3 py-2 text-xs">
+                  <div>
+                    <span className="font-medium">{importableRows.length} selecionadas de {selectableRows.length} novas</span>
+                    <span className="ml-2 text-muted-foreground">
+                      {[duplicateCount && `${duplicateCount} repetidas`, skipped && `${skipped} inválidas`]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </span>
+                  </div>
+                  <button type="button" className="font-medium text-primary hover:underline" onClick={toggleAllRows}>
+                    {allSelected ? "Desmarcar todas" : "Marcar todas"}
+                  </button>
                 </div>
                 <div className="max-h-72 divide-y overflow-y-auto">
                   {preparedRows.map(({ row, duplicate }, index) => (
                     <div
                       key={`${row.date}-${row.description}-${index}`}
-                      className={`grid gap-2 px-3 py-2.5 text-xs sm:grid-cols-[minmax(0,1fr)_140px_100px] sm:items-center ${duplicate ? "opacity-50" : ""}`}
+                      className={`grid grid-cols-[20px_minmax(0,1fr)] gap-2 px-3 py-2.5 text-xs sm:grid-cols-[20px_minmax(0,1fr)_140px_100px] sm:items-center ${
+                        duplicate || excludedRows.has(index) ? "opacity-50" : ""
+                      }`}
                     >
+                      <input
+                        type="checkbox"
+                        aria-label={`Selecionar ${row.description}`}
+                        checked={!duplicate && !excludedRows.has(index)}
+                        disabled={duplicate}
+                        onChange={() => toggleRow(index)}
+                        className="h-4 w-4 rounded border-input accent-primary disabled:cursor-not-allowed"
+                      />
                       <div className="min-w-0">
                         <p className="flex items-center gap-1.5 truncate font-medium">
                           {row.description}
@@ -280,15 +326,15 @@ export function ImportTransactionsModal({
                       <select
                         aria-label={`Categoria de ${row.description}`}
                         value={row.category}
-                        disabled={duplicate}
+                        disabled={duplicate || excludedRows.has(index)}
                         onChange={(event) => updateCategory(index, event.target.value)}
-                        className="h-8 min-w-0 rounded-md border border-input bg-background px-2 text-xs outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed"
+                        className="col-start-2 h-8 min-w-0 rounded-md border border-input bg-background px-2 text-xs outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed sm:col-start-auto"
                       >
                         {categoryOptions.map((category) => (
                           <option key={category} value={category}>{category}</option>
                         ))}
                       </select>
-                      <span className={`text-right ${row.type === "income" ? "font-semibold text-success" : "font-semibold text-destructive"}`}>
+                      <span className={`col-start-2 text-right sm:col-start-auto ${row.type === "income" ? "font-semibold text-success" : "font-semibold text-destructive"}`}>
                         {row.type === "income" ? "+" : "-"}
                         {row.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                       </span>
@@ -307,7 +353,7 @@ export function ImportTransactionsModal({
 
           {exceedsLimit && (
             <p className="rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
-              Seu plano permite importar mais {maxRows} transações neste mês. Reduza o arquivo ou faça upgrade.
+              Seu plano permite importar mais {maxRows} transações neste mês. Desmarque alguns lançamentos ou faça upgrade.
             </p>
           )}
           {error && <p className="rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p>}
