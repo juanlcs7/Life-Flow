@@ -44,8 +44,8 @@ export function CategoryRulesSettings() {
 
   const createRule = async () => {
     const keyword = normalizeTransactionDescription(description);
-    if (!keyword) {
-      toast.error("Informe a descrição que deve ser reconhecida.");
+    if (keyword.length < 3) {
+      toast.error("Informe pelo menos 3 caracteres para criar a regra.");
       return;
     }
 
@@ -85,7 +85,7 @@ export function CategoryRulesSettings() {
           <DialogHeader>
             <DialogTitle>Nova regra de categoria</DialogTitle>
             <DialogDescription>
-              Use a descrição exatamente como ela costuma aparecer no extrato do banco.
+              Informe uma parte marcante da descrição. Ela também reconhecerá lançamentos com números ou textos adicionais.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -95,7 +95,7 @@ export function CategoryRulesSettings() {
                 id="rule-description"
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
-                placeholder="Ex.: POSTO SHELL"
+                placeholder="Ex.: posto shell"
                 autoFocus
               />
             </div>
@@ -186,7 +186,7 @@ export function CategoryRulesSettings() {
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium capitalize">{rule.keyword}</p>
-                  <p className="text-[11px] text-muted-foreground">Descrição reconhecida no CSV</p>
+                  <p className="text-[11px] text-muted-foreground">Trecho reconhecido na descrição do CSV</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <select

@@ -41,6 +41,18 @@ const normalize = (value: string) =>
 export const normalizeTransactionDescription = (value: string) =>
   normalize(value).replace(/\s+/g, " ");
 
+export function findPersonalTransactionCategory(
+  description: string,
+  rules: Record<string, string>,
+) {
+  const normalizedDescription = normalizeTransactionDescription(description);
+  const match = Object.entries(rules)
+    .filter(([keyword]) => keyword.length >= 3 && normalizedDescription.includes(keyword))
+    .sort(([first], [second]) => second.length - first.length)[0];
+
+  return match?.[1];
+}
+
 const normalizeHeader = (value: string) =>
   normalize(value)
     .replace(/\([^)]*\)/g, "")

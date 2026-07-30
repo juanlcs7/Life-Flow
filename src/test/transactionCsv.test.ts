@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   inferTransactionCategory,
+  findPersonalTransactionCategory,
   normalizeTransactionDescription,
   parseTransactionsCsv,
   transactionFingerprint,
@@ -80,6 +81,27 @@ describe("parseTransactionsCsv", () => {
 describe("normalizeTransactionDescription", () => {
   it("gera uma chave estável para as preferências do usuário", () => {
     expect(normalizeTransactionDescription("  Pão   de Açúcar  ")).toBe("pao de acucar");
+  });
+});
+
+describe("findPersonalTransactionCategory", () => {
+  it("reconhece uma regra mesmo com texto adicional no lançamento", () => {
+    expect(findPersonalTransactionCategory("POSTO SHELL 0487", {
+      "posto shell": "Transporte",
+    })).toBe("Transporte");
+  });
+
+  it("prioriza a regra mais específica quando mais de uma combina", () => {
+    expect(findPersonalTransactionCategory("Mercado Livre Assinatura", {
+      mercado: "Alimentação",
+      "mercado livre": "Compras",
+    })).toBe("Compras");
+  });
+
+  it("ignora regras curtas demais", () => {
+    expect(findPersonalTransactionCategory("Pix recebido", {
+      pi: "Outros",
+    })).toBeUndefined();
   });
 });
 

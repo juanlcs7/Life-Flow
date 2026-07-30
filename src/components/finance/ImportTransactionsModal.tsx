@@ -14,6 +14,7 @@ import type { Account } from "@/hooks/useAccounts";
 import type { NewTransaction, Transaction } from "@/hooks/useTransactions";
 import {
   downloadTransactionsCsvTemplate,
+  findPersonalTransactionCategory,
   normalizeTransactionDescription,
   parseTransactionsCsv,
   TRANSACTION_CATEGORIES,
@@ -108,7 +109,7 @@ export function ImportTransactionsModal({
       const result = parseTransactionsCsv(await file.text());
       setRows(result.transactions.map((row) => ({
         ...row,
-        category: categoryRules[normalizeTransactionDescription(row.description)] || row.category,
+        category: findPersonalTransactionCategory(row.description, categoryRules) || row.category,
       })));
       setPendingRules({});
       setSkipped(result.skipped);
