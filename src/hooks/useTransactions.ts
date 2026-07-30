@@ -184,7 +184,17 @@ export function useTransactions() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       // Get transaction to revert its balance impact
-      const transaction = query.data?.find(t => t.id === id);
+      let transaction = query.data?.find(t => t.id === id);
+      if (!transaction) {
+        const { data, error } = await supabase
+          .from("transactions")
+          .select("*")
+          .eq("id", id)
+          .maybeSingle();
+
+        if (error) throw error;
+        transaction = data as Transaction | null || undefined;
+      }
       
       if (transaction && transaction.account_id) {
         const balanceChange = transaction.type === "income" ? -transaction.amount : transaction.amount;

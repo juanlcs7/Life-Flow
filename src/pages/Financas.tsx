@@ -188,9 +188,18 @@ export default function Financas() {
   };
 
   const handleImportTransactions = async (items: NewTransaction[], rules: CategoryRuleDraft[]) => {
-    for (const item of items) {
-      await addTransaction(item);
+    const importedIds: string[] = [];
+
+    try {
+      for (const item of items) {
+        const transaction = await addTransaction(item);
+        importedIds.push(transaction.id);
+      }
+    } catch (error) {
+      await Promise.allSettled(importedIds.map((id) => deleteTransaction(id)));
+      throw error;
     }
+
     if (rules.length > 0) {
       try {
         await saveCategoryRules(rules);
@@ -198,7 +207,28 @@ export default function Financas() {
         toast.info("As transações foram importadas, mas não foi possível salvar as novas regras de categoria.");
       }
     }
-    toast.success(`${items.length} transações importadas!`);
+
+    let undone = false;
+    toast.success(`${items.length} transações importadas!`, {
+      duration: 12000,
+      action: {
+        label: "Desfazer",
+        onClick: async () => {
+          if (undone) return;
+          undone = true;
+
+          try {
+            for (const id of importedIds) {
+              await deleteTransaction(id);
+            }
+            toast.success("Importação desfeita.");
+          } catch {
+            undone = false;
+            toast.error("Não foi possível desfazer toda a importação.");
+          }
+        },
+      },
+    });
   };
 
   return (
