@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,20 +10,23 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { RouteMeta } from "@/components/RouteMeta";
 import { Loader2 } from "lucide-react";
+import { AppErrorBoundary } from "@/components/AppErrorBoundary";
+import { ConnectionStatus } from "@/components/ConnectionStatus";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Financas = lazy(() => import("./pages/Financas"));
-const Agenda = lazy(() => import("./pages/Agenda"));
-const Planejamento = lazy(() => import("./pages/Planejamento"));
-const Saude = lazy(() => import("./pages/Saude"));
-const Metas = lazy(() => import("./pages/Metas"));
-const Historico = lazy(() => import("./pages/Historico"));
-const Documentos = lazy(() => import("./pages/Documentos"));
-const Contatos = lazy(() => import("./pages/Contatos"));
-const Configuracoes = lazy(() => import("./pages/Configuracoes"));
-const Auth = lazy(() => import("./pages/Auth"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"), "dashboard");
+const Financas = lazyWithRetry(() => import("./pages/Financas"), "financas");
+const Agenda = lazyWithRetry(() => import("./pages/Agenda"), "agenda");
+const Planejamento = lazyWithRetry(() => import("./pages/Planejamento"), "planejamento");
+const Saude = lazyWithRetry(() => import("./pages/Saude"), "saude");
+const Metas = lazyWithRetry(() => import("./pages/Metas"), "metas");
+const Historico = lazyWithRetry(() => import("./pages/Historico"), "historico");
+const Documentos = lazyWithRetry(() => import("./pages/Documentos"), "documentos");
+const Contatos = lazyWithRetry(() => import("./pages/Contatos"), "contatos");
+const Configuracoes = lazyWithRetry(() => import("./pages/Configuracoes"), "configuracoes");
+const Auth = lazyWithRetry(() => import("./pages/Auth"), "auth");
+const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"), "reset-password");
+const NotFound = lazyWithRetry(() => import("./pages/NotFound"), "not-found");
 
 const queryClient = new QueryClient();
 
@@ -40,49 +43,52 @@ function PageLoading({ fullScreen = false }: { fullScreen?: boolean }) {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <RouteMeta />
-            <Suspense fallback={<PageLoading fullScreen />}>
-              <Routes>
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route
-                  path="/*"
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Suspense fallback={<PageLoading />}>
-                          <Routes>
-                            <Route path="/" element={<Dashboard />} />
-                            <Route path="/financas" element={<Financas />} />
-                            <Route path="/agenda" element={<Agenda />} />
-                            <Route path="/planejamento" element={<Planejamento />} />
-                            <Route path="/saude" element={<Saude />} />
-                            <Route path="/metas" element={<Metas />} />
-                            <Route path="/historico" element={<Historico />} />
-                            <Route path="/documentos" element={<Documentos />} />
-                            <Route path="/contatos" element={<Contatos />} />
-                            <Route path="/configuracoes" element={<Configuracoes />} />
-                            <Route path="*" element={<NotFound />} />
-                          </Routes>
-                        </Suspense>
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <AppErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <ConnectionStatus />
+            <BrowserRouter>
+              <RouteMeta />
+              <Suspense fallback={<PageLoading fullScreen />}>
+                <Routes>
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route
+                    path="/*"
+                    element={
+                      <ProtectedRoute>
+                        <AppLayout>
+                          <Suspense fallback={<PageLoading />}>
+                            <Routes>
+                              <Route path="/" element={<Dashboard />} />
+                              <Route path="/financas" element={<Financas />} />
+                              <Route path="/agenda" element={<Agenda />} />
+                              <Route path="/planejamento" element={<Planejamento />} />
+                              <Route path="/saude" element={<Saude />} />
+                              <Route path="/metas" element={<Metas />} />
+                              <Route path="/historico" element={<Historico />} />
+                              <Route path="/documentos" element={<Documentos />} />
+                              <Route path="/contatos" element={<Contatos />} />
+                              <Route path="/configuracoes" element={<Configuracoes />} />
+                              <Route path="*" element={<NotFound />} />
+                            </Routes>
+                          </Suspense>
+                        </AppLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </AppErrorBoundary>
 );
 
 export default App;
