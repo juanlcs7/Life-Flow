@@ -54,6 +54,7 @@ export function ImportTransactionsModal({
   const [skipped, setSkipped] = useState(0);
   const [error, setError] = useState("");
   const [importing, setImporting] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [pendingRules, setPendingRules] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -63,6 +64,7 @@ export function ImportTransactionsModal({
     setSkipped(0);
     setError("");
     setImporting(false);
+    setIsDragging(false);
     setDefaultAccount("none");
     setPendingRules({});
   }, [open]);
@@ -104,6 +106,21 @@ export function ImportTransactionsModal({
   const handleFile = async (file?: File) => {
     if (!file) return;
     setError("");
+    const extension = file.name.split(".").pop()?.toLowerCase();
+
+    if (!["csv", "ofx"].includes(extension || "")) {
+      setRows([]);
+      setFileName(file.name);
+      setError("Formato não aceito. Selecione um arquivo CSV ou OFX.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setRows([]);
+      setFileName(file.name);
+      setError("O arquivo ultrapassa o limite de 5 MB.");
+      return;
+    }
 
     try {
       const result = parseTransactionsFile(await file.text(), file.name);
@@ -118,6 +135,13 @@ export function ImportTransactionsModal({
       setRows([]);
       setFileName(file.name);
       setError(parseError instanceof Error ? parseError.message : "Não foi possível ler o arquivo.");
+    }
+  };
+
+  const openFilePicker = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+      fileInputRef.current.click();
     }
   };
 
@@ -170,15 +194,35 @@ export function ImportTransactionsModal({
 
           <button
             type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 px-5 py-8 text-center transition-colors hover:bg-muted/35"
+            onClick={openFilePicker}
+            onDragEnter={(event) => {
+              event.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragOver={(event) => event.preventDefault()}
+            onDragLeave={(event) => {
+              event.preventDefault();
+              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                setIsDragging(false);
+              }
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              setIsDragging(false);
+              handleFile(event.dataTransfer.files[0]);
+            }}
+            className={`flex w-full flex-col items-center justify-center rounded-xl border border-dashed px-5 py-8 text-center transition-colors ${
+              isDragging
+                ? "border-primary bg-primary/10"
+                : "border-border bg-muted/20 hover:bg-muted/35"
+            }`}
           >
             <FileSpreadsheet className="mb-3 h-7 w-7 text-primary" />
             <span className="text-sm font-medium">
-              {fileName || "Selecionar arquivo CSV ou OFX"}
+              {isDragging ? "Solte o arquivo aqui" : fileName || "Selecionar arquivo CSV ou OFX"}
             </span>
             <span className="mt-1 text-xs text-muted-foreground">
-              Até 500 lançamentos por arquivo
+              Arraste ou clique · até 500 lançamentos · máximo 5 MB
             </span>
           </button>
 
