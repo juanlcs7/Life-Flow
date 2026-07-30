@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, Eye, EyeOff, KeyRound, Loader2, MailCheck, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, KeyRound, Loader2, Mail, MailCheck, Send, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,6 +16,10 @@ export function AccountSecurity() {
   const [confirmation, setConfirmation] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [savingEmail, setSavingEmail] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const emailVerified = Boolean(user?.email_confirmed_at);
   const lastAccess = user?.last_sign_in_at
@@ -60,6 +64,51 @@ export function AccountSecurity() {
     toast.success("Senha alterada com sucesso");
     setOpen(false);
     resetForm();
+  };
+
+  const handleEmailChange = async () => {
+    const normalizedEmail = newEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      toast.error("Digite um e-mail válido");
+      return;
+    }
+    if (normalizedEmail === user?.email?.toLowerCase()) {
+      toast.error("Este já é o e-mail da sua conta");
+      return;
+    }
+
+    setSavingEmail(true);
+    const { error } = await supabase.auth.updateUser(
+      { email: normalizedEmail },
+      { emailRedirectTo: `${window.location.origin}/configuracoes` },
+    );
+    setSavingEmail(false);
+
+    if (error) {
+      toast.error(error.message || "Não foi possível solicitar a alteração");
+      return;
+    }
+    toast.success("Enviamos a confirmação para o novo e-mail");
+    setEmailOpen(false);
+    setNewEmail("");
+  };
+
+  const handleResendConfirmation = async () => {
+    const pendingEmail = user?.new_email;
+    const targetEmail = pendingEmail || user?.email;
+    if (!targetEmail) return;
+    setResending(true);
+    const { error } = await supabase.auth.resend({
+      type: pendingEmail ? "email_change" : "signup",
+      email: targetEmail,
+      options: { emailRedirectTo: `${window.location.origin}/configuracoes` },
+    });
+    setResending(false);
+    if (error) {
+      toast.error(error.message || "Não foi possível reenviar a confirmação");
+      return;
+    }
+    toast.success("E-mail de confirmação reenviado");
   };
 
   return (
@@ -113,6 +162,28 @@ export function AccountSecurity() {
             Alterar senha
           </Button>
         </div>
+
+        <div className="mt-3 flex flex-col gap-3 rounded-xl border border-border/60 bg-background/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-medium">E-mail da conta</p>
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">{user?.email}</p>
+            {user?.new_email && (
+              <p className="mt-1 truncate text-xs font-medium text-amber-500">Aguardando confirmação: {user.new_email}</p>
+            )}
+          </div>
+          <div className="flex shrink-0 gap-2">
+            {(!emailVerified || user?.new_email) && (
+              <Button variant="ghost" size="sm" onClick={handleResendConfirmation} disabled={resending}>
+                {resending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                Reenviar
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => setEmailOpen(true)}>
+              <Mail className="mr-2 h-4 w-4" />
+              Alterar e-mail
+            </Button>
+          </div>
+        </div>
       </Card>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -158,6 +229,32 @@ export function AccountSecurity() {
               <Button className="flex-1" onClick={handlePasswordChange} disabled={saving || !password || !confirmation}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Salvar senha
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={emailOpen} onOpenChange={(next) => { setEmailOpen(next); if (!next) setNewEmail(""); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>Alterar e-mail</DialogTitle></DialogHeader>
+          <p className="text-sm leading-6 text-muted-foreground">
+            Enviaremos uma confirmação para o novo endereço. Dependendo da configuração de segurança, o Supabase também poderá confirmar a troca no e-mail atual.
+          </p>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <Label>E-mail atual</Label>
+              <Input value={user?.email ?? ""} disabled />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Novo e-mail</Label>
+              <Input type="email" value={newEmail} onChange={(event) => setNewEmail(event.target.value)} placeholder="novo@email.com" autoComplete="email" />
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setEmailOpen(false)}>Cancelar</Button>
+              <Button className="flex-1" onClick={handleEmailChange} disabled={savingEmail || !newEmail}>
+                {savingEmail && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Enviar confirmação
               </Button>
             </div>
           </div>
