@@ -923,6 +923,7 @@ export type Database = {
           id: string
           is_premium: boolean
           name: string | null
+          onboarding_completed_at: string | null
           premium_until: string | null
           updated_at: string
           user_id: string
@@ -934,6 +935,7 @@ export type Database = {
           id?: string
           is_premium?: boolean
           name?: string | null
+          onboarding_completed_at?: string | null
           premium_until?: string | null
           updated_at?: string
           user_id: string
@@ -945,6 +947,7 @@ export type Database = {
           id?: string
           is_premium?: boolean
           name?: string | null
+          onboarding_completed_at?: string | null
           premium_until?: string | null
           updated_at?: string
           user_id?: string

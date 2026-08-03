@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useDashboardPreferences, type CardId } from "@/hooks/useDashboardPreferences";
+import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
 
 const modules: Array<{ id: CardId; label: string; description: string; icon: typeof WalletCards }> = [
@@ -19,13 +20,12 @@ export function WelcomeOnboarding() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { savePreferences, isSaving } = useDashboardPreferences();
-  const storageKey = user ? `lifeflow:onboarding:${user.id}` : null;
-  const [open, setOpen] = useState(false);
+  const { profile, isLoading, completeOnboarding } = useProfile();
+  const [dismissed, setDismissed] = useState(false);
   const [selected, setSelected] = useState<CardId[]>(["finances", "tasks", "goals"]);
 
-  useEffect(() => {
-    if (storageKey && localStorage.getItem(storageKey) !== "done") setOpen(true);
-  }, [storageKey]);
+  useEffect(() => setDismissed(false), [user?.id, profile?.onboarding_completed_at]);
+  const open = Boolean(user && !isLoading && profile && !profile.onboarding_completed_at && !dismissed);
 
   const visibleCards = useMemo<CardId[]>(
     () => Array.from(new Set([...selected, "history"])),
@@ -37,21 +37,21 @@ export function WelcomeOnboarding() {
   };
 
   const finish = async () => {
-    if (!storageKey || selected.length === 0) return;
+    if (!user || selected.length === 0) return;
     const order: CardId[] = ["finances", "tasks", "goals", "health", "agenda", "history"];
     await savePreferences({
       card_order: order,
       visible_cards: visibleCards,
       card_sizes: { finances: "medium", tasks: "medium", goals: "medium", health: "small", agenda: "small", history: "small" },
     });
-    localStorage.setItem(storageKey, "done");
-    setOpen(false);
+    await completeOnboarding();
+    setDismissed(true);
     navigate("/");
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl" onEscapeKeyDown={(event) => event.preventDefault()}>
+    <Dialog open={open} onOpenChange={(next) => { if (!next) setDismissed(true); }}>
+      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl">Vamos montar seu LifeFlow</DialogTitle>
           <p className="text-sm text-muted-foreground">Escolha o que você quer acompanhar primeiro. Você poderá mudar tudo depois.</p>

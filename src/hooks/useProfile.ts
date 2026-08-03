@@ -12,6 +12,7 @@ export interface Profile {
   updated_at: string;
   is_premium: boolean;
   premium_until: string | null;
+  onboarding_completed_at: string | null;
 }
 
 export function useProfile() {
@@ -35,7 +36,7 @@ export function useProfile() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (updates: Partial<Pick<Profile, "name" | "avatar_url">>) => {
+    mutationFn: async (updates: Partial<Pick<Profile, "name" | "avatar_url" | "onboarding_completed_at">>) => {
       if (!user) throw new Error("User not authenticated");
       const { error } = await supabase
         .from("profiles")
@@ -55,5 +56,7 @@ export function useProfile() {
     error: query.error,
     updateProfile: updateMutation.mutateAsync,
     isUpdating: updateMutation.isPending,
+    completeOnboarding: () => updateMutation.mutateAsync({ onboarding_completed_at: new Date().toISOString() }),
+    restartOnboarding: () => updateMutation.mutateAsync({ onboarding_completed_at: null }),
   };
 }

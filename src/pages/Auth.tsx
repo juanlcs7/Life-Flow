@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { translateAuthError } from "@/lib/authErrors";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -99,14 +100,9 @@ export default function Auth() {
       const { error } = authResult;
 
       if (error) {
-        const knownMessage = error.message.includes("Invalid login credentials")
-          ? "Email ou senha incorretos"
-          : error.message.includes("User already registered")
-            ? "Este email já está cadastrado. Tente entrar."
-            : error.message;
         toast({
           title: isLogin ? "Não foi possível entrar" : "Não foi possível criar a conta",
-          description: knownMessage,
+          description: translateAuthError(error),
           variant: "destructive",
         });
         return;
@@ -150,7 +146,7 @@ export default function Auth() {
     });
     setResendingVerification(false);
     toast(error
-      ? { title: "Não foi possível reenviar", description: error.message, variant: "destructive" }
+      ? { title: "Não foi possível reenviar", description: translateAuthError(error), variant: "destructive" }
       : { title: "E-mail reenviado", description: "Confira também a caixa de spam." });
   };
 
@@ -166,7 +162,7 @@ export default function Auth() {
     });
     setSendingRecovery(false);
     if (error) {
-      toast({ title: "Não foi possível enviar o e-mail", description: error.message, variant: "destructive" });
+      toast({ title: "Não foi possível enviar o e-mail", description: translateAuthError(error), variant: "destructive" });
       return;
     }
     setRecoverySent(true);

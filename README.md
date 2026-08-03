@@ -41,6 +41,13 @@ Os arquivos de produção são gerados em `dist/`.
 
 As migrações e funções do Supabase ficam na pasta `supabase/`.
 
+### E-mail e monitoramento em produção
+
+- Configure um provedor SMTP próprio em **Supabase > Authentication > SMTP Settings**.
+- Cadastre a URL pública e `/reset-password` nas URLs de redirecionamento do Auth.
+- Para registrar erros do frontend, defina `VITE_SENTRY_DSN` na Vercel. Sem essa variável, o monitoramento permanece desativado.
+- `npm run test:e2e` valida autenticação no navegador. Defina `E2E_EMAIL` e `E2E_PASSWORD` apenas com uma conta exclusiva de teste para habilitar também o login real.
+
 Depois de atualizar o projeto, aplique as migrations antes de publicar o frontend:
 
 ```bash

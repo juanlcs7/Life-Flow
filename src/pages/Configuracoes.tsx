@@ -30,7 +30,7 @@ import { SlidersFlowIcon } from "@/components/icons/LifeFlowIcons";
 
 export default function Configuracoes() {
   const { signOut, user } = useAuth();
-  const { profile, updateProfile, isUpdating } = useProfile();
+  const { profile, updateProfile, isUpdating, restartOnboarding } = useProfile();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { isPremium, plan, limits, usage, premiumUntil } = usePlan();
@@ -232,7 +232,12 @@ export default function Configuracoes() {
             <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary"><ListChecks className="h-5 w-5" /></span>
             <div><p className="text-sm font-medium">Primeiros passos</p><p className="text-xs text-muted-foreground">Reabra o guia inicial no dashboard.</p></div>
           </div>
-          <Button variant="outline" onClick={() => { if (user) localStorage.removeItem(`lifeflow:getting-started:hidden:${user.id}`); navigate("/"); }}>Mostrar guia</Button>
+          <Button variant="outline" onClick={async () => {
+            await restartOnboarding();
+            if (user) localStorage.removeItem(`lifeflow:getting-started:hidden:${user.id}`);
+            toast.success("Guia inicial reativado");
+            navigate("/");
+          }}>Refazer guia</Button>
         </div>
       </Card>
 

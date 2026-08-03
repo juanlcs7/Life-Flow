@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { reportError } from "@/lib/monitoring";
 
 interface AppErrorBoundaryProps {
   children: ReactNode;
@@ -22,6 +23,7 @@ export class AppErrorBoundary extends Component<
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("LifeFlow encontrou um erro inesperado:", error, errorInfo);
+    reportError(error, { componentStack: errorInfo.componentStack });
   }
 
   render() {

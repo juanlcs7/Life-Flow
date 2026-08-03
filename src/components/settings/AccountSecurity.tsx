@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CheckCircle2, Clock3, Eye, EyeOff, KeyRound, Laptop, Loader2, LogOut, Mail, MailCheck, Send, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { translateAuthError } from "@/lib/authErrors";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -77,7 +78,7 @@ export function AccountSecurity() {
     setSaving(false);
 
     if (error) {
-      toast.error(error.message || "Não foi possível alterar a senha");
+      toast.error(translateAuthError(error, "Não foi possível alterar a senha."));
       return;
     }
 
@@ -105,7 +106,7 @@ export function AccountSecurity() {
     setSavingEmail(false);
 
     if (error) {
-      toast.error(error.message || "Não foi possível solicitar a alteração");
+      toast.error(translateAuthError(error, "Não foi possível solicitar a alteração."));
       return;
     }
     toast.success("Enviamos a confirmação para o novo e-mail");
@@ -125,7 +126,7 @@ export function AccountSecurity() {
     });
     setResending(false);
     if (error) {
-      toast.error(error.message || "Não foi possível reenviar a confirmação");
+      toast.error(translateAuthError(error, "Não foi possível reenviar a confirmação."));
       return;
     }
     toast.success("E-mail de confirmação reenviado");
@@ -136,7 +137,7 @@ export function AccountSecurity() {
     const { error } = await supabase.auth.signOut({ scope: "others" });
     setRevokingSessions(false);
     if (error) {
-      toast.error(error.message || "Não foi possível encerrar os outros acessos");
+      toast.error(translateAuthError(error, "Não foi possível encerrar os outros acessos."));
       return;
     }
     setSessionsOpen(false);

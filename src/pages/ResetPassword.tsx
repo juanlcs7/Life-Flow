@@ -7,9 +7,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { translateAuthError } from "@/lib/authErrors";
 
 export default function ResetPassword() {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
@@ -38,7 +39,7 @@ export default function ResetPassword() {
     const { error } = await supabase.auth.updateUser({ password });
     setSaving(false);
     if (error) {
-      toast.error(error.message || "Não foi possível definir a nova senha");
+      toast.error(translateAuthError(error, "Não foi possível definir a nova senha."));
       return;
     }
     setFinished(true);
@@ -63,8 +64,8 @@ export default function ResetPassword() {
             </span>
             <h1 className="mt-5 font-display text-2xl font-bold text-slate-950">Senha atualizada</h1>
             <p className="mt-2 text-sm leading-6 text-slate-500">Sua nova senha já está valendo. Você pode continuar para o LifeFlow.</p>
-            <Button className="mt-6 h-11 w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white" onClick={() => navigate("/")}>
-              Entrar no LifeFlow
+            <Button className="mt-6 h-11 w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white" onClick={async () => { await signOut(); navigate("/auth", { replace: true }); }}>
+              Ir para o login
             </Button>
           </div>
         ) : (
