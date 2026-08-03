@@ -63,6 +63,7 @@ export async function downloadLifeFlowBackup(userId: string, email?: string) {
     supabase.from("transaction_categories").select("*").eq("user_id", userId),
     supabase.from("transaction_imports").select("*").eq("user_id", userId),
     supabase.from("transaction_import_items").select("*"),
+    supabase.from("budget_alerts").select("*").eq("user_id", userId),
   ]);
 
   const names = [
@@ -89,6 +90,7 @@ export async function downloadLifeFlowBackup(userId: string, email?: string) {
     "categorias_personalizadas",
     "importacoes_de_transacoes",
     "itens_das_importacoes",
+    "alertas_de_orcamento",
   ];
 
   const data = ensureResults(

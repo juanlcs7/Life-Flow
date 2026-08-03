@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { differenceInCalendarDays, format, parseISO, startOfDay } from "date-fns";
+import { differenceInCalendarDays, endOfMonth, format, parseISO, startOfDay, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CheckCheck, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +24,8 @@ import { useInstallments } from "@/hooks/useInstallments";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { usePersonalGoals } from "@/hooks/usePersonalGoals";
 import { useFinancialGoals } from "@/hooks/useFinancialGoals";
+import { useBudgets } from "@/hooks/useBudgets";
+import { useTransactions } from "@/hooks/useTransactions";
 import { cn } from "@/lib/utils";
 
 type AlertTone = "danger" | "warning" | "info";
@@ -77,6 +79,8 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
   const { subscriptions } = useSubscriptions({ processAutoDebit: false });
   const { goals: personalGoals } = usePersonalGoals();
   const { goals: financialGoals } = useFinancialGoals();
+  const { budgets } = useBudgets(new Date());
+  const { transactions } = useTransactions();
 
   const alerts = useMemo<LifeFlowAlert[]>(() => {
     const today = startOfDay(new Date());
@@ -168,8 +172,40 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
         });
       });
 
+    const currentMonthStart = startOfMonth(today);
+    const currentMonthEnd = endOfMonth(today);
+    const expensesByCategory = new Map<string, number>();
+    transactions
+      .filter((transaction) => {
+        if (transaction.type !== "expense") return false;
+        const date = parseISO(transaction.date);
+        return date >= currentMonthStart && date <= currentMonthEnd;
+      })
+      .forEach((transaction) => {
+        expensesByCategory.set(
+          transaction.category,
+          (expensesByCategory.get(transaction.category) ?? 0) + transaction.amount,
+        );
+      });
+
+    budgets.forEach((budget) => {
+      const spent = expensesByCategory.get(budget.category) ?? 0;
+      const percent = Math.round((spent / budget.amount) * 100);
+      if (percent < 80) return;
+      const exceeded = percent >= 100;
+      items.push({
+        id: `budget-${budget.id}-${exceeded ? 100 : 80}`,
+        title: exceeded ? `Orçamento excedido: ${budget.category}` : `Orçamento perto do limite: ${budget.category}`,
+        description: `${percent}% utilizado • R$ ${spent.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} de R$ ${budget.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+        date: format(today, "yyyy-MM-dd"),
+        href: "/financas",
+        tone: exceeded ? "danger" : "warning",
+        icon: MoneyFlowIcon,
+      });
+    });
+
     return items.sort((a, b) => a.date.localeCompare(b.date));
-  }, [financialGoals, installments, payments, personalGoals, subscriptions, tasks]);
+  }, [budgets, financialGoals, installments, payments, personalGoals, subscriptions, tasks, transactions]);
 
   const unreadCount = alerts.filter((alert) => !readAlerts.includes(alert.id)).length;
 

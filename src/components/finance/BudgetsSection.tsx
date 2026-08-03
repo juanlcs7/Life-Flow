@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Pencil, Plus, Trash2, WalletCards } from "lucide-react";
+import { isSameMonth } from "date-fns";
 import { toast } from "sonner";
 import type { Transaction } from "@/hooks/useTransactions";
 import { useBudgets, type MonthlyBudget } from "@/hooks/useBudgets";
@@ -12,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useTransactionCategories } from "@/hooks/useTransactionCategories";
+import { useBudgetAlerts } from "@/hooks/useBudgetAlerts";
 
 export function BudgetsSection({
   selectedMonth,
@@ -22,6 +24,8 @@ export function BudgetsSection({
 }) {
   const { categories: transactionCategories } = useTransactionCategories();
   const { budgets, isLoading, saveBudget, deleteBudget, isSaving } = useBudgets(selectedMonth);
+  const { claimBudgetAlert } = useBudgetAlerts();
+  const attemptedAlerts = useRef(new Set<string>());
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<MonthlyBudget | null>(null);
   const [category, setCategory] = useState("");
@@ -38,6 +42,49 @@ export function BudgetsSection({
   const categories = [...new Set([...transactionCategories.map((item) => item.name), ...transactions.map((item) => item.category)])].sort();
   const totalLimit = budgets.reduce((sum, item) => sum + item.amount, 0);
   const totalSpent = budgets.reduce((sum, item) => sum + (expenses.get(item.category) ?? 0), 0);
+  const budgetProgress = useMemo(
+    () => budgets.map((budget) => {
+      const spent = expenses.get(budget.category) ?? 0;
+      const percent = Math.round((spent / budget.amount) * 100);
+      return { budget, spent, percent, exceeded: percent >= 100, near: percent >= 80 };
+    }),
+    [budgets, expenses],
+  );
+  const exceededBudgets = budgetProgress.filter((item) => item.exceeded);
+  const nearBudgets = budgetProgress.filter((item) => item.near && !item.exceeded);
+
+  useEffect(() => {
+    if (isLoading || !isSameMonth(selectedMonth, new Date())) return;
+
+    budgetProgress.forEach(({ budget, spent, percent }) => {
+      const level: 80 | 100 | null = percent >= 100 ? 100 : percent >= 80 ? 80 : null;
+      if (!level) return;
+
+      const attemptKey = `${budget.id}:${level}:${budget.amount}`;
+      if (attemptedAlerts.current.has(attemptKey)) return;
+      attemptedAlerts.current.add(attemptKey);
+
+      void claimBudgetAlert({
+        budgetId: budget.id,
+        level,
+        spentAmount: spent,
+        budgetAmount: budget.amount,
+      }).then((claimed) => {
+        if (!claimed) return;
+        if (level === 100) {
+          toast.error(`Orçamento de ${budget.category} excedido`, {
+            description: `${percent}% do limite mensal já foi utilizado.`,
+          });
+        } else {
+          toast.warning(`Orçamento de ${budget.category} perto do limite`, {
+            description: `${percent}% do limite mensal já foi utilizado.`,
+          });
+        }
+      }).catch((error) => {
+        console.error("Não foi possível registrar o alerta de orçamento:", error);
+      });
+    });
+  }, [budgetProgress, claimBudgetAlert, isLoading, selectedMonth]);
 
   const beginCreate = () => {
     setEditing(null);
@@ -89,12 +136,30 @@ export function BudgetsSection({
           </button>
         ) : (
           <>
+            {(exceededBudgets.length > 0 || nearBudgets.length > 0) && (
+              <div className={cn(
+                "mt-5 flex items-start gap-3 rounded-xl border px-3.5 py-3",
+                exceededBudgets.length > 0
+                  ? "border-destructive/30 bg-destructive/[0.07]"
+                  : "border-warning/30 bg-warning/[0.07]",
+              )}>
+                <AlertTriangle className={cn("mt-0.5 h-4 w-4 shrink-0", exceededBudgets.length > 0 ? "text-destructive" : "text-warning")} />
+                <div>
+                  <p className="text-xs font-semibold">
+                    {exceededBudgets.length > 0
+                      ? `${exceededBudgets.length} ${exceededBudgets.length === 1 ? "limite foi ultrapassado" : "limites foram ultrapassados"}`
+                      : `${nearBudgets.length} ${nearBudgets.length === 1 ? "categoria está" : "categorias estão"} perto do limite`}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    {exceededBudgets.length > 0 && nearBudgets.length > 0
+                      ? `${nearBudgets.length} ${nearBudgets.length === 1 ? "outra categoria precisa" : "outras categorias precisam"} de atenção.`
+                      : "Revise os gastos abaixo para manter o planejamento do mês."}
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="mt-5 grid gap-3 md:grid-cols-2">
-              {budgets.map((budget) => {
-                const spent = expenses.get(budget.category) ?? 0;
-                const percent = Math.round((spent / budget.amount) * 100);
-                const exceeded = percent >= 100;
-                const near = percent >= 80;
+              {budgetProgress.map(({ budget, spent, percent, exceeded, near }) => {
                 return (
                   <div key={budget.id} className="rounded-xl border border-border/60 bg-muted/20 p-3.5">
                     <div className="flex items-start justify-between gap-2">

@@ -199,6 +199,44 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_alerts: {
+        Row: {
+          alert_level: number
+          budget_amount: number
+          budget_id: string
+          created_at: string
+          id: string
+          spent_amount: number
+          user_id: string
+        }
+        Insert: {
+          alert_level: number
+          budget_amount: number
+          budget_id: string
+          created_at?: string
+          id?: string
+          spent_amount: number
+          user_id: string
+        }
+        Update: {
+          alert_level?: number
+          budget_amount?: number
+          budget_id?: string
+          created_at?: string
+          id?: string
+          spent_amount?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_alerts_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "monthly_budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           birthday: string | null
@@ -1214,6 +1252,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_budget_alert: {
+        Args: {
+          p_alert_level: number
+          p_budget_amount: number
+          p_budget_id: string
+          p_spent_amount: number
+        }
+        Returns: boolean
+      }
       undo_transaction_import: {
         Args: { p_import_id: string }
         Returns: number
