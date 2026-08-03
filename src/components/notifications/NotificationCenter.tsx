@@ -27,6 +27,8 @@ import { useFinancialGoals } from "@/hooks/useFinancialGoals";
 import { useBudgets } from "@/hooks/useBudgets";
 import { useTransactions } from "@/hooks/useTransactions";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { getUpcomingBrazilianCalendarEvents } from "@/lib/brazilianCalendar";
 
 type AlertTone = "danger" | "warning" | "info";
 
@@ -46,11 +48,9 @@ interface NotificationContextValue {
 }
 
 const NotificationContext = createContext<NotificationContextValue | null>(null);
-const readAlertsKey = "lifeflow_read_alerts";
-
-function loadReadAlerts() {
+function loadReadAlerts(storageKey: string) {
   try {
-    return JSON.parse(localStorage.getItem(readAlertsKey) || "[]") as string[];
+    return JSON.parse(localStorage.getItem(storageKey) || "[]") as string[];
   } catch {
     return [];
   }
@@ -72,7 +72,9 @@ function toneClasses(tone: AlertTone) {
 
 export function NotificationCenterProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const [readAlerts, setReadAlerts] = useState<string[]>(loadReadAlerts);
+  const [readAlerts, setReadAlerts] = useState<string[]>([]);
+  const { user } = useAuth();
+  const readAlertsKey = `lifeflow_read_alerts_${user?.id ?? "guest"}`;
   const navigate = useNavigate();
   const { tasks } = useTasks();
   const { installments, payments } = useInstallments({ processAutoDebit: false });
@@ -82,10 +84,26 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
   const { budgets } = useBudgets(new Date());
   const { transactions } = useTransactions();
 
+  useEffect(() => {
+    setReadAlerts(loadReadAlerts(readAlertsKey));
+  }, [readAlertsKey]);
+
   const alerts = useMemo<LifeFlowAlert[]>(() => {
     const today = startOfDay(new Date());
     const installmentNames = new Map(installments.map((item) => [item.id, item]));
     const items: LifeFlowAlert[] = [];
+
+    getUpcomingBrazilianCalendarEvents(today, 7).forEach((event) => {
+      items.push({
+        id: `calendar-${event.id}-${event.date}`,
+        title: event.name,
+        description: `${event.description} • ${relativeDate(event.date)}`,
+        date: event.date,
+        href: "/agenda",
+        tone: differenceInCalendarDays(parseISO(event.date), today) <= 1 ? "warning" : "info",
+        icon: NotificationFlowIcon,
+      });
+    });
 
     tasks
       .filter((task) => !task.completed)
@@ -216,7 +234,7 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
       if (next.length !== current.length) localStorage.setItem(readAlertsKey, JSON.stringify(next));
       return next;
     });
-  }, [alerts]);
+  }, [alerts, readAlertsKey]);
 
   const openNotifications = useCallback(() => setOpen(true), []);
 
@@ -327,7 +345,6 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
 }
 
 // O hook acompanha o provider para manter a central em um único módulo.
-// eslint-disable-next-line react-refresh/only-export-components
 export function useNotificationCenter() {
   const context = useContext(NotificationContext);
   if (!context) throw new Error("useNotificationCenter precisa estar dentro de NotificationCenterProvider");

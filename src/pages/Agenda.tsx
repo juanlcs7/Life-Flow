@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -15,6 +15,7 @@ import {
   Repeat2,
   Gift,
   UserRound,
+  PartyPopper,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -46,6 +47,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { AgendaFlowIcon } from "@/components/icons/LifeFlowIcons";
 import type { TaskRecurrence } from "@/hooks/useTasks";
 import { useContacts } from "@/hooks/useContacts";
+import { getBrazilianCalendarEvents } from "@/lib/brazilianCalendar";
 
 const days = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const currentDate = new Date();
@@ -75,6 +77,14 @@ export default function Agenda() {
   const { goals, isLoading: goalsLoading, addGoal } = useGoals();
   const { contacts } = useContacts();
   const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
+  const calendarEvents = useMemo(
+    () => [
+      ...getBrazilianCalendarEvents(calendarMonth.getFullYear() - 1),
+      ...getBrazilianCalendarEvents(calendarMonth.getFullYear()),
+      ...getBrazilianCalendarEvents(calendarMonth.getFullYear() + 1),
+    ],
+    [calendarMonth],
+  );
 
   const todayTasks = tasks.filter((task) => {
     try {
@@ -105,7 +115,13 @@ export default function Agenda() {
       return birthday.getMonth() === date.getMonth() && birthday.getDate() === date.getDate();
     });
 
+  const calendarEventsForDate = (date: Date) => {
+    const dateString = format(date, "yyyy-MM-dd");
+    return calendarEvents.filter((item) => item.date === dateString);
+  };
+
   const selectedDayTasks = tasksForDate(selectedDate);
+  const selectedDayCalendarEvents = calendarEventsForDate(selectedDate);
 
   const changeMonth = (direction: "previous" | "next") => {
     const nextMonth = direction === "previous" ? subMonths(calendarMonth, 1) : addMonths(calendarMonth, 1);
@@ -160,18 +176,25 @@ export default function Agenda() {
   };
 
   const handleExportCalendar = () => {
-    if (tasks.length === 0) {
-      toast.error("Sem tarefas para exportar");
-      return;
-    }
-    const events: IcsEvent[] = tasks.map((t) => ({
+    const taskEvents: IcsEvent[] = tasks.map((t) => ({
       uid: t.id,
       title: t.title,
       date: t.due_date,
       time: t.due_time,
       description: `Categoria: ${t.category} • Prioridade: ${t.priority}`,
     }));
-    downloadIcs(events, "lifeflow-agenda.ics");
+    const referenceYear = new Date().getFullYear();
+    const holidayEvents: IcsEvent[] = [
+      ...getBrazilianCalendarEvents(referenceYear),
+      ...getBrazilianCalendarEvents(referenceYear + 1),
+    ].map((item) => ({
+      uid: item.id,
+      title: item.name,
+      date: item.date,
+      time: null,
+      description: item.description,
+    }));
+    downloadIcs([...taskEvents, ...holidayEvents], "lifeflow-agenda.ics");
     toast.success("Arquivo gerado! Importe no Google Calendar ou Outlook.", {
       description: "Google: Configurações → Importar e exportar. Outlook: Arquivo → Abrir → Importar.",
       duration: 8000,
@@ -372,7 +395,7 @@ export default function Agenda() {
                       )}
                     >
                       {format(day, "d")}
-                      {(tasksForDate(day).length > 0 || birthdaysForDate(day).length > 0) && (
+                      {(tasksForDate(day).length > 0 || birthdaysForDate(day).length > 0 || calendarEventsForDate(day).length > 0) && (
                         <span className={cn("absolute bottom-1 h-1 w-1 rounded-full bg-tasks", isSameDay(day, selectedDate) && "bg-tasks-foreground")} />
                       )}
                     </button>
@@ -413,6 +436,7 @@ export default function Agenda() {
                 {calendarDays.map((day) => {
                   const dayTasks = tasksForDate(day);
                   const dayBirthdays = birthdaysForDate(day);
+                  const dayCalendarEvents = calendarEventsForDate(day);
                   const completed = dayTasks.filter((task) => task.completed).length;
                   return (
                     <button
@@ -432,6 +456,11 @@ export default function Agenda() {
                         {dayTasks.length > 0 && <span className="text-[9px] text-muted-foreground">{completed}/{dayTasks.length}</span>}
                       </div>
                       <div className="mt-1.5 space-y-1">
+                        {dayCalendarEvents.slice(0, 1).map((item) => (
+                          <div key={item.id} className="truncate rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] text-amber-500 sm:text-[10px]">
+                            <PartyPopper className="mr-1 inline h-2.5 w-2.5" />{item.name}
+                          </div>
+                        ))}
                         {dayTasks.slice(0, 2).map((task) => (
                           <div key={task.id} className={cn(
                             "truncate rounded px-1.5 py-0.5 text-[9px] sm:text-[10px]",
@@ -462,7 +491,7 @@ export default function Agenda() {
               <p className="mt-0.5 text-xs text-muted-foreground">{selectedDayTasks.length} tarefa{selectedDayTasks.length === 1 ? "" : "s"}</p>
 
               <div className="mt-4 space-y-2">
-                {selectedDayTasks.length === 0 && birthdaysForDate(selectedDate).length === 0 ? (
+                {selectedDayTasks.length === 0 && birthdaysForDate(selectedDate).length === 0 && selectedDayCalendarEvents.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/70 bg-muted/15 p-5 text-center">
                     <Calendar className="mx-auto mb-2 h-7 w-7 text-muted-foreground/40" />
                     <p className="text-xs text-muted-foreground">Nenhuma tarefa neste dia</p>
@@ -488,6 +517,15 @@ export default function Agenda() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-xs font-medium">Aniversário de {contact.name}</p>
                       <p className="text-[10px] text-muted-foreground">Data importante</p>
+                    </div>
+                  </div>
+                ))}
+                {selectedDayCalendarEvents.map((item) => (
+                  <div key={item.id} className="flex items-center gap-2 rounded-xl border border-amber-500/15 bg-amber-500/[0.055] p-2.5">
+                    <PartyPopper className="h-4 w-4 text-amber-500" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-medium">{item.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{item.description}</p>
                     </div>
                   </div>
                 ))}

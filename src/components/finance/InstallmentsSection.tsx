@@ -129,7 +129,7 @@ export function InstallmentsSection({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <p className="text-sm font-medium truncate">{inst.description}</p>
-                        {(inst as any).auto_debit && inst.account_id && (
+                        {inst.auto_debit && inst.account_id && (
                           <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded flex items-center gap-0.5 flex-shrink-0">
                             <Zap className="w-2.5 h-2.5" /> Auto
                           </span>

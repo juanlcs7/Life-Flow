@@ -10,6 +10,7 @@ import { useInstallments } from "./useInstallments";
 import { useMarketRates } from "./useMarketRates";
 import { useContacts } from "./useContacts";
 import { addDays, parseISO, differenceInDays, format, isToday, isTomorrow } from "date-fns";
+import { getBrazilianCalendarEvents } from "@/lib/brazilianCalendar";
 
 export interface NotificationSettings {
   enabled: boolean;
@@ -19,6 +20,7 @@ export interface NotificationSettings {
   installmentReminders: boolean;
   investmentTips: boolean;
   contactReminders: boolean;
+  holidayReminders: boolean;
   reminderTime: string; // HH:mm format
   installmentDaysBefore: number; // days before due to alert (1-7)
   investmentTipsFrequency: "daily" | "weekly" | "off";
@@ -32,6 +34,7 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   installmentReminders: true,
   investmentTips: true,
   contactReminders: true,
+  holidayReminders: true,
   reminderTime: "09:00",
   installmentDaysBefore: 3,
   investmentTipsFrequency: "daily",
@@ -231,6 +234,32 @@ export function useNotifications() {
       });
     }
 
+    if (settings.holidayReminders) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const calendarEvents = [
+        ...getBrazilianCalendarEvents(now.getFullYear()),
+        ...getBrazilianCalendarEvents(now.getFullYear() + 1),
+      ];
+
+      calendarEvents.forEach((event) => {
+        const eventDate = parseISO(event.date);
+        if (eventDate < today) return;
+        const sevenDaysBefore = addDays(eventDate, -7);
+        const reminderDate = sevenDaysBefore < today ? new Date(today) : sevenDaysBefore;
+        reminderDate.setHours(hours, minutes, 0, 0);
+        if (reminderDate <= now) return;
+
+        const daysUntil = differenceInDays(eventDate, today);
+        push(
+          "📅 Data importante chegando",
+          daysUntil === 0 ? `${event.name} é hoje.` : `${event.name} será em ${daysUntil} ${daysUntil === 1 ? "dia" : "dias"}.`,
+          reminderDate,
+          { type: "calendar_event", eventId: event.id, eventDate: event.date },
+        );
+      });
+    }
+
     // Goal reminders (financial)
     if (settings.goalReminders) {
       financialGoals.forEach((goal) => {
@@ -324,7 +353,6 @@ export function useNotifications() {
 
     if (isNativePlatform && notifications.length > 0) {
       await scheduleNotification({ notifications });
-      console.log(`Scheduled ${notifications.length} notifications`);
     }
   }, [
     settings,

@@ -345,7 +345,6 @@ export function GlobalSearchProvider({ children }: { children: ReactNode }) {
 }
 
 // O hook fica junto do provider para manter a API da busca em um único módulo.
-// eslint-disable-next-line react-refresh/only-export-components
 export function useGlobalSearch() {
   const context = useContext(SearchContext);
   if (!context) throw new Error("useGlobalSearch precisa estar dentro de GlobalSearchProvider");

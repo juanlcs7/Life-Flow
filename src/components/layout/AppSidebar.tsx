@@ -181,6 +181,8 @@ export function AppSidebar() {
                   ? "bg-slate-800 text-white"
                   : "text-slate-400 hover:bg-slate-800/70 hover:text-slate-100"
               )}
+              aria-label={collapsed ? item.label : undefined}
+              title={collapsed ? item.label : undefined}
             >
               {isActive && (
                 <motion.div
@@ -233,6 +235,8 @@ export function AppSidebar() {
         <Link
           to="/configuracoes"
           className="flex items-center gap-3 rounded-md px-3 py-2.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+          aria-label={collapsed ? "Configurações" : undefined}
+          title={collapsed ? "Configurações" : undefined}
         >
           <SlidersFlowIcon className="h-5 w-5" />
           <AnimatePresence>
@@ -252,6 +256,8 @@ export function AppSidebar() {
         <button
           onClick={handleSignOut}
           className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-slate-400 transition-colors hover:bg-red-400/10 hover:text-red-300"
+          aria-label={collapsed ? "Sair" : undefined}
+          title={collapsed ? "Sair" : undefined}
         >
           <LogOut className="w-5 h-5" />
           <AnimatePresence>
@@ -271,6 +277,8 @@ export function AppSidebar() {
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="mt-2 flex w-full items-center justify-center gap-2 rounded-md px-3 py-2 text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-200"
+          aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+          title={collapsed ? "Expandir menu" : undefined}
         >
           {collapsed ? (
             <ChevronRight className="w-5 h-5" />

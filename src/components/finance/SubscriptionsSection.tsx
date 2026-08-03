@@ -110,7 +110,7 @@ export function SubscriptionsSection({
                         {!sub.active && (
                           <span className="text-xs bg-muted px-1.5 py-0.5 rounded">Inativa</span>
                         )}
-                        {(sub as any).auto_debit && sub.account_id && (
+                        {sub.auto_debit && sub.account_id && (
                           <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded flex items-center gap-0.5">
                             <Zap className="w-2.5 h-2.5" /> Auto
                           </span>

@@ -1,10 +1,11 @@
 import { useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, TrendingUp, TrendingDown, Loader2, PiggyBank, Building2, LineChart, Briefcase, Coins, Sparkles, ArrowDownUp } from "lucide-react";
-import { Investment, useInvestments } from "@/hooks/useInvestments";
+import { Investment, useInvestments, type NewInvestment, type NewInvestmentTransaction } from "@/hooks/useInvestments";
 import { Account } from "@/hooks/useAccounts";
 import { InvestmentModal } from "./InvestmentModal";
 import { InvestmentTransactionModal } from "./InvestmentTransactionModal";
@@ -12,8 +13,9 @@ import { ContextActionMenu } from "@/components/ui/context-action-menu";
 import { toast } from "sonner";
 import { usePlan } from "@/hooks/usePlan";
 import { PremiumModal } from "@/components/premium/PremiumModal";
+import { getErrorMessage } from "@/lib/errors";
 
-const typeMeta: Record<string, { label: string; icon: any; color: string }> = {
+const typeMeta: Record<string, { label: string; icon: LucideIcon; color: string }> = {
   poupanca: { label: "Poupança", icon: PiggyBank, color: "text-info" },
   renda_fixa: { label: "Renda Fixa", icon: Building2, color: "text-success" },
   renda_variavel: { label: "Renda Variável", icon: LineChart, color: "text-warning" },
@@ -43,7 +45,7 @@ export function InvestmentsSection({ accounts }: Props) {
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const periodLabel = (p: string) => p === "daily" ? "a.d." : p === "monthly" ? "a.m." : "a.a.";
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: NewInvestment) => {
     try {
       if (editing) {
         await updateInvestment({ id: editing.id, ...data });
@@ -53,17 +55,17 @@ export function InvestmentsSection({ accounts }: Props) {
         toast.success("Investimento criado!");
       }
       setEditing(null);
-    } catch (e: any) {
-      toast.error(e.message || "Erro");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Erro ao salvar investimento"));
     }
   };
 
-  const handleTx = async (data: any) => {
+  const handleTx = async (data: NewInvestmentTransaction) => {
     try {
       await addTransaction(data);
       toast.success(data.type === "deposit" ? "Aporte realizado!" : "Resgate realizado!");
-    } catch (e: any) {
-      toast.error(e.message || "Erro");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Erro ao registrar movimentação"));
     }
   };
 

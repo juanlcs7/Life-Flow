@@ -10,6 +10,8 @@ export interface Profile {
   email: string | null;
   created_at: string;
   updated_at: string;
+  is_premium: boolean;
+  premium_until: string | null;
 }
 
 export function useProfile() {

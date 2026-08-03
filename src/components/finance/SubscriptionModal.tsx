@@ -6,13 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
-import { Subscription } from "@/hooks/useSubscriptions";
+import { Subscription, type NewSubscription } from "@/hooks/useSubscriptions";
 import { Account } from "@/hooks/useAccounts";
 
 interface SubscriptionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: Omit<Subscription, "id" | "user_id" | "created_at" | "updated_at">) => Promise<void>;
+  onSubmit: (data: NewSubscription) => Promise<void>;
   editData?: Subscription | null;
   accounts: Account[];
 }
@@ -50,7 +50,7 @@ export function SubscriptionModal({ open, onOpenChange, onSubmit, editData, acco
       setReminderDaysBefore(editData.reminder_days_before.toString());
       setAccountId(editData.account_id || "");
       setActive(editData.active);
-      setAutoDebit((editData as any).auto_debit ?? false);
+      setAutoDebit(editData.auto_debit);
     } else {
       setName("");
       setAmount("");
@@ -80,7 +80,7 @@ export function SubscriptionModal({ open, onOpenChange, onSubmit, editData, acco
         account_id: accountId || null,
         active,
         auto_debit: autoDebit && !!accountId,
-      } as any);
+      });
       onOpenChange(false);
     } finally {
       setIsSubmitting(false);

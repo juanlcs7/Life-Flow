@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
-import { Investment } from "@/hooks/useInvestments";
+import { Investment, type NewInvestment } from "@/hooks/useInvestments";
 import { Account } from "@/hooks/useAccounts";
 import { useMarketRates, getRate } from "@/hooks/useMarketRates";
 import { Sparkles } from "lucide-react";
@@ -14,7 +14,7 @@ import { Sparkles } from "lucide-react";
 interface Props {
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: NewInvestment) => Promise<void>;
   editData?: Investment | null;
   accounts: Account[];
 }

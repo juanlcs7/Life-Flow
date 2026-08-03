@@ -17,8 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Repeat2 } from "lucide-react";
+import { toast } from "sonner";
 import type { TaskRecurrence } from "@/hooks/useTasks";
 import { useContacts } from "@/hooks/useContacts";
+import { getErrorMessage } from "@/lib/errors";
 
 interface TaskModalProps {
   open: boolean;
@@ -92,12 +94,26 @@ export function TaskModal({ open, onOpenChange, onSubmit, editData }: TaskModalP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !category) return;
+
+    if (!title.trim()) {
+      toast.error("Digite um título para a tarefa.");
+      return;
+    }
+
+    if (!dueDate) {
+      toast.error("Escolha uma data para a tarefa.");
+      return;
+    }
+
+    if (!category) {
+      toast.error("Selecione uma categoria para continuar.");
+      return;
+    }
 
     setLoading(true);
     try {
       await onSubmit({
-        title,
+        title: title.trim(),
         due_date: dueDate,
         due_time: dueTime || null,
         priority,
@@ -113,6 +129,10 @@ export function TaskModal({ open, onOpenChange, onSubmit, editData }: TaskModalP
       setRecurrence("none");
       setContactId("none");
       onOpenChange(false);
+    } catch (error: unknown) {
+      toast.error("Não foi possível salvar a tarefa.", {
+        description: getErrorMessage(error, "Tente novamente em alguns instantes."),
+      });
     } finally {
       setLoading(false);
     }

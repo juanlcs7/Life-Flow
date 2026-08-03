@@ -30,9 +30,9 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { usePersonalGoals, PersonalGoal } from "@/hooks/usePersonalGoals";
-import { useFinancialGoals, FinancialGoal } from "@/hooks/useFinancialGoals";
-import { useAccounts } from "@/hooks/useAccounts";
+import { usePersonalGoals, PersonalGoal, type NewPersonalGoal } from "@/hooks/usePersonalGoals";
+import { useFinancialGoals, FinancialGoal, type NewFinancialGoal } from "@/hooks/useFinancialGoals";
+import { useAccounts, type Account } from "@/hooks/useAccounts";
 import { useTasks } from "@/hooks/useTasks";
 import { PersonalGoalModal } from "@/components/goals/PersonalGoalModal";
 import { FinancialGoalModal } from "@/components/finance/FinancialGoalModal";
@@ -48,6 +48,7 @@ import { usePlan } from "@/hooks/usePlan";
 import { PremiumModal } from "@/components/premium/PremiumModal";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { GoalFlowIcon } from "@/components/icons/LifeFlowIcons";
+import { getErrorMessage } from "@/lib/errors";
 
 const priorityColors = {
   high: "text-destructive bg-destructive/10",
@@ -136,7 +137,7 @@ export default function Metas() {
   };
 
   // Handlers
-  const handleAddPersonalGoal = async (data: any) => {
+  const handleAddPersonalGoal = async (data: NewPersonalGoal) => {
     if (!editingPersonalGoal && !canAddGoal) {
       setPremiumReason(`Plano gratuito permite ${limits.goals} metas. Você já tem ${usage.goalsCount}.`);
       setPremiumOpen(true);
@@ -152,7 +153,7 @@ export default function Metas() {
     setEditingPersonalGoal(null);
   };
 
-  const handleAddFinancialGoal = async (data: any) => {
+  const handleAddFinancialGoal = async (data: NewFinancialGoal) => {
     if (!editingFinancialGoal && !canAddGoal) {
       setPremiumReason(`Plano gratuito permite ${limits.goals} metas. Você já tem ${usage.goalsCount}.`);
       setPremiumOpen(true);
@@ -373,8 +374,8 @@ export default function Metas() {
                       try {
                         await withdrawFromGoal({ id: goal.id, amount: parseFloat(amount) });
                         toast.success("Resgate realizado!");
-                      } catch (error: any) {
-                        toast.error(error.message || "Erro ao resgatar");
+                      } catch (error: unknown) {
+                        toast.error(getErrorMessage(error, "Erro ao resgatar"));
                       }
                     }
                   }}
@@ -589,7 +590,7 @@ interface FinancialGoalCardProps {
   onAddContribution: () => void;
   onWithdraw: () => void;
   onViewHistory: () => void;
-  accounts: any[];
+  accounts: Account[];
 }
 
 function FinancialGoalCard({

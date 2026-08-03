@@ -31,6 +31,25 @@ export interface InvestmentTransaction {
   created_at: string;
 }
 
+export interface NewInvestment {
+  name: string;
+  type: string;
+  initial_value: number;
+  start_date: string;
+  notes?: string | null;
+  account_id?: string | null;
+  yield_rate?: number;
+  yield_period?: Investment["yield_period"];
+}
+
+export interface NewInvestmentTransaction {
+  investment_id: string;
+  amount: number;
+  type: InvestmentTransaction["type"];
+  account_id?: string | null;
+  notes?: string | null;
+}
+
 function daysBetween(fromISO: string, toISO: string) {
   const a = new Date(fromISO + "T00:00:00");
   const b = new Date(toISO + "T00:00:00");
@@ -104,16 +123,7 @@ export function useInvestments() {
   }, [investments.length, user?.id]);
 
   const addInvestment = useMutation({
-    mutationFn: async (payload: {
-      name: string;
-      type: string;
-      initial_value: number;
-      start_date: string;
-      notes?: string | null;
-      account_id?: string | null;
-      yield_rate?: number;
-      yield_period?: string;
-    }) => {
+    mutationFn: async (payload: NewInvestment) => {
       if (!user) throw new Error("not auth");
       const { data, error } = await supabase
         .from("investments")
@@ -174,13 +184,7 @@ export function useInvestments() {
   });
 
   const addTransaction = useMutation({
-    mutationFn: async (payload: {
-      investment_id: string;
-      amount: number;
-      type: "deposit" | "withdraw";
-      account_id?: string | null;
-      notes?: string | null;
-    }) => {
+    mutationFn: async (payload: NewInvestmentTransaction) => {
       if (!user) throw new Error("not auth");
       const inv = investments.find((i) => i.id === payload.investment_id);
       if (!inv) throw new Error("investment not found");

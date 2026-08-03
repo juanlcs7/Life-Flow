@@ -120,6 +120,7 @@ export function MobileNav() {
                 variant="ghost"
                 size="icon"
                 className="rounded-md text-foreground hover:bg-muted"
+                aria-label="Abrir menu principal"
               >
                 <Menu className="w-6 h-6" />
               </Button>

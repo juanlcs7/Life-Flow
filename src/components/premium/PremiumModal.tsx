@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Crown, Check, Loader2 } from "lucide-react";
 import { usePlan, PLAN_LIMITS, PREMIUM_PRICE } from "@/hooks/usePlan";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errors";
 
 interface Props {
   open: boolean;
@@ -28,8 +29,8 @@ export function PremiumModal({ open, onOpenChange, reason }: Props) {
       await activatePremium();
       toast.success("Plano Premium ativado! 🎉");
       onOpenChange(false);
-    } catch (e: any) {
-      toast.error(e.message || "Erro ao ativar");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Erro ao ativar"));
     }
   };
 
@@ -38,8 +39,8 @@ export function PremiumModal({ open, onOpenChange, reason }: Props) {
       await cancelPremium();
       toast.success("Plano cancelado.");
       onOpenChange(false);
-    } catch (e: any) {
-      toast.error(e.message || "Erro");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Erro ao cancelar"));
     }
   };
 

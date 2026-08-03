@@ -28,7 +28,7 @@ export const PREMIUM_PRICE = 19.9;
 
 export function usePlan() {
   const { user } = useAuth();
-  const { profile } = useProfile() as any;
+  const { profile } = useProfile();
   const queryClient = useQueryClient();
 
   const isPremium = useMemo(() => {
@@ -44,8 +44,8 @@ export function usePlan() {
   const { transactions } = useTransactions();
   const { investments } = useInvestments();
   const { goals } = useGoals();
-  const fin = (useFinancialGoals() as any).goals as any[] | undefined;
-  const personal = (usePersonalGoals() as any).goals as any[] | undefined;
+  const { goals: fin } = useFinancialGoals();
+  const { goals: personal } = usePersonalGoals();
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);

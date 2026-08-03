@@ -29,7 +29,18 @@ const Auth = lazyWithRetry(() => import("./pages/Auth"), "auth");
 const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"), "reset-password");
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"), "not-found");
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: 0,
+    },
+  },
+});
 
 function PageLoading({ fullScreen = false }: { fullScreen?: boolean }) {
   return (
