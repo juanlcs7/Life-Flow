@@ -27,7 +27,9 @@ import { TaskModal } from "@/components/modals/TaskModal";
 import { GoalModal } from "@/components/modals/GoalModal";
 import { ContextActionMenu } from "@/components/ui/context-action-menu";
 import {
+  addDays,
   addMonths,
+  differenceInCalendarDays,
   eachDayOfInterval,
   endOfMonth,
   endOfWeek,
@@ -51,6 +53,14 @@ import { getBrazilianCalendarEvents } from "@/lib/brazilianCalendar";
 
 const days = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const currentDate = new Date();
+type CalendarFilter = "all" | "tasks" | "holidays" | "birthdays";
+
+const calendarFilters: { value: CalendarFilter; label: string }[] = [
+  { value: "all", label: "Tudo" },
+  { value: "tasks", label: "Tarefas" },
+  { value: "holidays", label: "Datas importantes" },
+  { value: "birthdays", label: "Aniversários" },
+];
 
 const priorityColors = {
   high: "text-destructive",
@@ -65,6 +75,7 @@ export default function Agenda() {
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [goalModalOpen, setGoalModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [calendarFilter, setCalendarFilter] = useState<CalendarFilter>("all");
 
   useEffect(() => {
     if (searchParams.get("new") !== "task") return;
@@ -122,6 +133,43 @@ export default function Agenda() {
 
   const selectedDayTasks = tasksForDate(selectedDate);
   const selectedDayCalendarEvents = calendarEventsForDate(selectedDate);
+  const showTasks = calendarFilter === "all" || calendarFilter === "tasks";
+  const showHolidays = calendarFilter === "all" || calendarFilter === "holidays";
+  const showBirthdays = calendarFilter === "all" || calendarFilter === "birthdays";
+  const upcomingEvents = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const limit = addDays(today, 30);
+    const items: { id: string; title: string; date: string; type: "task" | "holiday" | "birthday" }[] = [];
+
+    if (calendarFilter === "all" || calendarFilter === "tasks") {
+      tasks.filter((task) => !task.completed).forEach((task) => {
+        const date = parseISO(task.due_date);
+        if (date >= today && date <= limit) items.push({ id: task.id, title: task.title, date: task.due_date, type: "task" });
+      });
+    }
+
+    if (calendarFilter === "all" || calendarFilter === "holidays") {
+      [
+        ...getBrazilianCalendarEvents(today.getFullYear()),
+        ...getBrazilianCalendarEvents(today.getFullYear() + 1),
+      ].forEach((event) => {
+        const date = parseISO(event.date);
+        if (date >= today && date <= limit) items.push({ id: event.id, title: event.name, date: event.date, type: "holiday" });
+      });
+    }
+
+    if (calendarFilter === "all" || calendarFilter === "birthdays") {
+      contacts.filter((contact) => contact.birthday).forEach((contact) => {
+        const birthday = parseISO(contact.birthday!);
+        let next = new Date(today.getFullYear(), birthday.getMonth(), birthday.getDate());
+        if (next < today) next = new Date(today.getFullYear() + 1, birthday.getMonth(), birthday.getDate());
+        if (next <= limit) items.push({ id: contact.id, title: `Aniversário de ${contact.name}`, date: format(next, "yyyy-MM-dd"), type: "birthday" });
+      });
+    }
+
+    return items.sort((a, b) => a.date.localeCompare(b.date)).slice(0, 8);
+  }, [calendarFilter, contacts, tasks]);
 
   const changeMonth = (direction: "previous" | "next") => {
     const nextMonth = direction === "previous" ? subMonths(calendarMonth, 1) : addMonths(calendarMonth, 1);
@@ -429,6 +477,21 @@ export default function Agenda() {
                 </div>
               </div>
 
+              <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+                {calendarFilters.map((filter) => (
+                  <Button
+                    key={filter.value}
+                    type="button"
+                    size="sm"
+                    variant={calendarFilter === filter.value ? "default" : "outline"}
+                    onClick={() => setCalendarFilter(filter.value)}
+                    className="h-8 shrink-0 rounded-full px-3 text-[11px]"
+                  >
+                    {filter.label}
+                  </Button>
+                ))}
+              </div>
+
               <div className="grid grid-cols-7 border-b border-border/60 pb-2 text-center">
                 {days.map((day) => <span key={day} className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{day}</span>)}
               </div>
@@ -456,12 +519,12 @@ export default function Agenda() {
                         {dayTasks.length > 0 && <span className="text-[9px] text-muted-foreground">{completed}/{dayTasks.length}</span>}
                       </div>
                       <div className="mt-1.5 space-y-1">
-                        {dayCalendarEvents.slice(0, 1).map((item) => (
+                        {showHolidays && dayCalendarEvents.slice(0, 1).map((item) => (
                           <div key={item.id} className="truncate rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] text-amber-500 sm:text-[10px]">
                             <PartyPopper className="mr-1 inline h-2.5 w-2.5" />{item.name}
                           </div>
                         ))}
-                        {dayTasks.slice(0, 2).map((task) => (
+                        {showTasks && dayTasks.slice(0, 2).map((task) => (
                           <div key={task.id} className={cn(
                             "truncate rounded px-1.5 py-0.5 text-[9px] sm:text-[10px]",
                             task.completed ? "bg-success/10 text-success line-through" : "bg-tasks/10 text-tasks",
@@ -470,12 +533,12 @@ export default function Agenda() {
                             {task.title}
                           </div>
                         ))}
-                        {dayBirthdays.slice(0, 1).map((contact) => (
+                        {showBirthdays && dayBirthdays.slice(0, 1).map((contact) => (
                           <div key={contact.id} className="truncate rounded bg-accent/10 px-1.5 py-0.5 text-[9px] text-accent sm:text-[10px]">
                             <Gift className="mr-1 inline h-2.5 w-2.5" />{contact.name}
                           </div>
                         ))}
-                        {dayTasks.length > 2 && <p className="px-1 text-[9px] text-muted-foreground">+{dayTasks.length - 2} tarefas</p>}
+                        {showTasks && dayTasks.length > 2 && <p className="px-1 text-[9px] text-muted-foreground">+{dayTasks.length - 2} tarefas</p>}
                       </div>
                     </button>
                   );
@@ -483,6 +546,7 @@ export default function Agenda() {
               </div>
             </Card>
 
+            <div className="space-y-4">
             <Card className="h-fit border-border/70 bg-card/80 p-4 shadow-sm sm:p-5">
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-tasks">Dia selecionado</p>
               <h3 className="mt-1 font-display text-lg font-semibold capitalize">
@@ -491,12 +555,12 @@ export default function Agenda() {
               <p className="mt-0.5 text-xs text-muted-foreground">{selectedDayTasks.length} tarefa{selectedDayTasks.length === 1 ? "" : "s"}</p>
 
               <div className="mt-4 space-y-2">
-                {selectedDayTasks.length === 0 && birthdaysForDate(selectedDate).length === 0 && selectedDayCalendarEvents.length === 0 ? (
+                {(!showTasks || selectedDayTasks.length === 0) && (!showBirthdays || birthdaysForDate(selectedDate).length === 0) && (!showHolidays || selectedDayCalendarEvents.length === 0) ? (
                   <div className="rounded-xl border border-dashed border-border/70 bg-muted/15 p-5 text-center">
                     <Calendar className="mx-auto mb-2 h-7 w-7 text-muted-foreground/40" />
                     <p className="text-xs text-muted-foreground">Nenhuma tarefa neste dia</p>
                   </div>
-                ) : selectedDayTasks.map((task) => (
+                ) : showTasks && selectedDayTasks.map((task) => (
                   <div key={task.id} className="group flex items-center gap-2 rounded-xl border border-border/60 bg-muted/20 p-2.5">
                     <button onClick={() => toggleTask({ id: task.id, completed: !task.completed })}>
                       {task.completed ? <Check className="h-4 w-4 text-success" /> : <Circle className="h-4 w-4 text-muted-foreground" />}
@@ -511,7 +575,7 @@ export default function Agenda() {
                     {task.due_time && <span className="text-[10px] text-muted-foreground">{task.due_time}</span>}
                   </div>
                 ))}
-                {birthdaysForDate(selectedDate).map((contact) => (
+                {showBirthdays && birthdaysForDate(selectedDate).map((contact) => (
                   <div key={contact.id} className="flex items-center gap-2 rounded-xl border border-accent/15 bg-accent/[0.055] p-2.5">
                     <Gift className="h-4 w-4 text-accent" />
                     <div className="min-w-0 flex-1">
@@ -520,7 +584,7 @@ export default function Agenda() {
                     </div>
                   </div>
                 ))}
-                {selectedDayCalendarEvents.map((item) => (
+                {showHolidays && selectedDayCalendarEvents.map((item) => (
                   <div key={item.id} className="flex items-center gap-2 rounded-xl border border-amber-500/15 bg-amber-500/[0.055] p-2.5">
                     <PartyPopper className="h-4 w-4 text-amber-500" />
                     <div className="min-w-0 flex-1">
@@ -534,6 +598,51 @@ export default function Agenda() {
                 <Plus className="mr-2 h-4 w-4" />Nova tarefa
               </Button>
             </Card>
+            <Card className="h-fit border-border/70 bg-card/80 p-4 shadow-sm sm:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-tasks">Próximos 30 dias</p>
+                  <h3 className="mt-1 font-display text-base font-semibold">O que vem por aí</h3>
+                </div>
+                <Calendar className="h-5 w-5 text-tasks" />
+              </div>
+              <div className="mt-4 space-y-2">
+                {upcomingEvents.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border/70 p-4 text-center text-xs text-muted-foreground">
+                    Nenhum evento próximo neste filtro.
+                  </div>
+                ) : upcomingEvents.map((item) => {
+                  const daysUntil = differenceInCalendarDays(parseISO(item.date), new Date());
+                  return (
+                    <button
+                      key={`${item.type}-${item.id}-${item.date}`}
+                      type="button"
+                      onClick={() => {
+                        const date = parseISO(item.date);
+                        setSelectedDate(date);
+                        setCalendarMonth(startOfMonth(date));
+                      }}
+                      className="flex w-full items-center gap-3 rounded-xl border border-border/60 bg-muted/15 p-2.5 text-left transition-colors hover:bg-muted/35"
+                    >
+                      <div className={cn(
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+                        item.type === "task" ? "bg-tasks/10 text-tasks" : item.type === "birthday" ? "bg-accent/10 text-accent" : "bg-amber-500/10 text-amber-500",
+                      )}>
+                        {item.type === "task" ? <Check className="h-4 w-4" /> : item.type === "birthday" ? <Gift className="h-4 w-4" /> : <PartyPopper className="h-4 w-4" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-medium">{item.title}</p>
+                        <p className="text-[10px] text-muted-foreground">{format(parseISO(item.date), "dd 'de' MMMM", { locale: ptBR })}</p>
+                      </div>
+                      <span className="shrink-0 text-[10px] font-medium text-muted-foreground">
+                        {daysUntil === 0 ? "Hoje" : daysUntil === 1 ? "Amanhã" : `${daysUntil} dias`}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </Card>
+            </div>
           </div>
         </TabsContent>
 
