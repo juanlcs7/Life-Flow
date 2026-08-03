@@ -44,6 +44,7 @@ import { useTransactionCategoryRules, type CategoryRuleDraft } from "@/hooks/use
 import { useTransactionImports } from "@/hooks/useTransactionImports";
 import { ImportHistoryModal } from "@/components/finance/ImportHistoryModal";
 import { MonthlyComparison } from "@/components/finance/MonthlyComparison";
+import { MonthForecast } from "@/components/finance/MonthForecast";
 
 type TransactionFormData = Omit<NewTransaction, "date">;
 
@@ -369,6 +370,13 @@ export default function Financas() {
         <TabsContent value="overview" className="space-y-4 mt-4">
           <BudgetsSection selectedMonth={selectedMonth} transactions={monthTransactions} />
           <MonthlyComparison selectedMonth={selectedMonth} transactions={transactions} />
+          <MonthForecast
+            selectedMonth={selectedMonth}
+            transactions={transactions}
+            installments={installments}
+            payments={payments}
+            subscriptions={subscriptions}
+          />
           {/* Chart */}
           <Card className="overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-primary/[0.025] p-4 shadow-sm sm:p-5">
             <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
