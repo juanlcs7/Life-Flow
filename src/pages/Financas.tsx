@@ -299,14 +299,14 @@ export default function Financas() {
         icon={MoneyFlowIcon}
         variant="finance"
         actions={
-          <div className="flex gap-2">
-            <Button variant="outline" className="h-10 px-3" size="sm" onClick={() => setImportHistoryOpen(true)}>
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+            <Button variant="outline" className="h-10 min-w-0 px-3" size="sm" onClick={() => setImportHistoryOpen(true)}>
               <History className="mr-2 h-4 w-4" />Histórico
             </Button>
-            <Button variant="outline" className="h-10 px-3" size="sm" onClick={() => setImportModalOpen(true)}>
+            <Button variant="outline" className="h-10 min-w-0 px-3" size="sm" onClick={() => setImportModalOpen(true)}>
               <Upload className="mr-2 h-4 w-4" />Importar arquivo
             </Button>
-            <Button className="gradient-finance text-finance-foreground h-10 px-4 active:scale-95 transition-transform" size="sm" onClick={() => { setEditingTransaction(null); setTransactionModalOpen(true); }}>
+            <Button className="gradient-finance col-span-2 h-11 w-full px-4 text-finance-foreground shadow-sm transition-transform active:scale-[0.98] sm:h-10 sm:w-auto" size="sm" onClick={() => { setEditingTransaction(null); setTransactionModalOpen(true); }}>
               <Plus className="w-4 h-4 mr-2" />Nova Transação
             </Button>
           </div>
