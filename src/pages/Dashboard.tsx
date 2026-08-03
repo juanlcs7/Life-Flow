@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Settings2, Bell, Check } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Settings2, Bell, Check, Sparkles } from "lucide-react";
 import { AgendaFlowIcon } from "@/components/icons/LifeFlowIcons";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfile } from "@/hooks/useProfile";
 import { useDashboardPreferences, type CardId } from "@/hooks/useDashboardPreferences";
 import { useTransactions } from "@/hooks/useTransactions";
@@ -51,6 +52,7 @@ export default function Dashboard() {
   const { accounts } = useAccounts();
   const { isNativePlatform, permissionGranted, requestPermission } = useNotifications();
   const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
 
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [transactionModal, setTransactionModal] = useState<{ open: boolean; type: "income" | "expense" }>({
@@ -64,6 +66,7 @@ export default function Dashboard() {
   const today = new Date();
   const greeting = today.getHours() < 12 ? "Bom dia" : today.getHours() < 18 ? "Boa tarde" : "Boa noite";
   const displayName = profile?.name || "Usuário";
+  const initials = displayName.substring(0, 2).toUpperCase();
   const formattedDate = new Intl.DateTimeFormat("pt-BR", {
     weekday: "long",
     day: "2-digit",
@@ -145,26 +148,57 @@ export default function Dashboard() {
       <GettingStartedChecklist />
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className="relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 p-6 text-white shadow-[0_24px_70px_-38px_rgba(8,145,178,.7)] sm:p-8"
       >
-        <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-28 left-1/3 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+        <motion.div
+          className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl"
+          animate={reduceMotion ? undefined : { scale: [1, 1.15, 1], opacity: [0.55, 0.9, 0.55] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="pointer-events-none absolute -bottom-28 left-1/3 h-64 w-64 rounded-full bg-emerald-400/15 blur-3xl"
+          animate={reduceMotion ? undefined : { x: [0, 36, 0], y: [0, -16, 0] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_75%_30%,rgba(34,211,238,.12),transparent_28%),linear-gradient(115deg,transparent_40%,rgba(255,255,255,.04)_50%,transparent_60%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/70 to-transparent" />
 
         <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-2xl">
+          <div className="flex max-w-2xl items-start gap-4 sm:gap-5">
+            <motion.button
+              type="button"
+              onClick={() => navigate("/configuracoes")}
+              whileHover={reduceMotion ? undefined : { scale: 1.04, rotate: -1 }}
+              whileTap={{ scale: 0.97 }}
+              className="group relative mt-1 shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-4 focus-visible:ring-offset-slate-950"
+              aria-label="Abrir meu perfil"
+            >
+              <span className="absolute -inset-1 rounded-full bg-gradient-to-br from-cyan-300 via-emerald-300 to-violet-400 opacity-80 blur-[2px] transition group-hover:opacity-100" />
+              <Avatar className="relative h-16 w-16 border-[3px] border-slate-950 shadow-2xl sm:h-20 sm:w-20">
+                <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} className="object-cover" />
+                <AvatarFallback className="bg-gradient-to-br from-cyan-500 to-violet-600 text-lg font-bold text-white sm:text-xl">{initials}</AvatarFallback>
+              </Avatar>
+              <span className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-[3px] border-slate-950 bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,.9)]" />
+            </motion.button>
+
+            <div className="min-w-0">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-medium text-cyan-100 backdrop-blur">
               <AgendaFlowIcon className="h-3.5 w-3.5" />
               <span className="capitalize">{formattedDate}</span>
             </div>
-            <h1 className="font-display text-3xl font-bold tracking-[-0.03em] text-white lg:text-4xl">
+            <h1 className="font-display text-2xl font-bold tracking-[-0.03em] text-white sm:text-3xl lg:text-4xl">
               {greeting}, {displayName}.
             </h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
               Veja o que está pendente e organize o restante do dia.
             </p>
+            <div className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-emerald-200">
+              <Sparkles className="h-3.5 w-3.5" />Seu dia em movimento
+            </div>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 self-start sm:justify-end">
