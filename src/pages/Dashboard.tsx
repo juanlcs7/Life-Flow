@@ -26,6 +26,7 @@ import { TaskModal } from "@/components/modals/TaskModal";
 import { HabitModal } from "@/components/modals/HabitModal";
 import { PersonalGoalModal } from "@/components/goals/PersonalGoalModal";
 import { toast } from "sonner";
+import { GettingStartedChecklist } from "@/components/onboarding/GettingStartedChecklist";
 
 const cardComponents: Record<CardId, React.ComponentType<{
   size?: "small" | "medium" | "large";
@@ -141,6 +142,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      <GettingStartedChecklist />
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

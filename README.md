@@ -40,3 +40,14 @@ Os arquivos de produção são gerados em `dist/`.
 ## Backend
 
 As migrações e funções do Supabase ficam na pasta `supabase/`.
+
+Depois de atualizar o projeto, aplique as migrations antes de publicar o frontend:
+
+```bash
+npx supabase db push
+```
+
+A migration `20260803_harden_financial_core.sql` protege o estado Premium,
+valida limites do plano gratuito, torna as movimentações financeiras atômicas
+e agenda os débitos automáticos. A integração de pagamentos reais ainda não faz
+parte desta versão.

@@ -35,7 +35,7 @@ export function InvestmentModal({ open, onOpenChange, onSubmit, editData, accoun
   const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [accountId, setAccountId] = useState<string>("none");
   const [yieldRate, setYieldRate] = useState("");
-  const [yieldPeriod, setYieldPeriod] = useState("monthly");
+  const [yieldPeriod, setYieldPeriod] = useState<Investment["yield_period"]>("monthly");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const { data: rates = [] } = useMarketRates();
@@ -91,7 +91,7 @@ export function InvestmentModal({ open, onOpenChange, onSubmit, editData, accoun
 
   const applyPreset = (p: (typeof presets)[number]) => {
     setYieldRate(p.rate);
-    setYieldPeriod(p.period);
+    setYieldPeriod(p.period as Investment["yield_period"]);
     setType(p.type);
     if (!name) setName(p.label);
   };
@@ -202,7 +202,7 @@ export function InvestmentModal({ open, onOpenChange, onSubmit, editData, accoun
             </div>
             <div className="space-y-1.5">
               <Label>Período</Label>
-              <Select value={yieldPeriod} onValueChange={setYieldPeriod}>
+              <Select value={yieldPeriod} onValueChange={(value) => setYieldPeriod(value as Investment["yield_period"])}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="daily">ao dia</SelectItem>

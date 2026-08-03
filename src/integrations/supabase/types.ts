@@ -1297,6 +1297,41 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_financial_transaction: {
+        Args: {
+          p_account_id?: string | null
+          p_amount: number
+          p_category: string
+          p_date: string
+          p_description: string
+          p_type: string
+        }
+        Returns: Database["public"]["Tables"]["transactions"]["Row"]
+      }
+      delete_financial_transaction: {
+        Args: { p_id: string }
+        Returns: undefined
+      }
+      pay_subscription: {
+        Args: { p_subscription_id: string }
+        Returns: string
+      }
+      set_installment_payment_status: {
+        Args: { p_paid: boolean; p_payment_id: string }
+        Returns: string | null
+      }
+      update_financial_transaction: {
+        Args: {
+          p_account_id?: string | null
+          p_amount: number
+          p_category: string
+          p_date: string
+          p_description: string
+          p_id: string
+          p_type: string
+        }
+        Returns: Database["public"]["Tables"]["transactions"]["Row"]
+      }
       undo_transaction_import: {
         Args: { p_import_id: string }
         Returns: number

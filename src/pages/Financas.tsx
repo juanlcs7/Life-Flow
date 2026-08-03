@@ -32,6 +32,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format, subMonths, startOfMonth, endOfMonth, parseISO, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errors";
 import { usePlan } from "@/hooks/usePlan";
 import { PremiumModal } from "@/components/premium/PremiumModal";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -461,7 +462,7 @@ export default function Financas() {
             <AccountsSection accounts={accounts} totalBalance={totalBalance} isLoading={accountsLoading} onAdd={() => { setEditingAccount(null); setAccountModalOpen(true); }} onEdit={(a) => { setEditingAccount(a); setAccountModalOpen(true); }} onDelete={(id) => { deleteAccount(id); toast.success("Conta excluída!"); }} onTransfer={() => setTransferModalOpen(true)} />
             <FinancialGoalsSection goals={goals} isLoading={goalsLoading} onAdd={() => { setEditingGoal(null); setGoalModalOpen(true); }} onEdit={(g) => { setEditingGoal(g); setGoalModalOpen(true); }} onDelete={(id) => { deleteGoal(id); toast.success("Meta excluída!"); }} onAddToGoal={(g) => { setSelectedGoalForAdd(g); setAddToGoalModalOpen(true); }} onWithdraw={async (id, amount, accountId) => { await withdrawFromGoal({ id, amount, accountId }); toast.success("Valor resgatado!"); }} accounts={accounts} />
             <InstallmentsSection installments={installments} payments={payments} monthlyImpact={monthlyImpact} isLoading={installmentsLoading} onAdd={() => setInstallmentModalOpen(true)} onDelete={(id) => { deleteInstallment(id); toast.success("Parcelamento excluído!"); }} onMarkPaid={(id, paid) => { markPaymentPaid({ paymentId: id, paid }); toast.success(paid ? "Parcela paga!" : "Parcela desmarcada!"); }} />
-            <SubscriptionsSection subscriptions={subscriptions} monthlyCost={monthlyCost} upcomingRenewals={upcomingRenewals} isLoading={subscriptionsLoading} onAdd={() => { setEditingSubscription(null); setSubscriptionModalOpen(true); }} onEdit={(s) => { setEditingSubscription(s); setSubscriptionModalOpen(true); }} onDelete={(id) => { deleteSubscription(id); toast.success("Assinatura excluída!"); }} onPay={async (id) => { setPayingSubscriptionId(id); try { await paySubscription(id); toast.success("Assinatura paga e debitada da conta!"); } catch (error) { toast.error(error instanceof Error ? error.message : "Falha ao pagar"); } finally { setPayingSubscriptionId(null); } }} payingId={payingSubscriptionId} />
+            <SubscriptionsSection subscriptions={subscriptions} monthlyCost={monthlyCost} upcomingRenewals={upcomingRenewals} isLoading={subscriptionsLoading} onAdd={() => { setEditingSubscription(null); setSubscriptionModalOpen(true); }} onEdit={(s) => { setEditingSubscription(s); setSubscriptionModalOpen(true); }} onDelete={(id) => { deleteSubscription(id); toast.success("Assinatura excluída!"); }} onPay={async (id) => { setPayingSubscriptionId(id); try { await paySubscription(id); toast.success("Pagamento registrado com sucesso!"); } catch (error) { toast.error(getErrorMessage(error, "Falha ao pagar a assinatura")); } finally { setPayingSubscriptionId(null); } }} payingId={payingSubscriptionId} />
             <InvestmentsSection accounts={accounts} />
             <InvestmentTips patrimony={patrimony} />
           </div>

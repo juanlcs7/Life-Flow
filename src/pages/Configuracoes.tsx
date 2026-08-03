@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Settings, LogOut, Moon, Sun, Crown, Check, Loader2, Pencil, Mail,
+  Settings, LogOut, Moon, Sun, Crown, Check, Loader2, Pencil, Mail, ListChecks,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -226,6 +226,13 @@ export default function Configuracoes() {
             </div>
           </div>
           <Switch checked={theme === "dark"} onCheckedChange={(c) => setTheme(c ? "dark" : "light")} />
+        </div>
+        <div className="mt-3 flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/25 p-3.5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary"><ListChecks className="h-5 w-5" /></span>
+            <div><p className="text-sm font-medium">Primeiros passos</p><p className="text-xs text-muted-foreground">Reabra o guia inicial no dashboard.</p></div>
+          </div>
+          <Button variant="outline" onClick={() => { if (user) localStorage.removeItem(`lifeflow:getting-started:hidden:${user.id}`); navigate("/"); }}>Mostrar guia</Button>
         </div>
       </Card>
 

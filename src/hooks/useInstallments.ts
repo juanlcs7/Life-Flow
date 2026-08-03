@@ -1,10 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
-import { addMonths, format } from "date-fns";
-import { logHistoryEvent } from "./useHistoryEvents";
-import { useEffect, useRef } from "react";
-import { parseISO, isBefore, startOfDay } from "date-fns";
+import { addMonths, format, parseISO } from "date-fns";
+import { activeInstallmentMonthlyImpact } from "@/lib/financialCalculations";
 
 export interface Installment {
   id: string;
@@ -39,6 +37,8 @@ export function useInstallments({
 }: {
   processAutoDebit?: boolean;
 } = {}) {
+  // Kept for backwards compatibility; processing now runs in Supabase Cron.
+  void processAutoDebit;
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -72,17 +72,6 @@ export function useInstallments({
     enabled: !!user,
   });
 
-  // Helper to get account name
-  const getAccountName = async (accountId: string | null): Promise<string | null> => {
-    if (!accountId) return null;
-    const { data } = await supabase
-      .from("accounts")
-      .select("name")
-      .eq("id", accountId)
-      .maybeSingle();
-    return data?.name || null;
-  };
-
   const addMutation = useMutation({
     mutationFn: async (installment: NewInstallment) => {
       if (!user) throw new Error("User not authenticated");
@@ -99,7 +88,7 @@ export function useInstallments({
       // Create individual payments
       const payments = [];
       for (let i = 0; i < installment.installment_count; i++) {
-        const dueDate = addMonths(new Date(installment.first_payment_date), i);
+        const dueDate = addMonths(parseISO(installment.first_payment_date), i);
         payments.push({
           installment_id: data.id,
           payment_number: i + 1,
@@ -126,141 +115,12 @@ export function useInstallments({
   const markPaymentPaidMutation = useMutation({
     mutationFn: async ({ paymentId, paid }: { paymentId: string; paid: boolean }) => {
       if (!user) throw new Error("User not authenticated");
-      
-      // Get payment details
-      const payment = (paymentsQuery.data || []).find(p => p.id === paymentId);
-      if (!payment) throw new Error("Parcela não encontrada");
-      
-      // Get installment details
-      const installment = (query.data || []).find(i => i.id === payment.installment_id);
-      if (!installment) throw new Error("Parcelamento não encontrado");
-      
-      if (paid) {
-        // Create expense transaction when marking as paid
-        const { data: transactionData, error: transactionError } = await supabase
-          .from("transactions")
-          .insert({
-            user_id: user.id,
-            type: "expense",
-            category: installment.category,
-            amount: payment.amount,
-            description: `${installment.description} (${payment.payment_number}/${installment.installment_count})`,
-            date: format(new Date(), "yyyy-MM-dd"),
-            account_id: installment.account_id,
-          })
-          .select()
-          .single();
-        
-        if (transactionError) throw transactionError;
-        
-        // Update account balance if account is linked
-        if (installment.account_id) {
-          const { data: accountData, error: accountError } = await supabase
-            .from("accounts")
-            .select("balance")
-            .eq("id", installment.account_id)
-            .single();
-          
-          if (!accountError && accountData) {
-            await supabase
-              .from("accounts")
-              .update({ balance: accountData.balance - payment.amount })
-              .eq("id", installment.account_id);
-          }
-        }
-        
-        // Update payment as paid with transaction reference
-        const { error } = await supabase
-          .from("installment_payments")
-          .update({ 
-            paid: true, 
-            paid_date: format(new Date(), "yyyy-MM-dd"),
-          })
-          .eq("id", paymentId);
-        
-        if (error) throw error;
-
-        // Log to history
-        const accountName = await getAccountName(installment.account_id);
-        await logHistoryEvent(user.id, {
-          event_type: "finance",
-          action: "payment",
-          title: `${installment.description} (${payment.payment_number}/${installment.installment_count})`,
-          description: "Parcela paga",
-          amount: payment.amount,
-          category: installment.category,
-          account_name: accountName,
-          reference_id: paymentId,
-          reference_type: "installment_payment",
-          metadata: { installment_id: installment.id, payment_number: payment.payment_number },
-        });
-        
-        return { transactionId: transactionData.id };
-      } else {
-        // When unmarking as paid, find and delete the related transaction
-        // Search for transaction with matching description pattern
-        const { data: transactions } = await supabase
-          .from("transactions")
-          .select("*")
-          .eq("user_id", user.id)
-          .eq("type", "expense")
-          .eq("amount", payment.amount)
-          .ilike("description", `%${installment.description}%${payment.payment_number}/${installment.installment_count}%`);
-        
-        if (transactions && transactions.length > 0) {
-          const transactionToDelete = transactions[0];
-          
-          // Revert account balance if account was linked
-          if (transactionToDelete.account_id) {
-            const { data: accountData } = await supabase
-              .from("accounts")
-              .select("balance")
-              .eq("id", transactionToDelete.account_id)
-              .single();
-            
-            if (accountData) {
-              await supabase
-                .from("accounts")
-                .update({ balance: accountData.balance + payment.amount })
-                .eq("id", transactionToDelete.account_id);
-            }
-          }
-          
-          // Delete the most recent matching transaction
-          const { error: deleteError } = await supabase
-            .from("transactions")
-            .delete()
-            .eq("id", transactionToDelete.id);
-          
-          if (deleteError) throw deleteError;
-        }
-        
-        // Update payment as unpaid
-        const { error } = await supabase
-          .from("installment_payments")
-          .update({ 
-            paid: false, 
-            paid_date: null,
-          })
-          .eq("id", paymentId);
-        
-        if (error) throw error;
-
-        // Log refund to history
-        const accountName = await getAccountName(installment.account_id);
-        await logHistoryEvent(user.id, {
-          event_type: "finance",
-          action: "refund",
-          title: `${installment.description} (${payment.payment_number}/${installment.installment_count})`,
-          description: "Pagamento de parcela estornado",
-          amount: payment.amount,
-          category: installment.category,
-          account_name: accountName,
-          reference_id: paymentId,
-          reference_type: "installment_payment",
-          metadata: { installment_id: installment.id, payment_number: payment.payment_number },
-        });
-      }
+      const { data, error } = await supabase.rpc("set_installment_payment_status", {
+        p_payment_id: paymentId,
+        p_paid: paid,
+      });
+      if (error) throw error;
+      return { transactionId: data };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["installment_payments", user?.id] });
@@ -281,44 +141,8 @@ export function useInstallments({
     },
   });
 
-  // Auto-debit processor: pays installment_payments whose installment has
-  // auto_debit=true, account linked, and due_date <= today, that are still
-  // unpaid. Runs once per session.
-  const processedRef = useRef(false);
-  useEffect(() => {
-    if (!processAutoDebit) return;
-    if (!user || !query.data || !paymentsQuery.data || processedRef.current)
-      return;
-    processedRef.current = true;
-    (async () => {
-      const today = startOfDay(new Date());
-      const autoDebitInstallmentIds = new Set(
-        query.data
-          .filter((i) => i.auto_debit && i.account_id)
-          .map((i) => i.id),
-      );
-      const due = paymentsQuery.data.filter(
-        (p) =>
-          !p.paid &&
-          autoDebitInstallmentIds.has(p.installment_id) &&
-          !isBefore(today, parseISO(p.due_date)),
-      );
-      for (const p of due) {
-        try {
-          await markPaymentPaidMutation.mutateAsync({
-            paymentId: p.id,
-            paid: true,
-          });
-        } catch (e) {
-          console.error("auto-debit parcela falhou", e);
-        }
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, query.data, paymentsQuery.data, processAutoDebit]);
-
   // Calculate monthly impact
-  const monthlyImpact = (query.data || []).reduce((sum, inst) => sum + inst.installment_amount, 0);
+  const monthlyImpact = activeInstallmentMonthlyImpact(query.data || [], paymentsQuery.data || []);
 
   return {
     installments: query.data ?? [],

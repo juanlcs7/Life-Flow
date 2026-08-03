@@ -1,13 +1,11 @@
 import { useMemo } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "./useAuth";
 import { useProfile } from "./useProfile";
 import { useTransactions } from "./useTransactions";
 import { useInvestments } from "./useInvestments";
 import { useGoals } from "./useGoals";
 import { useFinancialGoals } from "./useFinancialGoals";
 import { usePersonalGoals } from "./usePersonalGoals";
+import { isDateInMonth } from "@/lib/financialCalculations";
 
 export const PLAN_LIMITS = {
   free: {
@@ -27,9 +25,7 @@ export const PLAN_LIMITS = {
 export const PREMIUM_PRICE = 19.9;
 
 export function usePlan() {
-  const { user } = useAuth();
   const { profile } = useProfile();
-  const queryClient = useQueryClient();
 
   const isPremium = useMemo(() => {
     if (!profile) return false;
@@ -48,9 +44,8 @@ export function usePlan() {
   const { goals: personal } = usePersonalGoals();
 
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const transactionsThisMonth = transactions.filter(
-    (t) => new Date(t.date) >= monthStart,
+    (transaction) => isDateInMonth(transaction.date, now),
   ).length;
 
   const investmentsCount = investments.length;
@@ -68,36 +63,6 @@ export function usePlan() {
   const canAddGoal = goalsCount < limits.goals;
   const canUseReports = limits.advancedReports;
 
-  const activatePremium = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error("not auth");
-      const until = new Date();
-      until.setMonth(until.getMonth() + 1);
-      const { error } = await supabase
-        .from("profiles")
-        .update({ is_premium: true, premium_until: until.toISOString() })
-        .eq("user_id", user.id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-    },
-  });
-
-  const cancelPremium = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error("not auth");
-      const { error } = await supabase
-        .from("profiles")
-        .update({ is_premium: false, premium_until: null })
-        .eq("user_id", user.id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-    },
-  });
-
   return {
     isPremium,
     plan: isPremium ? "premium" : "free",
@@ -108,8 +73,5 @@ export function usePlan() {
     canAddGoal,
     canUseReports,
     premiumUntil: profile?.premium_until as string | null | undefined,
-    activatePremium: activatePremium.mutateAsync,
-    cancelPremium: cancelPremium.mutateAsync,
-    isActivating: activatePremium.isPending,
   };
 }

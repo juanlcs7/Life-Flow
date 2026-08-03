@@ -125,13 +125,14 @@ export function SubscriptionsSection({
                       <span className="text-sm font-medium">
                         R$ {sub.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </span>
-                      {onPay && sub.active && sub.account_id && (
+                      {onPay && sub.active && (
                         <Button
                           size="sm"
                           variant="outline"
                           className="h-7 px-2 text-[11px] active:scale-95"
                           disabled={payingId === sub.id}
                           onClick={() => onPay(sub.id)}
+                          title={sub.account_id ? "Registrar pagamento e debitar a conta" : "Registrar pagamento sem alterar saldo de conta"}
                         >
                           {payingId === sub.id ? (
                             <Loader2 className="w-3 h-3 animate-spin" />

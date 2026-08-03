@@ -3,6 +3,7 @@ import { AppSidebar } from "./AppSidebar";
 import { MobileNav } from "./MobileNav";
 import { GlobalSearchProvider } from "@/components/search/GlobalSearch";
 import { NotificationCenterProvider } from "@/components/notifications/NotificationCenter";
+import { WelcomeOnboarding } from "@/components/onboarding/WelcomeOnboarding";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -12,6 +13,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <GlobalSearchProvider>
       <NotificationCenterProvider>
+        <WelcomeOnboarding />
         <div className="dashboard-aurora flex min-h-screen bg-background">
           <MobileNav />
           <AppSidebar />

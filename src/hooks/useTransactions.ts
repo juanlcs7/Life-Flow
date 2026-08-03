@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
-import { logHistoryEvent } from "./useHistoryEvents";
 
 export interface Transaction {
   id: string;
@@ -36,67 +35,20 @@ export function useTransactions() {
     enabled: !!user,
   });
 
-  // Helper to get account name
-  const getAccountName = async (accountId: string | null): Promise<string | null> => {
-    if (!accountId) return null;
-    const { data } = await supabase
-      .from("accounts")
-      .select("name")
-      .eq("id", accountId)
-      .maybeSingle();
-    return data?.name || null;
-  };
-
   const addMutation = useMutation({
     mutationFn: async (transaction: NewTransaction) => {
       if (!user) throw new Error("User not authenticated");
-      
-      // Insert transaction
       const { data, error } = await supabase
-        .from("transactions")
-        .insert({ ...transaction, user_id: user.id })
-        .select()
-        .single();
-
+        .rpc("create_financial_transaction", {
+          p_type: transaction.type,
+          p_category: transaction.category,
+          p_amount: transaction.amount,
+          p_description: transaction.description,
+          p_date: transaction.date,
+          p_account_id: transaction.account_id,
+        });
       if (error) throw error;
-
-      // Update account balance if account is selected
-      if (transaction.account_id) {
-        const balanceChange = transaction.type === "income" ? transaction.amount : -transaction.amount;
-        
-        // Get current account balance
-        const { data: accountData, error: accountError } = await supabase
-          .from("accounts")
-          .select("balance")
-          .eq("id", transaction.account_id)
-          .single();
-        
-        if (accountError) throw accountError;
-        
-        const { error: updateError } = await supabase
-          .from("accounts")
-          .update({ balance: accountData.balance + balanceChange })
-          .eq("id", transaction.account_id);
-        
-        if (updateError) throw updateError;
-      }
-
-      // Log to history
-      const accountName = await getAccountName(transaction.account_id);
-      await logHistoryEvent(user.id, {
-        event_type: "finance",
-        action: "create",
-        title: transaction.description,
-        description: transaction.type === "income" ? "Nova receita registrada" : "Nova despesa registrada",
-        amount: transaction.amount,
-        category: transaction.category,
-        account_name: accountName,
-        reference_id: data.id,
-        reference_type: "transaction",
-        metadata: { type: transaction.type },
-      });
-
-      return data;
+      return data as Transaction;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
@@ -107,72 +59,19 @@ export function useTransactions() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Transaction> & { id: string }) => {
-      // Get existing transaction to revert its balance impact
-      const existingTransaction = query.data?.find(t => t.id === id);
-      
-      if (existingTransaction && existingTransaction.account_id) {
-        // Revert old balance change
-        const oldChange = existingTransaction.type === "income" ? -existingTransaction.amount : existingTransaction.amount;
-        
-        const { data: oldAccountData } = await supabase
-          .from("accounts")
-          .select("balance")
-          .eq("id", existingTransaction.account_id)
-          .single();
-        
-        if (oldAccountData) {
-          await supabase
-            .from("accounts")
-            .update({ balance: oldAccountData.balance + oldChange })
-            .eq("id", existingTransaction.account_id);
-        }
-      }
-      
-      // Update transaction
-      const { error } = await supabase
-        .from("transactions")
-        .update(updates)
-        .eq("id", id);
+      const existing = query.data?.find((transaction) => transaction.id === id);
+      if (!existing) throw new Error("Transação não encontrada");
+      const next = { ...existing, ...updates };
+      const { error } = await supabase.rpc("update_financial_transaction", {
+        p_id: id,
+        p_type: next.type,
+        p_category: next.category,
+        p_amount: next.amount,
+        p_description: next.description,
+        p_date: next.date,
+        p_account_id: next.account_id,
+      });
       if (error) throw error;
-
-      // Apply new balance change if account is set
-      const newAccountId = updates.account_id ?? existingTransaction?.account_id;
-      const newType = updates.type ?? existingTransaction?.type;
-      const newAmount = updates.amount ?? existingTransaction?.amount;
-      
-      if (newAccountId && newType && newAmount) {
-        const newChange = newType === "income" ? newAmount : -newAmount;
-        
-        const { data: newAccountData } = await supabase
-          .from("accounts")
-          .select("balance")
-          .eq("id", newAccountId)
-          .single();
-        
-        if (newAccountData) {
-          await supabase
-            .from("accounts")
-            .update({ balance: newAccountData.balance + newChange })
-            .eq("id", newAccountId);
-        }
-      }
-
-      // Log to history
-      if (user && existingTransaction) {
-        const accountName = await getAccountName(newAccountId || null);
-        await logHistoryEvent(user.id, {
-          event_type: "finance",
-          action: "update",
-          title: updates.description || existingTransaction.description,
-          description: "Transação editada",
-          amount: newAmount,
-          category: updates.category || existingTransaction.category,
-          account_name: accountName,
-          reference_id: id,
-          reference_type: "transaction",
-          metadata: { type: newType },
-        });
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
@@ -183,54 +82,7 @@ export function useTransactions() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      // Get transaction to revert its balance impact
-      let transaction = query.data?.find(t => t.id === id);
-      if (!transaction) {
-        const { data, error } = await supabase
-          .from("transactions")
-          .select("*")
-          .eq("id", id)
-          .maybeSingle();
-
-        if (error) throw error;
-        transaction = data as Transaction | null || undefined;
-      }
-      
-      if (transaction && transaction.account_id) {
-        const balanceChange = transaction.type === "income" ? -transaction.amount : transaction.amount;
-        
-        const { data: accountData } = await supabase
-          .from("accounts")
-          .select("balance")
-          .eq("id", transaction.account_id)
-          .single();
-        
-        if (accountData) {
-          await supabase
-            .from("accounts")
-            .update({ balance: accountData.balance + balanceChange })
-            .eq("id", transaction.account_id);
-        }
-      }
-      
-      // Log to history before deleting
-      if (user && transaction) {
-        const accountName = await getAccountName(transaction.account_id);
-        await logHistoryEvent(user.id, {
-          event_type: "finance",
-          action: "delete",
-          title: transaction.description,
-          description: "Transação excluída",
-          amount: transaction.amount,
-          category: transaction.category,
-          account_name: accountName,
-          reference_id: id,
-          reference_type: "transaction",
-          metadata: { type: transaction.type },
-        });
-      }
-      
-      const { error } = await supabase.from("transactions").delete().eq("id", id);
+      const { error } = await supabase.rpc("delete_financial_transaction", { p_id: id });
       if (error) throw error;
     },
     onSuccess: () => {

@@ -1,9 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
-import { addDays, addMonths, addWeeks, addYears, format, parseISO, isBefore, startOfDay } from "date-fns";
-import { logHistoryEvent } from "./useHistoryEvents";
-import { useEffect, useRef } from "react";
+import { differenceInCalendarDays, parseISO } from "date-fns";
+import { monthlyEquivalent } from "@/lib/financialCalculations";
 
 export interface Subscription {
   id: string;
@@ -28,6 +27,8 @@ export function useSubscriptions({
 }: {
   processAutoDebit?: boolean;
 } = {}) {
+  // Kept for backwards compatibility; processing now runs in Supabase Cron.
+  void processAutoDebit;
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -91,60 +92,8 @@ export function useSubscriptions({
   const payNowMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error("not auth");
-      const sub = (query.data || []).find((s) => s.id === id);
-      if (!sub) throw new Error("Assinatura não encontrada");
-
-      const today = format(new Date(), "yyyy-MM-dd");
-
-      // Create expense transaction
-      await supabase.from("transactions").insert({
-        user_id: user.id,
-        type: "expense",
-        category: sub.category,
-        amount: sub.amount,
-        description: `${sub.name} (assinatura)`,
-        date: today,
-        account_id: sub.account_id,
-      });
-
-      // Debit account
-      if (sub.account_id) {
-        const { data: acc } = await supabase
-          .from("accounts")
-          .select("balance")
-          .eq("id", sub.account_id)
-          .single();
-        if (acc) {
-          await supabase
-            .from("accounts")
-            .update({ balance: acc.balance - sub.amount })
-            .eq("id", sub.account_id);
-        }
-      }
-
-      // Advance next billing date
-      const base = parseISO(sub.next_billing_date);
-      const next =
-        sub.frequency === "weekly"
-          ? addWeeks(base, 1)
-          : sub.frequency === "yearly"
-          ? addYears(base, 1)
-          : addMonths(base, 1);
-      await supabase
-        .from("subscriptions")
-        .update({ next_billing_date: format(next, "yyyy-MM-dd") })
-        .eq("id", id);
-
-      await logHistoryEvent(user.id, {
-        event_type: "finance",
-        action: "payment",
-        title: sub.name,
-        description: "Assinatura paga",
-        amount: sub.amount,
-        category: sub.category,
-        reference_id: sub.id,
-        reference_type: "subscription",
-      });
+      const { error } = await supabase.rpc("pay_subscription", { p_subscription_id: id });
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subscriptions", user?.id] });
@@ -154,52 +103,16 @@ export function useSubscriptions({
     },
   });
 
-  // Auto-debit processor: runs once when subscriptions data loads. For any
-  // active subscription with auto_debit=true, account linked, and a
-  // next_billing_date <= today, charges it automatically.
-  const processedRef = useRef(false);
-  useEffect(() => {
-    if (!processAutoDebit) return;
-    if (!user || !query.data || processedRef.current) return;
-    processedRef.current = true;
-    (async () => {
-      const today = startOfDay(new Date());
-      const due = query.data.filter(
-        (s) =>
-          s.active &&
-          s.auto_debit &&
-          s.account_id &&
-          !isBefore(today, parseISO(s.next_billing_date)),
-      );
-      for (const s of due) {
-        try {
-          await payNowMutation.mutateAsync(s.id);
-        } catch (e) {
-          console.error("auto-debit failed", s.name, e);
-        }
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, query.data, processAutoDebit]);
-
   // Calculate monthly cost (normalize all to monthly)
   const monthlyCost = (query.data || [])
     .filter(s => s.active)
-    .reduce((sum, sub) => {
-      switch (sub.frequency) {
-        case "weekly": return sum + (sub.amount * 4);
-        case "yearly": return sum + (sub.amount / 12);
-        default: return sum + sub.amount;
-      }
-    }, 0);
+    .reduce((sum, sub) => sum + monthlyEquivalent(sub.amount, sub.frequency), 0);
 
   // Get upcoming renewals (next 7 days)
   const upcomingRenewals = (query.data || [])
     .filter(s => {
       if (!s.active) return false;
-      const nextDate = new Date(s.next_billing_date);
-      const today = new Date();
-      const diffDays = Math.ceil((nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const diffDays = differenceInCalendarDays(parseISO(s.next_billing_date), new Date());
       return diffDays >= 0 && diffDays <= 7;
     });
 

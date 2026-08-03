@@ -1,9 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Crown, Check, Loader2 } from "lucide-react";
+import { Crown, Check, Clock3 } from "lucide-react";
 import { usePlan, PLAN_LIMITS, PREMIUM_PRICE } from "@/hooks/usePlan";
-import { toast } from "sonner";
-import { getErrorMessage } from "@/lib/errors";
 
 interface Props {
   open: boolean;
@@ -22,27 +20,7 @@ const features = [
 ];
 
 export function PremiumModal({ open, onOpenChange, reason }: Props) {
-  const { isPremium, activatePremium, isActivating, cancelPremium, premiumUntil } = usePlan();
-
-  const activate = async () => {
-    try {
-      await activatePremium();
-      toast.success("Plano Premium ativado! 🎉");
-      onOpenChange(false);
-    } catch (error: unknown) {
-      toast.error(getErrorMessage(error, "Erro ao ativar"));
-    }
-  };
-
-  const cancel = async () => {
-    try {
-      await cancelPremium();
-      toast.success("Plano cancelado.");
-      onOpenChange(false);
-    } catch (error: unknown) {
-      toast.error(getErrorMessage(error, "Erro ao cancelar"));
-    }
-  };
+  const { isPremium, premiumUntil } = usePlan();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -66,7 +44,7 @@ export function PremiumModal({ open, onOpenChange, reason }: Props) {
             <span className="text-sm font-normal text-muted-foreground"> /mês</span>
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Cobrança simulada — sem cartão real.
+            Pagamentos reais estarão disponíveis em breve.
           </p>
         </div>
 
@@ -94,18 +72,17 @@ export function PremiumModal({ open, onOpenChange, reason }: Props) {
             <p className="text-xs text-center text-success">
               ✓ Você já é Premium{premiumUntil ? ` até ${new Date(premiumUntil).toLocaleDateString("pt-BR")}` : ""}
             </p>
-            <Button variant="outline" className="w-full" onClick={cancel}>
-              Cancelar plano
+            <Button variant="outline" className="w-full" onClick={() => onOpenChange(false)}>
+              Fechar
             </Button>
           </div>
         ) : (
           <Button
             className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground"
-            onClick={activate}
-            disabled={isActivating}
+            disabled
           >
-            {isActivating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Ativar Premium (simulado)
+            <Clock3 className="mr-2 h-4 w-4" />
+            Pagamentos em breve
           </Button>
         )}
       </DialogContent>

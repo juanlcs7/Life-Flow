@@ -9,6 +9,8 @@ import {
   Loader2,
   Lock,
   Mail,
+  MailCheck,
+  Send,
   Target,
   User,
   WalletCards,
@@ -58,6 +60,8 @@ export default function Auth() {
     confirmPassword: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
+  const [resendingVerification, setResendingVerification] = useState(false);
 
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
@@ -89,9 +93,10 @@ export default function Auth() {
         return;
       }
 
-      const { error } = isLogin
-        ? await signIn(formData.email, formData.password)
+      const authResult = isLogin
+        ? { ...(await signIn(formData.email, formData.password)), session: null }
         : await signUp(formData.email, formData.password, formData.name);
+      const { error } = authResult;
 
       if (error) {
         const knownMessage = error.message.includes("Invalid login credentials")
@@ -104,6 +109,11 @@ export default function Auth() {
           description: knownMessage,
           variant: "destructive",
         });
+        return;
+      }
+
+      if (!isLogin && !authResult.session) {
+        setVerificationEmail(formData.email.trim().toLowerCase());
         return;
       }
 
@@ -128,6 +138,20 @@ export default function Auth() {
     setIsLogin((current) => !current);
     setErrors({});
     setFormData({ email: "", password: "", name: "", confirmPassword: "" });
+  };
+
+  const handleResendVerification = async () => {
+    if (!verificationEmail) return;
+    setResendingVerification(true);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: verificationEmail,
+      options: { emailRedirectTo: `${window.location.origin}/` },
+    });
+    setResendingVerification(false);
+    toast(error
+      ? { title: "Não foi possível reenviar", description: error.message, variant: "destructive" }
+      : { title: "E-mail reenviado", description: "Confira também a caixa de spam." });
   };
 
   const handleRecovery = async () => {
@@ -243,6 +267,29 @@ export default function Auth() {
               <span className="font-display text-xl font-bold text-slate-900">LifeFlow</span>
             </div>
 
+            {verificationEmail ? (
+              <div className="py-4 text-center">
+                <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-teal-50 text-teal-600">
+                  <MailCheck className="h-8 w-8" />
+                </span>
+                <p className="mt-6 text-sm font-semibold text-teal-600">Conta criada</p>
+                <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-slate-950">Verifique seu e-mail</h2>
+                <p className="mt-3 text-sm leading-6 text-slate-500">
+                  Enviamos um link de confirmação para <strong className="text-slate-700">{verificationEmail}</strong>.
+                  Abra a mensagem para ativar sua conta antes de entrar.
+                </p>
+                <div className="mt-6 space-y-3">
+                  <Button className="h-12 w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white" onClick={() => { setVerificationEmail(null); setIsLogin(true); setFormData((current) => ({ ...current, password: "", confirmPassword: "" })); }}>
+                    Ir para o login
+                  </Button>
+                  <Button variant="outline" className="h-11 w-full border-slate-200 text-slate-700" onClick={handleResendVerification} disabled={resendingVerification}>
+                    {resendingVerification ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                    Reenviar e-mail
+                  </Button>
+                </div>
+                <p className="mt-4 text-xs text-slate-400">Não encontrou? Verifique a caixa de spam ou lixo eletrônico.</p>
+              </div>
+            ) : <>
             <div className="mb-7">
               <p className="mb-2 text-sm font-semibold text-teal-600">
                 {isLogin ? "Área pessoal" : "Novo por aqui?"}
@@ -347,6 +394,7 @@ export default function Auth() {
                 {isLogin ? "Criar conta grátis" : "Entrar"}
               </span>
             </button>
+            </>}
           </motion.div>
         </section>
       </div>
