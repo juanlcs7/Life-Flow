@@ -29,6 +29,7 @@ import { useTransactions } from "@/hooks/useTransactions";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { getUpcomingBrazilianCalendarEvents } from "@/lib/brazilianCalendar";
+import { usePersonalEvents } from "@/hooks/usePersonalEvents";
 
 type AlertTone = "danger" | "warning" | "info";
 
@@ -83,6 +84,7 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
   const { goals: financialGoals } = useFinancialGoals();
   const { budgets } = useBudgets(new Date());
   const { transactions } = useTransactions();
+  const { events: personalEvents } = usePersonalEvents();
 
   useEffect(() => {
     setReadAlerts(loadReadAlerts(readAlertsKey));
@@ -101,6 +103,20 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
         date: event.date,
         href: "/agenda",
         tone: differenceInCalendarDays(parseISO(event.date), today) <= 1 ? "warning" : "info",
+        icon: NotificationFlowIcon,
+      });
+    });
+
+    personalEvents.forEach((event) => {
+      const days = differenceInCalendarDays(parseISO(event.event_date), today);
+      if (days < 0 || days > event.reminder_days_before) return;
+      items.push({
+        id: `personal-event-${event.id}-${event.event_date}`,
+        title: event.title,
+        description: `${event.notes || "Lembrete pessoal"} • ${relativeDate(event.event_date)}`,
+        date: event.event_date,
+        href: "/agenda",
+        tone: days <= 1 ? "warning" : "info",
         icon: NotificationFlowIcon,
       });
     });
@@ -223,7 +239,7 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
     });
 
     return items.sort((a, b) => a.date.localeCompare(b.date));
-  }, [budgets, financialGoals, installments, payments, personalGoals, subscriptions, tasks, transactions]);
+  }, [budgets, financialGoals, installments, payments, personalEvents, personalGoals, subscriptions, tasks, transactions]);
 
   const unreadCount = alerts.filter((alert) => !readAlerts.includes(alert.id)).length;
 

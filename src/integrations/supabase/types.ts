@@ -58,6 +58,42 @@ export type Database = {
           },
         ]
       }
+      personal_events: {
+        Row: {
+          created_at: string
+          event_date: string
+          event_time: string | null
+          id: string
+          notes: string | null
+          reminder_days_before: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_date: string
+          event_time?: string | null
+          id?: string
+          notes?: string | null
+          reminder_days_before?: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_date?: string
+          event_time?: string | null
+          id?: string
+          notes?: string | null
+          reminder_days_before?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       accounts: {
         Row: {
           balance: number

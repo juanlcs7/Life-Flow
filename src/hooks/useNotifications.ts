@@ -11,6 +11,7 @@ import { useMarketRates } from "./useMarketRates";
 import { useContacts } from "./useContacts";
 import { addDays, parseISO, differenceInDays, format, isToday, isTomorrow } from "date-fns";
 import { getBrazilianCalendarEvents } from "@/lib/brazilianCalendar";
+import { usePersonalEvents } from "./usePersonalEvents";
 
 export interface NotificationSettings {
   enabled: boolean;
@@ -55,6 +56,7 @@ export function useNotifications() {
   const marketRatesQuery = useMarketRates();
   const marketRates = useMemo(() => marketRatesQuery.data ?? [], [marketRatesQuery.data]);
   const { contacts } = useContacts();
+  const { events: personalEvents } = usePersonalEvents();
 
   useEffect(() => {
     const platform = Capacitor.getPlatform();
@@ -260,6 +262,20 @@ export function useNotifications() {
       });
     }
 
+    personalEvents.forEach((event) => {
+      const eventDate = parseISO(event.event_date);
+      const reminderDate = addDays(eventDate, -event.reminder_days_before);
+      const [eventHours, eventMinutes] = event.event_time?.split(":").map(Number) ?? [hours, minutes];
+      reminderDate.setHours(eventHours, eventMinutes, 0, 0);
+      if (reminderDate <= new Date()) return;
+      push(
+        "🔔 Lembrete pessoal",
+        event.title,
+        reminderDate,
+        { type: "personal_event", eventId: event.id },
+      );
+    });
+
     // Goal reminders (financial)
     if (settings.goalReminders) {
       financialGoals.forEach((goal) => {
@@ -361,6 +377,7 @@ export function useNotifications() {
     permissionGranted,
     tasks,
     contacts,
+    personalEvents,
     financialGoals,
     personalGoals,
     subscriptions,
@@ -377,7 +394,7 @@ export function useNotifications() {
     if (settings.enabled && permissionGranted && (isNativePlatform || isWebNotificationSupported)) {
       scheduleAllReminders();
     }
-  }, [tasks, contacts, financialGoals, personalGoals, subscriptions, installmentPayments, installments, marketRates, scheduleAllReminders, settings.enabled, permissionGranted, isNativePlatform, isWebNotificationSupported]);
+  }, [tasks, contacts, personalEvents, financialGoals, personalGoals, subscriptions, installmentPayments, installments, marketRates, scheduleAllReminders, settings.enabled, permissionGranted, isNativePlatform, isWebNotificationSupported]);
 
   return {
     settings,

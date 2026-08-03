@@ -16,6 +16,7 @@ import {
   Gift,
   UserRound,
   PartyPopper,
+  BellRing,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -50,14 +51,17 @@ import { AgendaFlowIcon } from "@/components/icons/LifeFlowIcons";
 import type { TaskRecurrence } from "@/hooks/useTasks";
 import { useContacts } from "@/hooks/useContacts";
 import { getBrazilianCalendarEvents } from "@/lib/brazilianCalendar";
+import { PersonalEventModal } from "@/components/modals/PersonalEventModal";
+import { usePersonalEvents, type PersonalEvent, type PersonalEventInput } from "@/hooks/usePersonalEvents";
 
 const days = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const currentDate = new Date();
-type CalendarFilter = "all" | "tasks" | "holidays" | "birthdays";
+type CalendarFilter = "all" | "tasks" | "reminders" | "holidays" | "birthdays";
 
 const calendarFilters: { value: CalendarFilter; label: string }[] = [
   { value: "all", label: "Tudo" },
   { value: "tasks", label: "Tarefas" },
+  { value: "reminders", label: "Lembretes" },
   { value: "holidays", label: "Datas importantes" },
   { value: "birthdays", label: "Aniversários" },
 ];
@@ -76,6 +80,8 @@ export default function Agenda() {
   const [goalModalOpen, setGoalModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [calendarFilter, setCalendarFilter] = useState<CalendarFilter>("all");
+  const [personalEventModalOpen, setPersonalEventModalOpen] = useState(false);
+  const [editingPersonalEvent, setEditingPersonalEvent] = useState<PersonalEvent | null>(null);
 
   useEffect(() => {
     if (searchParams.get("new") !== "task") return;
@@ -87,6 +93,7 @@ export default function Agenda() {
   const { tasks, isLoading: tasksLoading, addTask, toggleTask, updateTask, deleteTask } = useTasks();
   const { goals, isLoading: goalsLoading, addGoal } = useGoals();
   const { contacts } = useContacts();
+  const { events: personalEvents, addEvent, updateEvent, deleteEvent } = usePersonalEvents();
   const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
   const calendarEvents = useMemo(
     () => [
@@ -131,21 +138,35 @@ export default function Agenda() {
     return calendarEvents.filter((item) => item.date === dateString);
   };
 
+  const personalEventsForDate = (date: Date) => {
+    const dateString = format(date, "yyyy-MM-dd");
+    return personalEvents.filter((item) => item.event_date === dateString);
+  };
+
   const selectedDayTasks = tasksForDate(selectedDate);
   const selectedDayCalendarEvents = calendarEventsForDate(selectedDate);
+  const selectedDayPersonalEvents = personalEventsForDate(selectedDate);
   const showTasks = calendarFilter === "all" || calendarFilter === "tasks";
+  const showReminders = calendarFilter === "all" || calendarFilter === "reminders";
   const showHolidays = calendarFilter === "all" || calendarFilter === "holidays";
   const showBirthdays = calendarFilter === "all" || calendarFilter === "birthdays";
   const upcomingEvents = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const limit = addDays(today, 30);
-    const items: { id: string; title: string; date: string; type: "task" | "holiday" | "birthday" }[] = [];
+    const items: { id: string; title: string; date: string; type: "task" | "reminder" | "holiday" | "birthday" }[] = [];
 
     if (calendarFilter === "all" || calendarFilter === "tasks") {
       tasks.filter((task) => !task.completed).forEach((task) => {
         const date = parseISO(task.due_date);
         if (date >= today && date <= limit) items.push({ id: task.id, title: task.title, date: task.due_date, type: "task" });
+      });
+    }
+
+    if (calendarFilter === "all" || calendarFilter === "reminders") {
+      personalEvents.forEach((event) => {
+        const date = parseISO(event.event_date);
+        if (date >= today && date <= limit) items.push({ id: event.id, title: event.title, date: event.event_date, type: "reminder" });
       });
     }
 
@@ -169,7 +190,28 @@ export default function Agenda() {
     }
 
     return items.sort((a, b) => a.date.localeCompare(b.date)).slice(0, 8);
-  }, [calendarFilter, contacts, tasks]);
+  }, [calendarFilter, contacts, personalEvents, tasks]);
+
+  const handleSavePersonalEvent = async (data: PersonalEventInput) => {
+    if (editingPersonalEvent) {
+      await updateEvent({ id: editingPersonalEvent.id, ...data });
+      toast.success("Lembrete atualizado!");
+    } else {
+      await addEvent(data);
+      toast.success("Lembrete adicionado!");
+    }
+    setEditingPersonalEvent(null);
+  };
+
+  const handleOpenPersonalEvent = (event?: PersonalEvent) => {
+    setEditingPersonalEvent(event ?? null);
+    setPersonalEventModalOpen(true);
+  };
+
+  const handleDeletePersonalEvent = async (id: string) => {
+    await deleteEvent(id);
+    toast.success("Lembrete excluído.");
+  };
 
   const changeMonth = (direction: "previous" | "next") => {
     const nextMonth = direction === "previous" ? subMonths(calendarMonth, 1) : addMonths(calendarMonth, 1);
@@ -242,7 +284,14 @@ export default function Agenda() {
       time: null,
       description: item.description,
     }));
-    downloadIcs([...taskEvents, ...holidayEvents], "lifeflow-agenda.ics");
+    const reminderEvents: IcsEvent[] = personalEvents.map((item) => ({
+      uid: `personal-${item.id}`,
+      title: item.title,
+      date: item.event_date,
+      time: item.event_time,
+      description: item.notes || "Lembrete pessoal do LifeFlow",
+    }));
+    downloadIcs([...taskEvents, ...reminderEvents, ...holidayEvents], "lifeflow-agenda.ics");
     toast.success("Arquivo gerado! Importe no Google Calendar ou Outlook.", {
       description: "Google: Configurações → Importar e exportar. Outlook: Arquivo → Abrir → Importar.",
       duration: 8000,
@@ -262,6 +311,16 @@ export default function Agenda() {
         onOpenChange={setGoalModalOpen}
         onSubmit={handleAddGoal}
       />
+      <PersonalEventModal
+        open={personalEventModalOpen}
+        onOpenChange={(open) => {
+          setPersonalEventModalOpen(open);
+          if (!open) setEditingPersonalEvent(null);
+        }}
+        onSubmit={handleSavePersonalEvent}
+        editData={editingPersonalEvent}
+        initialDate={format(selectedDate, "yyyy-MM-dd")}
+      />
 
       <PageHeader
         title="Agenda & Tarefas"
@@ -279,6 +338,15 @@ export default function Agenda() {
           >
             <CalendarPlus className="w-4 h-4 mr-2" />
             Sincronizar com Google / Outlook
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleOpenPersonalEvent()}
+            className="h-10 border-white/15 bg-white/[0.07] text-white transition-transform hover:bg-white/15 hover:text-white active:scale-95"
+          >
+            <BellRing className="mr-2 h-4 w-4" />
+            Novo lembrete
           </Button>
           <Button
             className="gradient-tasks text-tasks-foreground h-10 sm:h-9 active:scale-95 transition-transform"
@@ -443,7 +511,7 @@ export default function Agenda() {
                       )}
                     >
                       {format(day, "d")}
-                      {(tasksForDate(day).length > 0 || birthdaysForDate(day).length > 0 || calendarEventsForDate(day).length > 0) && (
+                      {(tasksForDate(day).length > 0 || personalEventsForDate(day).length > 0 || birthdaysForDate(day).length > 0 || calendarEventsForDate(day).length > 0) && (
                         <span className={cn("absolute bottom-1 h-1 w-1 rounded-full bg-tasks", isSameDay(day, selectedDate) && "bg-tasks-foreground")} />
                       )}
                     </button>
@@ -500,6 +568,7 @@ export default function Agenda() {
                   const dayTasks = tasksForDate(day);
                   const dayBirthdays = birthdaysForDate(day);
                   const dayCalendarEvents = calendarEventsForDate(day);
+                  const dayPersonalEvents = personalEventsForDate(day);
                   const completed = dayTasks.filter((task) => task.completed).length;
                   return (
                     <button
@@ -522,6 +591,11 @@ export default function Agenda() {
                         {showHolidays && dayCalendarEvents.slice(0, 1).map((item) => (
                           <div key={item.id} className="truncate rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] text-amber-500 sm:text-[10px]">
                             <PartyPopper className="mr-1 inline h-2.5 w-2.5" />{item.name}
+                          </div>
+                        ))}
+                        {showReminders && dayPersonalEvents.slice(0, 1).map((item) => (
+                          <div key={item.id} className="truncate rounded bg-violet-500/10 px-1.5 py-0.5 text-[9px] text-violet-500 sm:text-[10px]">
+                            <BellRing className="mr-1 inline h-2.5 w-2.5" />{item.title}
                           </div>
                         ))}
                         {showTasks && dayTasks.slice(0, 2).map((task) => (
@@ -555,10 +629,10 @@ export default function Agenda() {
               <p className="mt-0.5 text-xs text-muted-foreground">{selectedDayTasks.length} tarefa{selectedDayTasks.length === 1 ? "" : "s"}</p>
 
               <div className="mt-4 space-y-2">
-                {(!showTasks || selectedDayTasks.length === 0) && (!showBirthdays || birthdaysForDate(selectedDate).length === 0) && (!showHolidays || selectedDayCalendarEvents.length === 0) ? (
+                {(!showTasks || selectedDayTasks.length === 0) && (!showReminders || selectedDayPersonalEvents.length === 0) && (!showBirthdays || birthdaysForDate(selectedDate).length === 0) && (!showHolidays || selectedDayCalendarEvents.length === 0) ? (
                   <div className="rounded-xl border border-dashed border-border/70 bg-muted/15 p-5 text-center">
                     <Calendar className="mx-auto mb-2 h-7 w-7 text-muted-foreground/40" />
-                    <p className="text-xs text-muted-foreground">Nenhuma tarefa neste dia</p>
+                    <p className="text-xs text-muted-foreground">Nenhum evento neste dia</p>
                   </div>
                 ) : showTasks && selectedDayTasks.map((task) => (
                   <div key={task.id} className="group flex items-center gap-2 rounded-xl border border-border/60 bg-muted/20 p-2.5">
@@ -584,6 +658,18 @@ export default function Agenda() {
                     </div>
                   </div>
                 ))}
+                {showReminders && selectedDayPersonalEvents.map((item) => (
+                  <div key={item.id} className="flex items-center gap-2 rounded-xl border border-violet-500/15 bg-violet-500/[0.055] p-2.5">
+                    <BellRing className="h-4 w-4 shrink-0 text-violet-500" />
+                    <button type="button" onClick={() => handleOpenPersonalEvent(item)} className="min-w-0 flex-1 text-left">
+                      <p className="truncate text-xs font-medium">{item.title}</p>
+                      <p className="truncate text-[10px] text-muted-foreground">
+                        {item.event_time ? item.event_time.slice(0, 5) : "Sem horário"}{item.notes ? ` • ${item.notes}` : ""}
+                      </p>
+                    </button>
+                    <ContextActionMenu onEdit={() => handleOpenPersonalEvent(item)} onDelete={() => handleDeletePersonalEvent(item.id)} />
+                  </div>
+                ))}
                 {showHolidays && selectedDayCalendarEvents.map((item) => (
                   <div key={item.id} className="flex items-center gap-2 rounded-xl border border-amber-500/15 bg-amber-500/[0.055] p-2.5">
                     <PartyPopper className="h-4 w-4 text-amber-500" />
@@ -596,6 +682,9 @@ export default function Agenda() {
               </div>
               <Button className="mt-4 w-full gradient-tasks text-tasks-foreground" size="sm" onClick={handleOpenTaskModal}>
                 <Plus className="mr-2 h-4 w-4" />Nova tarefa
+              </Button>
+              <Button className="mt-2 w-full" variant="outline" size="sm" onClick={() => handleOpenPersonalEvent()}>
+                <BellRing className="mr-2 h-4 w-4" />Novo lembrete
               </Button>
             </Card>
             <Card className="h-fit border-border/70 bg-card/80 p-4 shadow-sm sm:p-5">
@@ -626,9 +715,9 @@ export default function Agenda() {
                     >
                       <div className={cn(
                         "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
-                        item.type === "task" ? "bg-tasks/10 text-tasks" : item.type === "birthday" ? "bg-accent/10 text-accent" : "bg-amber-500/10 text-amber-500",
+                        item.type === "task" ? "bg-tasks/10 text-tasks" : item.type === "reminder" ? "bg-violet-500/10 text-violet-500" : item.type === "birthday" ? "bg-accent/10 text-accent" : "bg-amber-500/10 text-amber-500",
                       )}>
-                        {item.type === "task" ? <Check className="h-4 w-4" /> : item.type === "birthday" ? <Gift className="h-4 w-4" /> : <PartyPopper className="h-4 w-4" />}
+                        {item.type === "task" ? <Check className="h-4 w-4" /> : item.type === "reminder" ? <BellRing className="h-4 w-4" /> : item.type === "birthday" ? <Gift className="h-4 w-4" /> : <PartyPopper className="h-4 w-4" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-xs font-medium">{item.title}</p>
