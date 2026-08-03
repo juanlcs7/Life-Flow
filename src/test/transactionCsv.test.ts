@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   inferTransactionCategory,
   findPersonalTransactionCategory,
+  filterTransactionPreview,
   normalizeTransactionDescription,
   parseTransactionsCsv,
   parseTransactionsFile,
@@ -101,6 +102,28 @@ describe("summarizeTransactions", () => {
       expenses: 0,
       balance: 0,
     });
+  });
+});
+
+describe("filterTransactionPreview", () => {
+  const items = [
+    { row: { description: "Salário empresa", type: "income" as const }, duplicate: false },
+    { row: { description: "Mercado", type: "expense" as const }, duplicate: false },
+    { row: { description: "Mercado antigo", type: "expense" as const }, duplicate: true },
+  ];
+
+  it("busca descrições sem diferenciar acentos ou maiúsculas", () => {
+    expect(filterTransactionPreview(items, "SALARIO", "all")).toHaveLength(1);
+  });
+
+  it("filtra receitas, despesas novas e repetidos", () => {
+    expect(filterTransactionPreview(items, "", "income")).toHaveLength(1);
+    expect(filterTransactionPreview(items, "", "expense")).toHaveLength(1);
+    expect(filterTransactionPreview(items, "", "duplicate")).toHaveLength(1);
+  });
+
+  it("combina busca e filtro", () => {
+    expect(filterTransactionPreview(items, "mercado", "duplicate")).toEqual([items[2]]);
   });
 });
 

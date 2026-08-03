@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, Download, FileSpreadsheet, Loader2, TrendingDown, TrendingUp, Upload, Wallet } from "lucide-react";
+import { Check, Download, FileSpreadsheet, Loader2, Search, TrendingDown, TrendingUp, Upload, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,11 +9,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Account } from "@/hooks/useAccounts";
 import type { NewTransaction, Transaction } from "@/hooks/useTransactions";
 import {
   downloadTransactionsCsvTemplate,
+  filterTransactionPreview,
   findPersonalTransactionCategory,
   normalizeTransactionDescription,
   parseTransactionsFile,
@@ -21,6 +23,7 @@ import {
   TRANSACTION_CATEGORIES,
   transactionFingerprint,
   type ParsedCsvTransaction,
+  type TransactionPreviewFilter,
 } from "@/lib/transactionCsv";
 
 interface ImportTransactionsModalProps {
@@ -57,6 +60,8 @@ export function ImportTransactionsModal({
   const [importing, setImporting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [excludedRows, setExcludedRows] = useState<Set<number>>(new Set());
+  const [previewSearch, setPreviewSearch] = useState("");
+  const [previewFilter, setPreviewFilter] = useState<TransactionPreviewFilter>("all");
   const [pendingRules, setPendingRules] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -68,6 +73,8 @@ export function ImportTransactionsModal({
     setImporting(false);
     setIsDragging(false);
     setExcludedRows(new Set());
+    setPreviewSearch("");
+    setPreviewFilter("all");
     setDefaultAccount("none");
     setPendingRules({});
   }, [open]);
@@ -107,6 +114,14 @@ export function ImportTransactionsModal({
     () => summarizeTransactions(importableRows.map((item) => item.transaction)),
     [importableRows],
   );
+  const visiblePreparedRows = useMemo(
+    () => filterTransactionPreview(
+      preparedRows.map((item, index) => ({ ...item, index })),
+      previewSearch,
+      previewFilter,
+    ),
+    [preparedRows, previewFilter, previewSearch],
+  );
   const exceedsLimit = maxRows !== undefined && importableRows.length > maxRows;
   const categoryOptions = useMemo(
     () => [...new Set([...TRANSACTION_CATEGORIES, ...rows.map((row) => row.category)])],
@@ -117,6 +132,8 @@ export function ImportTransactionsModal({
     if (!file) return;
     setError("");
     setExcludedRows(new Set());
+    setPreviewSearch("");
+    setPreviewFilter("all");
     const extension = file.name.split(".").pop()?.toLowerCase();
 
     if (!["csv", "ofx"].includes(extension || "")) {
@@ -343,8 +360,30 @@ export function ImportTransactionsModal({
                     {allSelected ? "Desmarcar todas" : "Marcar todas"}
                   </button>
                 </div>
+                <div className="flex flex-col gap-2 border-t border-border/60 bg-muted/15 p-2 sm:flex-row">
+                  <div className="relative min-w-0 flex-1">
+                    <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      value={previewSearch}
+                      onChange={(event) => setPreviewSearch(event.target.value)}
+                      placeholder="Buscar lançamento..."
+                      className="h-8 pl-8 text-xs"
+                    />
+                  </div>
+                  <select
+                    aria-label="Filtrar lançamentos"
+                    value={previewFilter}
+                    onChange={(event) => setPreviewFilter(event.target.value as TransactionPreviewFilter)}
+                    className="h-8 rounded-md border border-input bg-background px-2 text-xs outline-none focus:ring-2 focus:ring-ring sm:w-32"
+                  >
+                    <option value="all">Todos</option>
+                    <option value="income">Receitas</option>
+                    <option value="expense">Despesas</option>
+                    <option value="duplicate">Repetidos</option>
+                  </select>
+                </div>
                 <div className="max-h-72 divide-y overflow-y-auto">
-                  {preparedRows.map(({ row, duplicate }, index) => (
+                  {visiblePreparedRows.map(({ row, duplicate, index }) => (
                     <div
                       key={`${row.date}-${row.description}-${index}`}
                       className={`grid grid-cols-[20px_minmax(0,1fr)] gap-2 px-3 py-2.5 text-xs sm:grid-cols-[20px_minmax(0,1fr)_140px_100px] sm:items-center ${
@@ -383,6 +422,12 @@ export function ImportTransactionsModal({
                       </span>
                     </div>
                   ))}
+                  {visiblePreparedRows.length === 0 && (
+                    <div className="px-4 py-8 text-center">
+                      <p className="text-sm font-medium">Nenhum lançamento encontrado</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Tente outro termo ou filtro.</p>
+                    </div>
+                  )}
                 </div>
               </div>
               {duplicateCount > 0 && (

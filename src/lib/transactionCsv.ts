@@ -36,6 +36,13 @@ interface TransactionSummaryInput {
   type: "income" | "expense";
 }
 
+export type TransactionPreviewFilter = "all" | "income" | "expense" | "duplicate";
+
+interface TransactionPreviewItem {
+  row: Pick<ParsedCsvTransaction, "description" | "type">;
+  duplicate: boolean;
+}
+
 const normalize = (value: string) =>
   value
     .normalize("NFD")
@@ -145,6 +152,25 @@ export function summarizeTransactions(transactions: TransactionSummaryInput[]) {
     .reduce((total, transaction) => total + transaction.amount, 0);
 
   return { income, expenses, balance: income - expenses };
+}
+
+export function filterTransactionPreview<T extends TransactionPreviewItem>(
+  items: T[],
+  search: string,
+  filter: TransactionPreviewFilter,
+) {
+  const normalizedSearch = normalizeTransactionDescription(search);
+
+  return items.filter((item) => {
+    const matchesSearch =
+      !normalizedSearch ||
+      normalizeTransactionDescription(item.row.description).includes(normalizedSearch);
+    const matchesType =
+      filter === "all" ||
+      (filter === "duplicate" ? item.duplicate : !item.duplicate && item.row.type === filter);
+
+    return matchesSearch && matchesType;
+  });
 }
 
 function parseLine(line: string, delimiter: string) {
