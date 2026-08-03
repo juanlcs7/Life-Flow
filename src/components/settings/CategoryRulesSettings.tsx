@@ -18,10 +18,12 @@ import {
 } from "@/hooks/useTransactionCategoryRules";
 import {
   normalizeTransactionDescription,
-  TRANSACTION_CATEGORIES,
 } from "@/lib/transactionCsv";
+import { useTransactionCategories } from "@/hooks/useTransactionCategories";
 
 export function CategoryRulesSettings() {
+  const { categories: transactionCategories } = useTransactionCategories();
+  const categoryNames = transactionCategories.map((item) => item.name);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<string>("Outros");
@@ -107,7 +109,7 @@ export function CategoryRulesSettings() {
                 onChange={(event) => setCategory(event.target.value)}
                 className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
               >
-                {TRANSACTION_CATEGORIES.map((option) => (
+                {categoryNames.map((option) => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
@@ -196,7 +198,7 @@ export function CategoryRulesSettings() {
                     onChange={(event) => updateRule(rule, event.target.value)}
                     className="h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-xs outline-none focus:ring-2 focus:ring-ring sm:w-36"
                   >
-                    {[...new Set([...TRANSACTION_CATEGORIES, rule.category])].map((category) => (
+                    {[...new Set([...categoryNames, rule.category])].map((category) => (
                       <option key={category} value={category}>{category}</option>
                     ))}
                   </select>

@@ -11,8 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-
-const defaultCategories = ["Alimentação", "Moradia", "Transporte", "Lazer", "Saúde", "Educação", "Compras", "Outros"];
+import { useTransactionCategories } from "@/hooks/useTransactionCategories";
 
 export function BudgetsSection({
   selectedMonth,
@@ -21,6 +20,7 @@ export function BudgetsSection({
   selectedMonth: Date;
   transactions: Transaction[];
 }) {
+  const { categories: transactionCategories } = useTransactionCategories();
   const { budgets, isLoading, saveBudget, deleteBudget, isSaving } = useBudgets(selectedMonth);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<MonthlyBudget | null>(null);
@@ -35,7 +35,7 @@ export function BudgetsSection({
     return totals;
   }, [transactions]);
 
-  const categories = [...new Set([...defaultCategories, ...transactions.map((item) => item.category)])].sort();
+  const categories = [...new Set([...transactionCategories.map((item) => item.name), ...transactions.map((item) => item.category)])].sort();
   const totalLimit = budgets.reduce((sum, item) => sum + item.amount, 0);
   const totalSpent = budgets.reduce((sum, item) => sum + (expenses.get(item.category) ?? 0), 0);
 

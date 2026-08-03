@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Account } from "@/hooks/useAccounts";
 import { Wallet, Banknote, PiggyBank, CreditCard } from "lucide-react";
+import { useTransactionCategories } from "@/hooks/useTransactionCategories";
 
 interface TransactionModalProps {
   open: boolean;
@@ -40,17 +41,6 @@ interface TransactionModalProps {
   accounts: Account[];
 }
 
-const categories = [
-  "Moradia",
-  "Alimentação",
-  "Transporte",
-  "Lazer",
-  "Saúde",
-  "Educação",
-  "Receita",
-  "Outros",
-];
-
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   checking: Banknote,
   savings: PiggyBank,
@@ -59,6 +49,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export function TransactionModal({ open, onOpenChange, onSubmit, editData, accounts }: TransactionModalProps) {
+  const { categories } = useTransactionCategories();
   const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
@@ -172,8 +163,8 @@ export function TransactionModal({ open, onOpenChange, onSubmit, editData, accou
               </SelectTrigger>
               <SelectContent className="bg-popover">
                 {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat} className="py-3">
-                    {cat}
+                  <SelectItem key={cat.id || cat.name} value={cat.name} className="py-3">
+                    <span className="flex items-center gap-2"><span>{cat.icon}</span>{cat.name}</span>
                   </SelectItem>
                 ))}
               </SelectContent>

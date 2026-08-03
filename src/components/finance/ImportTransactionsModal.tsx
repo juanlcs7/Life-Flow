@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Download, FileSpreadsheet, Loader2, Search, TrendingDown, TrendingUp, Upload, Wallet } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Account } from "@/hooks/useAccounts";
 import type { NewTransaction, Transaction } from "@/hooks/useTransactions";
+import { useTransactionCategories } from "@/hooks/useTransactionCategories";
 import {
   downloadTransactionsCsvTemplate,
   filterTransactionPreview,
@@ -20,7 +22,6 @@ import {
   normalizeTransactionDescription,
   parseTransactionsFile,
   summarizeTransactions,
-  TRANSACTION_CATEGORIES,
   transactionFingerprint,
   type ParsedCsvTransaction,
   type TransactionPreviewFilter,
@@ -51,6 +52,7 @@ export function ImportTransactionsModal({
   categoryRules,
   onImport,
 }: ImportTransactionsModalProps) {
+  const { categories: transactionCategories } = useTransactionCategories();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [rows, setRows] = useState<ParsedCsvTransaction[]>([]);
   const [fileName, setFileName] = useState("");
@@ -62,6 +64,7 @@ export function ImportTransactionsModal({
   const [excludedRows, setExcludedRows] = useState<Set<number>>(new Set());
   const [previewSearch, setPreviewSearch] = useState("");
   const [previewFilter, setPreviewFilter] = useState<TransactionPreviewFilter>("all");
+  const [bulkCategory, setBulkCategory] = useState("none");
   const [pendingRules, setPendingRules] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -75,6 +78,7 @@ export function ImportTransactionsModal({
     setExcludedRows(new Set());
     setPreviewSearch("");
     setPreviewFilter("all");
+    setBulkCategory("none");
     setDefaultAccount("none");
     setPendingRules({});
   }, [open]);
@@ -122,10 +126,13 @@ export function ImportTransactionsModal({
     ),
     [preparedRows, previewFilter, previewSearch],
   );
+  const visibleEditableRows = visiblePreparedRows.filter(
+    ({ duplicate, index }) => !duplicate && !excludedRows.has(index),
+  );
   const exceedsLimit = maxRows !== undefined && importableRows.length > maxRows;
   const categoryOptions = useMemo(
-    () => [...new Set([...TRANSACTION_CATEGORIES, ...rows.map((row) => row.category)])],
-    [rows],
+    () => [...new Set([...transactionCategories.map((category) => category.name), ...rows.map((row) => row.category)])],
+    [rows, transactionCategories],
   );
 
   const handleFile = async (file?: File) => {
@@ -134,6 +141,7 @@ export function ImportTransactionsModal({
     setExcludedRows(new Set());
     setPreviewSearch("");
     setPreviewFilter("all");
+    setBulkCategory("none");
     const extension = file.name.split(".").pop()?.toLowerCase();
 
     if (!["csv", "ofx"].includes(extension || "")) {
@@ -224,6 +232,28 @@ export function ImportTransactionsModal({
     } else {
       setExcludedRows(new Set());
     }
+  };
+
+  const applyCategoryToVisibleRows = () => {
+    if (bulkCategory === "none" || visibleEditableRows.length === 0) return;
+
+    const targetIndices = new Set(visibleEditableRows.map(({ index }) => index));
+    setRows((current) =>
+      current.map((row, index) =>
+        targetIndices.has(index) ? { ...row, category: bulkCategory } : row,
+      ),
+    );
+    setPendingRules((current) => {
+      const next = { ...current };
+      visibleEditableRows.forEach(({ row }) => {
+        next[normalizeTransactionDescription(row.description)] = bulkCategory;
+      });
+      return next;
+    });
+    toast.success(
+      `Categoria aplicada a ${visibleEditableRows.length} lançamento${visibleEditableRows.length === 1 ? "" : "s"}.`,
+    );
+    setBulkCategory("none");
   };
 
   return (
@@ -381,6 +411,29 @@ export function ImportTransactionsModal({
                     <option value="expense">Despesas</option>
                     <option value="duplicate">Repetidos</option>
                   </select>
+                </div>
+                <div className="flex flex-col gap-2 border-t border-border/60 bg-muted/15 p-2 sm:flex-row">
+                  <select
+                    aria-label="Categoria para aplicar em lote"
+                    value={bulkCategory}
+                    onChange={(event) => setBulkCategory(event.target.value)}
+                    className="h-8 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-xs outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="none">Escolha uma categoria para as linhas visíveis</option>
+                    {categoryOptions.map((category) => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8"
+                    disabled={bulkCategory === "none" || visibleEditableRows.length === 0}
+                    onClick={applyCategoryToVisibleRows}
+                  >
+                    Aplicar a {visibleEditableRows.length}
+                  </Button>
                 </div>
                 <div className="max-h-72 divide-y overflow-y-auto">
                   {visiblePreparedRows.map(({ row, duplicate, index }) => (

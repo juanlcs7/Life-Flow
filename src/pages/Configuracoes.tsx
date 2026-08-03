@@ -19,6 +19,7 @@ import { DataExport } from "@/components/settings/DataExport";
 import { InstallApp } from "@/components/settings/InstallApp";
 import { AccountSecurity } from "@/components/settings/AccountSecurity";
 import { CategoryRulesSettings } from "@/components/settings/CategoryRulesSettings";
+import { TransactionCategoriesSettings } from "@/components/settings/TransactionCategoriesSettings";
 import { useTheme } from "next-themes";
 import { usePlan, PLAN_LIMITS, PREMIUM_PRICE } from "@/hooks/usePlan";
 import { PremiumModal } from "@/components/premium/PremiumModal";
@@ -241,6 +242,8 @@ export default function Configuracoes() {
       <DataExport />
 
       {/* CSV category preferences */}
+      <TransactionCategoriesSettings />
+
       <CategoryRulesSettings />
 
       {/* Logout */}
