@@ -1214,7 +1214,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      undo_transaction_import: {
+        Args: { p_import_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

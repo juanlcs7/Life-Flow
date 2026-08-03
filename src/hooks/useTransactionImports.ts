@@ -87,25 +87,30 @@ export function useTransactionImports() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
   });
 
-  const markUndoneMutation = useMutation({
+  const undoMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error("Usuário não autenticado");
-      const { error } = await supabase
-        .from("transaction_imports")
-        .update({ status: "undone", undone_at: new Date().toISOString() })
-        .eq("id", id)
-        .eq("user_id", user.id);
+      const { data, error } = await supabase.rpc("undo_transaction_import", {
+        p_import_id: id,
+      });
 
       if (error) throw error;
+      return data;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["accounts", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["history_events", user?.id] });
+    },
   });
 
   return {
     imports: query.data ?? [],
     isLoading: query.isLoading,
     createImport: createMutation.mutateAsync,
-    markImportUndone: markUndoneMutation.mutateAsync,
+    undoImport: undoMutation.mutateAsync,
+    undoingImportId: undoMutation.isPending ? undoMutation.variables : null,
     isCreating: createMutation.isPending,
   };
 }

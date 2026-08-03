@@ -79,7 +79,7 @@ export default function Financas() {
   // Hooks
   const { transactions, isLoading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
   const { categoryRules, saveCategoryRules } = useTransactionCategoryRules();
-  const { imports, isLoading: importsLoading, createImport, markImportUndone } = useTransactionImports();
+  const { imports, isLoading: importsLoading, createImport, undoImport, undoingImportId } = useTransactionImports();
   const { accounts, totalBalance, isLoading: accountsLoading, addAccount, updateAccount, deleteAccount, transfer } = useAccounts();
   const { goals, totalSavings, isLoading: goalsLoading, addGoal, updateGoal, deleteGoal, addToGoal, withdrawFromGoal } = useFinancialGoals();
   const { installments, payments, monthlyImpact, isLoading: installmentsLoading, addInstallment, markPaymentPaid, deleteInstallment } = useInstallments();
@@ -241,10 +241,7 @@ export default function Financas() {
           undone = true;
 
           try {
-            for (const id of importedIds) {
-              await deleteTransaction(id);
-            }
-            await markImportUndone(importRecordId);
+            await undoImport(importRecordId);
             toast.success("Importação desfeita.");
           } catch {
             undone = false;
@@ -280,6 +277,16 @@ export default function Financas() {
         onOpenChange={setImportHistoryOpen}
         imports={imports}
         isLoading={importsLoading}
+        undoingImportId={undoingImportId}
+        onUndo={async (item) => {
+          try {
+            const removedCount = await undoImport(item.id);
+            toast.success(`${removedCount} transaç${removedCount === 1 ? "ão removida" : "ões removidas"}. Saldos atualizados.`);
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Não foi possível desfazer a importação.");
+            throw error;
+          }
+        }}
       />
 
       <PageHeader
