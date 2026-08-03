@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Plus, TrendingUp, TrendingDown, Wallet, PiggyBank, Filter, Download, Loader2, CreditCard, BarChart3, Upload } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Wallet, PiggyBank, Filter, Download, Loader2, CreditCard, BarChart3, Upload, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -41,6 +41,8 @@ import { Lock } from "lucide-react";
 import { ImportTransactionsModal } from "@/components/finance/ImportTransactionsModal";
 import type { NewTransaction } from "@/hooks/useTransactions";
 import { useTransactionCategoryRules, type CategoryRuleDraft } from "@/hooks/useTransactionCategoryRules";
+import { useTransactionImports } from "@/hooks/useTransactionImports";
+import { ImportHistoryModal } from "@/components/finance/ImportHistoryModal";
 
 type TransactionFormData = Omit<NewTransaction, "date">;
 
@@ -60,6 +62,7 @@ export default function Financas() {
   const [transferModalOpen, setTransferModalOpen] = useState(false);
   const [addToGoalModalOpen, setAddToGoalModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importHistoryOpen, setImportHistoryOpen] = useState(false);
   
   // Edit states
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -76,6 +79,7 @@ export default function Financas() {
   // Hooks
   const { transactions, isLoading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
   const { categoryRules, saveCategoryRules } = useTransactionCategoryRules();
+  const { imports, isLoading: importsLoading, createImport, markImportUndone } = useTransactionImports();
   const { accounts, totalBalance, isLoading: accountsLoading, addAccount, updateAccount, deleteAccount, transfer } = useAccounts();
   const { goals, totalSavings, isLoading: goalsLoading, addGoal, updateGoal, deleteGoal, addToGoal, withdrawFromGoal } = useFinancialGoals();
   const { installments, payments, monthlyImpact, isLoading: installmentsLoading, addInstallment, markPaymentPaid, deleteInstallment } = useInstallments();
@@ -187,7 +191,11 @@ export default function Financas() {
     setEditingSubscription(null);
   };
 
-  const handleImportTransactions = async (items: NewTransaction[], rules: CategoryRuleDraft[]) => {
+  const handleImportTransactions = async (
+    items: NewTransaction[],
+    rules: CategoryRuleDraft[],
+    file: { name: string; type: "csv" | "ofx" },
+  ) => {
     const importedIds: string[] = [];
 
     try {
@@ -198,6 +206,21 @@ export default function Financas() {
     } catch (error) {
       await Promise.allSettled(importedIds.map((id) => deleteTransaction(id)));
       throw error;
+    }
+
+    let importRecordId = "";
+    try {
+      const importRecord = await createImport({
+        fileName: file.name,
+        fileType: file.type,
+        transactionIds: importedIds,
+        totalIncome: items.filter((item) => item.type === "income").reduce((total, item) => total + item.amount, 0),
+        totalExpense: items.filter((item) => item.type === "expense").reduce((total, item) => total + item.amount, 0),
+      });
+      importRecordId = importRecord.id;
+    } catch (error) {
+      await Promise.allSettled(importedIds.map((id) => deleteTransaction(id)));
+      throw new Error("Não foi possível registrar o histórico. A importação foi cancelada para manter seus dados seguros.");
     }
 
     if (rules.length > 0) {
@@ -221,6 +244,7 @@ export default function Financas() {
             for (const id of importedIds) {
               await deleteTransaction(id);
             }
+            await markImportUndone(importRecordId);
             toast.success("Importação desfeita.");
           } catch {
             undone = false;
@@ -251,6 +275,12 @@ export default function Financas() {
         maxRows={isPremium ? undefined : Math.max(0, limits.transactionsPerMonth - usage.transactionsThisMonth)}
         onImport={handleImportTransactions}
       />
+      <ImportHistoryModal
+        open={importHistoryOpen}
+        onOpenChange={setImportHistoryOpen}
+        imports={imports}
+        isLoading={importsLoading}
+      />
 
       <PageHeader
         title="Finanças"
@@ -260,8 +290,11 @@ export default function Financas() {
         variant="finance"
         actions={
           <div className="flex gap-2">
+            <Button variant="outline" className="h-10 px-3" size="sm" onClick={() => setImportHistoryOpen(true)}>
+              <History className="mr-2 h-4 w-4" />Histórico
+            </Button>
             <Button variant="outline" className="h-10 px-3" size="sm" onClick={() => setImportModalOpen(true)}>
-              <Upload className="mr-2 h-4 w-4" />Importar CSV
+              <Upload className="mr-2 h-4 w-4" />Importar arquivo
             </Button>
             <Button className="gradient-finance text-finance-foreground h-10 px-4 active:scale-95 transition-transform" size="sm" onClick={() => { setEditingTransaction(null); setTransactionModalOpen(true); }}>
               <Plus className="w-4 h-4 mr-2" />Nova Transação

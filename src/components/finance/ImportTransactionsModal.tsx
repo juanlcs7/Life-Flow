@@ -37,6 +37,7 @@ interface ImportTransactionsModalProps {
   onImport: (
     transactions: NewTransaction[],
     rules: Array<{ keyword: string; category: string }>,
+    file: { name: string; type: "csv" | "ofx" },
   ) => Promise<void>;
 }
 
@@ -196,6 +197,10 @@ export function ImportTransactionsModal({
             ),
           )
           .map(([keyword, category]) => ({ keyword, category })),
+        {
+          name: fileName,
+          type: fileName.toLowerCase().endsWith(".ofx") ? "ofx" : "csv",
+        },
       );
       onOpenChange(false);
     } catch (importError) {

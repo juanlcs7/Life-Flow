@@ -94,6 +94,81 @@ export type Database = {
         }
         Relationships: []
       }
+      transaction_imports: {
+        Row: {
+          file_name: string
+          file_type: string
+          id: string
+          imported_at: string
+          status: string
+          total_expense: number
+          total_income: number
+          transaction_count: number
+          undone_at: string | null
+          user_id: string
+        }
+        Insert: {
+          file_name: string
+          file_type: string
+          id?: string
+          imported_at?: string
+          status?: string
+          total_expense?: number
+          total_income?: number
+          transaction_count: number
+          undone_at?: string | null
+          user_id: string
+        }
+        Update: {
+          file_name?: string
+          file_type?: string
+          id?: string
+          imported_at?: string
+          status?: string
+          total_expense?: number
+          total_income?: number
+          transaction_count?: number
+          undone_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transaction_import_items: {
+        Row: {
+          created_at: string
+          id: string
+          import_id: string
+          transaction_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          import_id: string
+          transaction_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          import_id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_import_items_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_imports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_import_items_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: true
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monthly_budgets: {
         Row: {
           amount: number
