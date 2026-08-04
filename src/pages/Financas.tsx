@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
-import { Plus, TrendingUp, TrendingDown, Wallet, PiggyBank, Filter, Download, Loader2, CreditCard, BarChart3, Upload, History } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Plus, TrendingUp, TrendingDown, Wallet, PiggyBank, Loader2, CreditCard, BarChart3, Upload, History, LayoutDashboard, Landmark, ChartSpline, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,6 +50,7 @@ import { MonthForecast } from "@/components/finance/MonthForecast";
 type TransactionFormData = Omit<NewTransaction, "date">;
 
 export default function Financas() {
+  const reduceMotion = useReducedMotion();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const { isPremium, canAddTransaction, canUseReports, usage, limits } = usePlan();
@@ -321,12 +322,18 @@ export default function Financas() {
       )}
 
       {/* Month Selector */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/60 bg-card/40 p-2 sm:px-3">
+      <motion.div
+        initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative flex flex-wrap items-center justify-between gap-3 overflow-hidden rounded-[1.5rem] border border-finance/15 bg-gradient-to-r from-finance/[0.08] via-card to-primary/[0.045] p-3 shadow-sm sm:px-4"
+      >
+        <div className="pointer-events-none absolute -right-10 -top-16 h-36 w-36 rounded-full bg-finance/10 blur-3xl" />
         <MonthSelector selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
-        <p className="px-1 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+        <p className="relative flex items-center gap-1.5 px-1 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+          <Sparkles className="h-3.5 w-3.5 shrink-0 text-finance" />
           Receitas e despesas são do mês selecionado. Saldo e poupança são acumulados.
         </p>
-      </div>
+      </motion.div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
@@ -337,10 +344,11 @@ export default function Financas() {
           { label: "Poupança", value: totalSavings, icon: PiggyBank, color: "bg-warning/10", textColor: "text-warning", border: "before:bg-warning", glow: "from-warning/[0.07]", monthly: false },
           { label: "Patrimônio", value: patrimony, icon: BarChart3, color: "bg-primary/10", textColor: "text-primary", border: "before:bg-primary", glow: "from-primary/[0.08]", monthly: false },
         ].map((stat, idx) => (
-          <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + idx * 0.05 }}>
-            <Card className={`relative h-full min-h-[112px] overflow-hidden border-border/70 bg-gradient-to-br ${stat.glow} via-card to-card p-4 shadow-sm transition-all before:absolute before:inset-x-0 before:top-0 before:h-0.5 ${stat.border} hover:-translate-y-0.5 hover:border-border hover:shadow-md sm:p-5`}>
+          <motion.div key={stat.label} initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + idx * 0.05 }}>
+            <Card className={`group relative h-full min-h-[122px] overflow-hidden rounded-[1.35rem] border-border/60 bg-gradient-to-br ${stat.glow} via-card to-card p-4 shadow-sm transition-all before:absolute before:inset-x-0 before:top-0 before:h-0.5 ${stat.border} hover:-translate-y-1 hover:border-finance/20 hover:shadow-xl motion-reduce:hover:translate-y-0 sm:p-5`}>
+              <div className={`pointer-events-none absolute -right-5 -top-7 h-20 w-20 rounded-full ${stat.color} opacity-70 blur-2xl transition-transform duration-500 group-hover:scale-150`} />
               <div className="flex h-full items-center gap-3">
-                <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${stat.color}`}>
+                <div className={`relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl ${stat.color} shadow-sm ring-1 ring-white/10`}>
                   <stat.icon className={`h-5 w-5 ${stat.textColor}`} />
                 </div>
                 <div className="min-w-0">
@@ -362,10 +370,10 @@ export default function Financas() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid h-11 w-full grid-cols-3 rounded-xl border border-border/60 bg-card/60 p-1 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="overview" className="rounded-lg px-5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Visão Geral</TabsTrigger>
-          <TabsTrigger value="management" className="rounded-lg px-5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Gestão</TabsTrigger>
-          <TabsTrigger value="reports" className="rounded-lg px-5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Relatórios</TabsTrigger>
+        <TabsList className="grid h-[52px] w-full grid-cols-3 rounded-2xl border border-finance/15 bg-gradient-to-r from-card/90 via-card to-finance/[0.06] p-1.5 shadow-sm lg:w-auto lg:inline-grid">
+          <TabsTrigger value="overview" className="gap-2 rounded-xl px-4 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><LayoutDashboard className="h-4 w-4" /><span className="hidden sm:inline">Visão Geral</span><span className="sm:hidden">Visão</span></TabsTrigger>
+          <TabsTrigger value="management" className="gap-2 rounded-xl px-4 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><Landmark className="h-4 w-4" />Gestão</TabsTrigger>
+          <TabsTrigger value="reports" className="gap-2 rounded-xl px-4 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><ChartSpline className="h-4 w-4" /><span className="hidden sm:inline">Relatórios</span><span className="sm:hidden">Dados</span></TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
@@ -379,7 +387,8 @@ export default function Financas() {
             subscriptions={subscriptions}
           />
           {/* Chart */}
-          <Card className="overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-primary/[0.025] p-4 shadow-sm sm:p-5">
+          <Card className="relative overflow-hidden rounded-[1.75rem] border-finance/15 bg-gradient-to-br from-card via-card to-finance/[0.055] p-4 shadow-[0_18px_50px_-36px_rgba(8,145,178,.55)] sm:p-6">
+            <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-finance/10 blur-3xl" />
             <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Fluxo financeiro</p>
@@ -421,7 +430,7 @@ export default function Financas() {
 
           {/* Filters & Transactions */}
           <TransactionFilters accounts={accounts} onFilter={setFilters} categories={categories} />
-          <Card className="overflow-hidden border-border/70 bg-card/80 p-4 shadow-sm sm:p-5">
+          <Card className="overflow-hidden rounded-[1.75rem] border-finance/10 bg-gradient-to-br from-card via-card to-primary/[0.035] p-4 shadow-sm sm:p-5">
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <h3 className="font-display text-base font-semibold">Transações recentes</h3>
@@ -434,9 +443,9 @@ export default function Financas() {
             ) : (
               <div className="max-h-96 space-y-1.5 overflow-y-auto pr-1">
                 {filteredTransactions.slice(0, 20).map(t => (
-                  <div key={t.id} className="group flex items-center justify-between rounded-xl border border-transparent bg-muted/25 p-3 transition-all hover:border-border/70 hover:bg-muted/45">
+                  <div key={t.id} className="group flex items-center justify-between rounded-2xl border border-border/40 bg-background/55 p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-finance/20 hover:bg-finance/[0.035] hover:shadow-md motion-reduce:hover:translate-y-0">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${t.type === "income" ? "bg-success/10" : "bg-destructive/10"}`}>
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-2xl shadow-sm ${t.type === "income" ? "bg-success/10" : "bg-destructive/10"}`}>
                         {t.type === "income" ? <TrendingUp className="w-4 h-4 text-success" /> : <CreditCard className="w-4 h-4 text-destructive" />}
                       </div>
                       <div className="min-w-0">

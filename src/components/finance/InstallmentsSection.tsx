@@ -42,7 +42,8 @@ export function InstallmentsSection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <Card className="h-full overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-warning/[0.025] p-4 shadow-sm sm:p-5">
+      <Card className="group relative h-full overflow-hidden rounded-[1.6rem] border-warning/15 bg-gradient-to-br from-card via-card to-warning/[0.06] p-4 shadow-sm transition-all hover:shadow-xl sm:p-5">
+        <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-warning/10 blur-3xl transition-transform duration-700 group-hover:scale-125" />
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display font-semibold text-sm sm:text-base flex items-center gap-2">
             <CreditCard className="w-4 h-4 text-primary" />
@@ -69,7 +70,7 @@ export function InstallmentsSection({
         ) : (
           <>
             {/* Monthly Impact */}
-            <div className="mb-4 rounded-xl border border-warning/15 bg-warning/[0.08] p-3.5">
+            <div className="mb-4 rounded-2xl border border-warning/15 bg-gradient-to-r from-warning/[0.12] to-transparent p-3.5 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-sm">Impacto mensal</span>
                 <span className="font-bold text-warning">
@@ -90,7 +91,7 @@ export function InstallmentsSection({
                     return (
                       <div
                         key={payment.id}
-                        className={`flex items-center justify-between rounded-xl border p-3 ${payment.paid ? "border-success/15 bg-success/[0.07]" : "border-border/50 bg-muted/30"}`}
+                        className={`flex items-center justify-between rounded-2xl border p-3 shadow-sm transition-all hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 ${payment.paid ? "border-success/15 bg-success/[0.07]" : "border-border/50 bg-background/60"}`}
                       >
                         <div className="flex items-center gap-2">
                           <Checkbox
@@ -124,7 +125,7 @@ export function InstallmentsSection({
                 return (
                   <div
                     key={inst.id}
-                    className="group flex items-center justify-between rounded-lg px-2 py-2.5 transition-colors hover:bg-muted/40"
+                    className="group/item flex items-center justify-between rounded-xl border border-transparent px-3 py-2.5 transition-all hover:border-warning/15 hover:bg-warning/[0.045]"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">

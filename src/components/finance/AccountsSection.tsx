@@ -36,7 +36,8 @@ export function AccountsSection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <Card className="h-full overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-primary/[0.035] p-4 shadow-sm sm:p-5">
+      <Card className="group relative h-full overflow-hidden rounded-[1.6rem] border-finance/15 bg-gradient-to-br from-card via-card to-finance/[0.055] p-4 shadow-sm transition-all hover:shadow-xl sm:p-5">
+        <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-finance/10 blur-3xl transition-transform duration-700 group-hover:scale-125" />
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display font-semibold text-sm sm:text-base flex items-center gap-2">
             <Wallet className="w-4 h-4 text-primary" />
@@ -75,7 +76,7 @@ export function AccountsSection({
                 return (
                   <div
                     key={account.id}
-                    className="group flex items-center justify-between rounded-xl border border-transparent bg-muted/35 p-3 transition-all hover:border-primary/15 hover:bg-primary/[0.045]"
+                    className="group/item flex items-center justify-between rounded-2xl border border-border/45 bg-background/60 p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-finance/20 hover:bg-finance/[0.04] hover:shadow-md motion-reduce:hover:translate-y-0"
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-xl ${account.color} flex items-center justify-center shadow-sm`}>
@@ -105,7 +106,7 @@ export function AccountsSection({
               })}
             </div>
             
-            <div className="mt-4 rounded-xl border border-success/15 bg-success/[0.055] px-3.5 py-3">
+            <div className="mt-4 rounded-2xl border border-success/15 bg-gradient-to-r from-success/[0.1] to-finance/[0.04] px-4 py-3.5 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Saldo Total</span>
                 <span className={`font-bold ${totalBalance >= 0 ? "text-success" : "text-destructive"}`}>

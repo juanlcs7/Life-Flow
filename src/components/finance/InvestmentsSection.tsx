@@ -70,7 +70,8 @@ export function InvestmentsSection({ accounts }: Props) {
   };
 
   return (
-    <Card className="h-full overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-success/[0.025] p-4 shadow-sm sm:p-5">
+    <Card className="group relative h-full overflow-hidden rounded-[1.6rem] border-success/15 bg-gradient-to-br from-card via-card to-success/[0.06] p-4 shadow-sm transition-all hover:shadow-xl sm:p-5">
+      <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-success/10 blur-3xl transition-transform duration-700 group-hover:scale-125" />
       <PremiumModal open={premiumOpen} onOpenChange={setPremiumOpen}
         reason={`Plano gratuito permite ${limits.investments} investimentos. Você já tem ${usage.investmentsCount}.`} />
       <InvestmentModal open={modalOpen} onOpenChange={(o) => { setModalOpen(o); if (!o) setEditing(null); }} onSubmit={handleSubmit} editData={editing} accounts={accounts} />
@@ -105,9 +106,9 @@ export function InvestmentsSection({ accounts }: Props) {
             const pct = inv.initial_value > 0 ? (profit / Number(inv.initial_value)) * 100 : 0;
             return (
               <motion.div key={inv.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-                className="rounded-xl border border-border/60 bg-muted/20 p-3.5 transition-all hover:border-success/20 hover:bg-success/[0.035]">
+                className="rounded-2xl border border-border/45 bg-background/60 p-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-success/20 hover:bg-success/[0.04] hover:shadow-md motion-reduce:hover:translate-y-0">
                 <div className="flex items-start gap-3">
-                  <div className={`w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 ${meta.color}`}>
+                  <div className={`w-10 h-10 rounded-2xl bg-muted flex items-center justify-center flex-shrink-0 shadow-sm ${meta.color}`}>
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className="min-w-0 flex-1">

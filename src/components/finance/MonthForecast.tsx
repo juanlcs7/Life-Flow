@@ -57,7 +57,8 @@ export function MonthForecast({ selectedMonth, transactions, installments, payme
   const monthProgress = Math.round((forecast.elapsedDays / forecast.totalDays) * 100);
 
   return (
-    <Card className="overflow-hidden border-border/70 bg-card/80 p-4 shadow-sm sm:p-5">
+    <Card className="relative overflow-hidden rounded-[1.75rem] border-info/15 bg-gradient-to-br from-card via-card to-info/[0.055] p-4 shadow-sm sm:p-5">
+      <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-info/10 blur-3xl" />
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Previsão do mês</p>
@@ -78,31 +79,31 @@ export function MonthForecast({ selectedMonth, transactions, installments, payme
       ) : (
         <>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5">
+            <div className="rounded-2xl border border-border/50 bg-background/55 p-3.5 shadow-sm">
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><TrendingDown className="h-3.5 w-3.5" />Despesas projetadas</p>
               <p className="mt-2 text-base font-bold text-destructive">{currency(forecast.projectedExpenses)}</p>
               <p className="mt-0.5 text-[10px] text-muted-foreground">Até agora: {currency(forecast.expensesSoFar)}</p>
             </div>
-            <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5">
+            <div className="rounded-2xl border border-border/50 bg-background/55 p-3.5 shadow-sm">
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><Wallet className="h-3.5 w-3.5" />Saldo projetado</p>
               <p className={cn("mt-2 text-base font-bold", forecast.projectedBalance >= 0 ? "text-success" : "text-destructive")}>
                 {currency(forecast.projectedBalance)}
               </p>
               <p className="mt-0.5 text-[10px] text-muted-foreground">Saldo atual: {currency(forecast.currentBalance)}</p>
             </div>
-            <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5">
+            <div className="rounded-2xl border border-border/50 bg-background/55 p-3.5 shadow-sm">
               <p className="text-xs text-muted-foreground">Média diária variável</p>
               <p className="mt-2 text-base font-bold">{currency(forecast.averageDailyExpense)}</p>
               <p className="mt-0.5 text-[10px] text-muted-foreground">Em {forecast.elapsedDays} dias do mês</p>
             </div>
-            <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5">
+            <div className="rounded-2xl border border-border/50 bg-background/55 p-3.5 shadow-sm">
               <p className="text-xs text-muted-foreground">Ainda pode sair</p>
               <p className="mt-2 text-base font-bold">{currency(forecast.expectedAdditionalExpenses)}</p>
               <p className="mt-0.5 text-[10px] text-muted-foreground">Mantendo o ritmo atual</p>
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-border/60 bg-muted/20 px-3.5 py-3">
+          <div className="mt-4 rounded-2xl border border-info/15 bg-gradient-to-r from-info/[0.08] to-transparent px-3.5 py-3 shadow-sm">
             <div className="mb-3 grid gap-2 border-b border-border/60 pb-3 text-[11px] sm:grid-cols-2">
               <p><span className="text-muted-foreground">Fixos já pagos: </span><strong>{currency(forecast.fixedExpensesSoFar)}</strong></p>
               <p><span className="text-muted-foreground">Fixos ainda previstos: </span><strong>{currency(forecast.upcomingFixedExpenses)}</strong></p>

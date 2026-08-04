@@ -61,7 +61,7 @@ export function TransactionFilters({ accounts, onFilter, categories }: Transacti
   const hasActiveFilters = Object.values(filters).some(v => v !== "");
 
   return (
-    <Card className="border-border/70 bg-card/75 p-2.5 shadow-sm sm:p-3">
+    <Card className="rounded-[1.4rem] border-finance/10 bg-gradient-to-r from-card/90 via-card to-finance/[0.045] p-2.5 shadow-sm sm:p-3">
       <div className="space-y-3">
         {/* Search bar - always visible */}
         <div className="flex gap-2">

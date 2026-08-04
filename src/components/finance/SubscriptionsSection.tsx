@@ -41,7 +41,8 @@ export function SubscriptionsSection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <Card className="h-full overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-info/[0.025] p-4 shadow-sm sm:p-5">
+      <Card className="group relative h-full overflow-hidden rounded-[1.6rem] border-info/15 bg-gradient-to-br from-card via-card to-info/[0.06] p-4 shadow-sm transition-all hover:shadow-xl sm:p-5">
+        <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-info/10 blur-3xl transition-transform duration-700 group-hover:scale-125" />
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display font-semibold text-sm sm:text-base flex items-center gap-2">
             <RefreshCw className="w-4 h-4 text-primary" />
@@ -68,7 +69,7 @@ export function SubscriptionsSection({
         ) : (
           <>
             {/* Monthly cost */}
-            <div className="mb-4 rounded-xl border border-info/15 bg-info/[0.08] p-3.5">
+            <div className="mb-4 rounded-2xl border border-info/15 bg-gradient-to-r from-info/[0.12] to-transparent p-3.5 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-sm">Custo mensal estimado</span>
                 <span className="font-bold text-info">
@@ -102,7 +103,7 @@ export function SubscriptionsSection({
                 return (
                   <div
                     key={sub.id}
-                    className={`group flex items-center justify-between rounded-xl border border-transparent p-3 ${sub.active ? "bg-muted/35" : "bg-muted/20 opacity-60"} transition-all hover:border-info/15 hover:bg-info/[0.04]`}
+                    className={`group/item flex items-center justify-between rounded-2xl border p-3 shadow-sm ${sub.active ? "border-border/45 bg-background/60" : "border-transparent bg-muted/20 opacity-60"} transition-all hover:-translate-y-0.5 hover:border-info/20 hover:bg-info/[0.04] hover:shadow-md motion-reduce:hover:translate-y-0`}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">

@@ -12,18 +12,18 @@ export function MonthSelector({ selectedMonth, onMonthChange }: MonthSelectorPro
   const isCurrentMonth = format(selectedMonth, "yyyy-MM") === format(new Date(), "yyyy-MM");
 
   return (
-    <div className="flex items-center gap-1 rounded-xl border border-border/70 bg-card/80 p-1 shadow-sm backdrop-blur">
+    <div className="relative flex items-center gap-1 rounded-2xl border border-finance/15 bg-background/75 p-1.5 shadow-sm backdrop-blur">
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
+        className="h-9 w-9 rounded-xl hover:bg-finance/10 hover:text-finance"
         onClick={() => onMonthChange(subMonths(selectedMonth, 1))}
       >
         <ChevronLeft className="w-4 h-4" />
       </Button>
       
       <div className="flex min-w-[148px] items-center justify-center gap-2 px-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-finance/10 shadow-sm">
           <Calendar className="w-3.5 h-3.5 text-primary" />
         </span>
         <span className="text-sm font-semibold capitalize tracking-tight">
@@ -34,7 +34,7 @@ export function MonthSelector({ selectedMonth, onMonthChange }: MonthSelectorPro
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
+        className="h-9 w-9 rounded-xl hover:bg-finance/10 hover:text-finance"
         onClick={() => onMonthChange(addMonths(selectedMonth, 1))}
         disabled={isCurrentMonth}
       >

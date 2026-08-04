@@ -100,7 +100,7 @@ export function AdvancedReports({ transactions, isLoading }: AdvancedReportsProp
 
   if (transactions.length === 0) {
     return (
-      <Card className="p-8 text-center text-muted-foreground">
+      <Card className="rounded-[1.75rem] border-finance/15 bg-gradient-to-br from-card to-finance/[0.05] p-8 text-center text-muted-foreground shadow-sm">
         <PieChartIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
         <p>Adicione transações para ver os relatórios</p>
       </Card>
@@ -114,7 +114,7 @@ export function AdvancedReports({ transactions, isLoading }: AdvancedReportsProp
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Card className="p-4 sm:p-5 bg-gradient-to-r from-primary/5 to-primary/10">
+        <Card className="rounded-[1.75rem] border-primary/15 bg-gradient-to-r from-primary/[0.06] to-primary/[0.12] p-4 shadow-sm sm:p-5">
           <h3 className="font-display font-semibold text-sm sm:text-base mb-3 flex items-center gap-2">
             <Lightbulb className="w-4 h-4 text-warning" />
             Sugestões de Economia
@@ -137,7 +137,7 @@ export function AdvancedReports({ transactions, isLoading }: AdvancedReportsProp
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="p-4 sm:p-5">
+          <Card className="rounded-[1.75rem] border-finance/10 bg-gradient-to-br from-card to-finance/[0.035] p-4 shadow-sm sm:p-5">
             <h3 className="font-display font-semibold text-sm sm:text-base mb-4">Gastos por Categoria</h3>
             <div className="h-48 sm:h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -172,7 +172,7 @@ export function AdvancedReports({ transactions, isLoading }: AdvancedReportsProp
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
         >
-          <Card className="p-4 sm:p-5">
+          <Card className="rounded-[1.75rem] border-finance/10 bg-gradient-to-br from-card to-finance/[0.035] p-4 shadow-sm sm:p-5">
             <h3 className="font-display font-semibold text-sm sm:text-base mb-4">Evolução Mensal</h3>
             <div className="h-48 sm:h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -205,7 +205,7 @@ export function AdvancedReports({ transactions, isLoading }: AdvancedReportsProp
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <Card className="p-4 sm:p-5">
+        <Card className="rounded-[1.75rem] border-finance/10 bg-gradient-to-br from-card to-finance/[0.035] p-4 shadow-sm sm:p-5">
           <h3 className="font-display font-semibold text-sm sm:text-base mb-4">Onde Você Mais Gasta</h3>
           <div className="h-48 sm:h-64">
             <ResponsiveContainer width="100%" height="100%">

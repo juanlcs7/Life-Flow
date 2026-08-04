@@ -114,7 +114,8 @@ export function BudgetsSection({
 
   return (
     <>
-      <Card className="overflow-hidden border-border/70 bg-card/80 p-4 shadow-sm sm:p-5">
+      <Card className="relative overflow-hidden rounded-[1.75rem] border-warning/15 bg-gradient-to-br from-card via-card to-warning/[0.055] p-4 shadow-sm sm:p-5">
+        <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-warning/10 blur-3xl" />
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Planejamento mensal</p>
@@ -129,7 +130,7 @@ export function BudgetsSection({
         {isLoading ? (
           <div className="mt-5 h-24 animate-pulse rounded-xl bg-muted/40" />
         ) : budgets.length === 0 ? (
-          <button type="button" onClick={beginCreate} className="mt-5 flex w-full flex-col items-center rounded-xl border border-dashed border-border p-7 text-center hover:bg-muted/20">
+          <button type="button" onClick={beginCreate} className="mt-5 flex w-full flex-col items-center rounded-2xl border border-dashed border-warning/25 bg-warning/[0.035] p-7 text-center transition-all hover:border-warning/40 hover:bg-warning/[0.07]">
             <WalletCards className="h-7 w-7 text-muted-foreground" />
             <span className="mt-2 text-sm font-medium">Nenhum limite definido</span>
             <span className="mt-1 text-xs text-muted-foreground">Crie um orçamento para acompanhar onde pode gastar.</span>
@@ -161,7 +162,7 @@ export function BudgetsSection({
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {budgetProgress.map(({ budget, spent, percent, exceeded, near }) => {
                 return (
-                  <div key={budget.id} className="rounded-xl border border-border/60 bg-muted/20 p-3.5">
+                  <div key={budget.id} className="rounded-2xl border border-border/50 bg-background/55 p-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-warning/20 hover:shadow-md motion-reduce:hover:translate-y-0">
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <p className="text-sm font-semibold">{budget.category}</p>

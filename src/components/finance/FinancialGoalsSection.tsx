@@ -148,7 +148,8 @@ export function FinancialGoalsSection({
         </DialogContent>
       </Dialog>
 
-      <Card className="h-full overflow-hidden border-border/70 bg-gradient-to-br from-card via-card to-primary/[0.035] p-4 shadow-sm sm:p-5">
+      <Card className="group relative h-full overflow-hidden rounded-[1.6rem] border-primary/15 bg-gradient-to-br from-card via-card to-primary/[0.06] p-4 shadow-sm transition-all hover:shadow-xl sm:p-5">
+        <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-3xl transition-transform duration-700 group-hover:scale-125" />
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display font-semibold text-sm sm:text-base flex items-center gap-2">
             <Target className="w-4 h-4 text-primary" />
@@ -183,7 +184,7 @@ export function FinancialGoalsSection({
               return (
                 <div
                   key={goal.id}
-                  className="group rounded-xl border border-transparent bg-muted/35 p-3.5 transition-all hover:border-primary/15 hover:bg-primary/[0.045]"
+                  className="group/item rounded-2xl border border-border/45 bg-background/60 p-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:bg-primary/[0.045] hover:shadow-md motion-reduce:hover:translate-y-0"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">

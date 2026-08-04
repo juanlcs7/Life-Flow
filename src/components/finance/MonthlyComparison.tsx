@@ -52,7 +52,8 @@ export function MonthlyComparison({ transactions, selectedMonth }: MonthlyCompar
   ];
 
   return (
-    <Card className="overflow-hidden border-border/70 bg-card/80 p-4 shadow-sm sm:p-5">
+    <Card className="relative overflow-hidden rounded-[1.75rem] border-primary/15 bg-gradient-to-br from-card via-card to-primary/[0.055] p-4 shadow-sm sm:p-5">
+      <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Comparação mensal</p>
@@ -80,7 +81,7 @@ export function MonthlyComparison({ transactions, selectedMonth }: MonthlyCompar
               const increased = metric.change !== null && metric.change > 0;
               const ChangeIcon = unchanged ? Minus : increased ? ArrowUp : ArrowDown;
               return (
-                <div key={metric.label} className="rounded-xl border border-border/60 bg-muted/20 p-3.5">
+                <div key={metric.label} className="rounded-2xl border border-border/50 bg-background/55 p-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md motion-reduce:hover:translate-y-0">
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-xs font-medium text-muted-foreground">{metric.label}</p>
                     <span className={cn(
@@ -125,4 +126,3 @@ export function MonthlyComparison({ transactions, selectedMonth }: MonthlyCompar
     </Card>
   );
 }
-
