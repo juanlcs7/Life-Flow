@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   Apple,
@@ -20,6 +20,7 @@ import {
   HeartPulse,
   Loader2,
   Moon,
+  Sparkles,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -61,6 +62,7 @@ const getDateLabel = (date: Date) => {
 };
 
 export function DailyHub() {
+  const reduceMotion = useReducedMotion();
   const { tasks, isLoading: tasksLoading, toggleTask } = useTasks();
   const { habits, isLoading: habitsLoading, incrementHabit } = useHabits();
   const { installments, payments, isLoading: installmentsLoading } = useInstallments();
@@ -198,28 +200,34 @@ export function DailyHub() {
 
   if (isLoading) {
     return (
-      <div className="h-[420px] animate-pulse rounded-lg border bg-card sm:h-[360px]" />
+      <div className="h-[420px] animate-pulse rounded-[1.75rem] border border-primary/10 bg-gradient-to-br from-card via-card to-primary/[0.04] shadow-sm sm:h-[360px]" />
     );
   }
 
   return (
     <motion.section
-      initial={{ opacity: 0 }}
+      initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, delay: 0.05 }}
-      className="overflow-hidden rounded-lg border bg-card shadow-sm"
+      transition={{ duration: 0.45, delay: 0.08 }}
+      className="relative overflow-hidden rounded-[1.75rem] border border-primary/15 bg-gradient-to-br from-card via-card to-primary/[0.035] shadow-[0_22px_60px_-38px_rgba(8,145,178,.55)]"
     >
-      <div className="border-b bg-muted/20 px-5 py-4">
+      <div className="pointer-events-none absolute -right-20 -top-28 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute left-1/4 top-20 h-48 w-48 rounded-full bg-violet-400/[0.055] blur-3xl" />
+      <div className="relative border-b border-primary/10 bg-gradient-to-r from-primary/[0.075] via-transparent to-accent/[0.06] px-5 py-5 sm:px-6 sm:py-6">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <motion.div
+              animate={reduceMotion ? undefined : { y: [0, -3, 0] }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg shadow-primary/20"
+            >
               <DayFlowIcon className="h-5 w-5" />
-            </div>
+            </motion.div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-display text-lg font-bold tracking-tight">Resumo de hoje</h2>
-                <span className="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                  Hoje
+                <h2 className="font-display text-xl font-bold tracking-tight">Resumo de hoje</h2>
+                <span className="inline-flex items-center gap-1 rounded-full border border-primary/15 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">
+                  <Sparkles className="h-3 w-3" />Hoje
                 </span>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -230,29 +238,29 @@ export function DailyHub() {
             </div>
           </div>
 
-          <div className="flex min-w-48 items-center gap-3 rounded-md border bg-background px-4 py-3">
+          <div className="flex min-w-56 items-center gap-3 rounded-2xl border border-white/60 bg-background/70 p-3 pr-4 shadow-sm backdrop-blur dark:border-white/5">
+            <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-full" style={{ background: `conic-gradient(hsl(var(--primary)) ${progress * 3.6}deg, hsl(var(--muted)) 0deg)` }}>
+              <div className="grid h-10 w-10 place-items-center rounded-full bg-card text-xs font-bold text-primary">{progress}%</div>
+            </div>
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">Feito hoje</p>
-              <p className="mt-0.5 text-lg font-semibold">
-                {progress}%
-                <span className="ml-2 text-xs font-normal text-muted-foreground">
-                {progress === 100
-                  ? "Tudo pronto"
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Seu ritmo</p>
+              <p className="mt-1 text-xs font-medium text-foreground">
+                  {progress === 100
+                    ? "Tudo pronto"
                   : progress >= 50
                     ? "Mais da metade feita"
                     : progress > 0
                       ? "Você já começou"
-                      : "Nenhum item concluído"}
-                </span>
+                      : "Comece pelo primeiro passo"}
               </p>
             </div>
           </div>
         </div>
-        <Progress value={progress} className="mt-4 h-1.5 bg-primary/10" />
+        <Progress value={progress} className="mt-5 h-2 bg-primary/10 [&>div]:bg-gradient-to-r [&>div]:from-primary [&>div]:via-cyan-400 [&>div]:to-emerald-400" />
       </div>
 
-      <div className="grid lg:grid-cols-[1.25fr_.75fr]">
-        <div className="space-y-5 p-5 sm:p-6 lg:border-r">
+      <div className="relative grid gap-4 p-4 sm:p-5 lg:grid-cols-[1.25fr_.75fr]">
+        <div className="space-y-6 rounded-2xl border border-border/60 bg-background/55 p-4 shadow-sm backdrop-blur sm:p-5">
           <div>
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
@@ -269,8 +277,8 @@ export function DailyHub() {
             </div>
 
             {pendingTasks.length === 0 ? (
-              <div className="flex items-center gap-3 rounded-xl border border-dashed bg-muted/20 p-4">
-                <CheckCircle2 className="h-5 w-5 text-success" />
+              <div className="flex items-center gap-3 rounded-2xl border border-dashed border-success/25 bg-gradient-to-r from-success/[0.07] to-transparent p-4">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-success/10"><CheckCircle2 className="h-5 w-5 text-success" /></span>
                 <div>
                   <p className="text-sm font-medium">Nenhuma tarefa pendente</p>
                   <p className="text-xs text-muted-foreground">Sua lista de hoje está livre.</p>
@@ -286,14 +294,14 @@ export function DailyHub() {
                   return (
                     <div
                       key={task.id}
-                      className="group flex items-center gap-3 rounded-md border bg-background p-3 transition-colors hover:bg-muted/20"
+                      className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/80 p-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md motion-reduce:hover:translate-y-0"
                     >
                       <button
                         type="button"
                         onClick={() => handleTaskToggle(task.id)}
                         disabled={isPending}
                         aria-label={`Concluir ${task.title}`}
-                        className="grid h-8 w-8 shrink-0 place-items-center rounded-md border text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
+                        className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border bg-background text-muted-foreground transition-all hover:border-primary hover:bg-primary/10 hover:text-primary disabled:opacity-60"
                       >
                         {isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -349,7 +357,7 @@ export function DailyHub() {
             </div>
 
             {habits.length === 0 ? (
-              <div className="flex items-center gap-3 rounded-xl border border-dashed bg-muted/20 p-4">
+              <div className="flex items-center gap-3 rounded-2xl border border-dashed border-health/25 bg-gradient-to-r from-health/[0.07] to-transparent p-4">
                 <HeartPulse className="h-5 w-5 text-health" />
                 <div>
                   <p className="text-sm font-medium">Crie seu primeiro hábito</p>
@@ -377,11 +385,11 @@ export function DailyHub() {
                       type="button"
                       onClick={() => handleHabitIncrement(habit)}
                       disabled={isPending}
-                      className="group rounded-md border bg-background p-3 text-left transition-colors hover:border-health/35 disabled:opacity-60"
+                      className="group rounded-xl border border-border/60 bg-card/80 p-3 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-health/35 hover:shadow-md disabled:opacity-60 motion-reduce:hover:translate-y-0"
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className="grid h-9 w-9 shrink-0 place-items-center rounded-md"
+                          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
                           style={{ backgroundColor: `${habit.color}18`, color: habit.color }}
                         >
                           {isPending ? (
@@ -414,7 +422,7 @@ export function DailyHub() {
           </div>
         </div>
 
-        <div className="space-y-5 bg-muted/10 p-5 sm:p-6">
+        <div className="space-y-5 rounded-2xl border border-border/60 bg-gradient-to-br from-background/70 to-primary/[0.035] p-4 shadow-sm backdrop-blur sm:p-5">
           <div>
             <div className="mb-3 flex items-center justify-between">
               <div>
@@ -433,9 +441,9 @@ export function DailyHub() {
                 <Link
                   key={item.id}
                   to="/financas"
-                  className="flex items-center gap-3 rounded-md border bg-background p-3 transition-colors hover:bg-muted/20"
+                  className="flex items-center gap-3 rounded-xl border border-border/60 bg-card/80 p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-finance/25 hover:shadow-md motion-reduce:hover:translate-y-0"
                 >
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-finance/10 text-finance">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-finance/10 text-finance">
                     <CreditCard className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -454,9 +462,9 @@ export function DailyHub() {
                 <Link
                   key={contact.id}
                   to="/contatos"
-                  className="flex items-center gap-3 rounded-md border bg-background p-3 transition-colors hover:bg-muted/20"
+                  className="flex items-center gap-3 rounded-xl border border-border/60 bg-card/80 p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-contacts/25 hover:shadow-md motion-reduce:hover:translate-y-0"
                 >
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-contacts/10 text-contacts">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-contacts/10 text-contacts">
                     <Gift className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -469,8 +477,8 @@ export function DailyHub() {
               ))}
 
               {upcomingFinancialItems.length === 0 && upcomingBirthdays.length === 0 && (
-                <div className="rounded-xl border border-dashed bg-background/45 p-4 text-center">
-                  <CalendarDays className="mx-auto h-5 w-5 text-muted-foreground" />
+                <div className="rounded-2xl border border-dashed border-primary/20 bg-gradient-to-br from-primary/[0.055] to-accent/[0.025] p-6 text-center">
+                  <span className="mx-auto grid h-10 w-10 place-items-center rounded-xl bg-primary/10"><CalendarDays className="h-5 w-5 text-primary" /></span>
                     <p className="mt-2 text-sm font-medium">Nada marcado por aqui</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     Nenhum vencimento ou aniversário próximo.
@@ -480,15 +488,15 @@ export function DailyHub() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 border-t pt-5">
-            <div className="rounded-xl bg-background/65 p-3">
+          <div className="grid grid-cols-2 gap-3 border-t border-border/60 pt-5">
+            <div className="rounded-2xl border border-tasks/10 bg-gradient-to-br from-tasks/[0.09] to-background p-3 shadow-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Circle className="h-3.5 w-3.5 text-tasks" />
                 <span className="text-[11px]">Pendências</span>
               </div>
               <p className="mt-1 text-xl font-bold">{allPendingTasks.length}</p>
             </div>
-            <div className="rounded-xl bg-background/65 p-3">
+            <div className="rounded-2xl border border-success/10 bg-gradient-to-br from-success/[0.09] to-background p-3 shadow-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <CheckCircle2 className="h-3.5 w-3.5 text-success" />
                 <span className="text-[11px]">Concluídos</span>
