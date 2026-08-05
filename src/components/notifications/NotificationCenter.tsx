@@ -281,13 +281,13 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side="right"
-          className="flex w-full flex-col border-slate-800 bg-slate-950 p-0 sm:max-w-md"
+          className="flex w-full flex-col border-border bg-card p-0 text-foreground dark:border-slate-800 dark:bg-slate-950 dark:text-white sm:max-w-md"
         >
-          <SheetHeader className="border-b border-slate-800 px-5 pb-4 pt-5 text-left">
+          <SheetHeader className="border-b border-border px-5 pb-4 pt-5 text-left dark:border-slate-800">
             <div className="flex items-start justify-between gap-4 pr-8">
               <div>
-                <SheetTitle className="text-white">Seus alertas</SheetTitle>
-                <SheetDescription className="mt-1 text-slate-400">
+                <SheetTitle className="text-foreground dark:text-white">Seus alertas</SheetTitle>
+                <SheetDescription className="mt-1 text-muted-foreground dark:text-slate-400">
                   O que merece atenção nos próximos dias.
                 </SheetDescription>
               </div>
@@ -295,7 +295,7 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
                 <button
                   type="button"
                   onClick={markAllAsRead}
-                  className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-cyan-300 hover:text-cyan-200"
+                  className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 dark:text-cyan-300 dark:hover:text-cyan-200"
                 >
                   <CheckCheck className="h-4 w-4" />
                   Marcar lidos
@@ -306,10 +306,10 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
 
           <div className="flex-1 overflow-y-auto px-3 py-4">
             {alerts.length === 0 ? (
-              <div className="mx-2 mt-8 rounded-xl border border-dashed border-slate-700 px-5 py-10 text-center">
-                <NotificationFlowIcon className="mx-auto h-8 w-8 text-slate-500" />
-                <p className="mt-3 text-sm font-medium text-slate-200">Tudo em dia por aqui</p>
-                <p className="mt-1 text-xs leading-relaxed text-slate-500">
+              <div className="mx-2 mt-8 rounded-xl border border-dashed border-border px-5 py-10 text-center dark:border-slate-700">
+                <NotificationFlowIcon className="mx-auto h-8 w-8 text-muted-foreground dark:text-slate-500" />
+                <p className="mt-3 text-sm font-medium text-foreground dark:text-slate-200">Tudo em dia por aqui</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground dark:text-slate-500">
                   Quando uma tarefa ou cobrança estiver próxima, ela aparecerá aqui.
                 </p>
               </div>
@@ -324,25 +324,25 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
                       type="button"
                       onClick={() => openAlert(alert)}
                       className={cn(
-                        "group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-slate-800/80",
-                        unread && "bg-slate-900",
+                        "group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-muted dark:hover:bg-slate-800/80",
+                        unread && "bg-primary/[0.055] dark:bg-slate-900",
                       )}
                     >
                       <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-lg", toneClasses(alert.tone))}>
                         <Icon className="h-5 w-5" />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className={cn("block truncate text-sm text-slate-300", unread && "font-semibold text-white")}>
+                        <span className={cn("block truncate text-sm text-foreground/80 dark:text-slate-300", unread && "font-semibold text-foreground dark:text-white")}>
                           {alert.title}
                         </span>
-                        <span className="mt-0.5 block truncate text-xs text-slate-500">
+                        <span className="mt-0.5 block truncate text-xs text-muted-foreground dark:text-slate-500">
                           {alert.description}
                         </span>
                       </span>
                       {unread ? (
                         <span className="h-2 w-2 shrink-0 rounded-full bg-cyan-400" />
                       ) : (
-                        <ChevronRight className="h-4 w-4 shrink-0 text-slate-600 transition-transform group-hover:translate-x-0.5" />
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 dark:text-slate-600" />
                       )}
                     </button>
                   );
@@ -351,7 +351,7 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
             )}
           </div>
 
-          <div className="border-t border-slate-800 px-5 py-3 text-xs text-slate-500">
+          <div className="border-t border-border px-5 py-3 text-xs text-muted-foreground dark:border-slate-800 dark:text-slate-500">
             Alertas são atualizados com os dados do LifeFlow.
           </div>
         </SheetContent>
@@ -399,7 +399,7 @@ export function NotificationCenterButton({
     <button
       type="button"
       onClick={openNotifications}
-      className="relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-slate-400 transition-colors hover:bg-white/[0.055] hover:text-white"
+      className="relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground dark:text-slate-400 dark:hover:bg-white/[0.055] dark:hover:text-white"
     >
       <NotificationFlowIcon className="h-5 w-5 shrink-0" />
       {!compact && (

@@ -301,10 +301,10 @@ export default function Financas() {
         variant="finance"
         actions={
           <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
-            <Button variant="outline" className="h-10 min-w-0 px-3" size="sm" onClick={() => setImportHistoryOpen(true)}>
+            <Button variant="outline" className="h-10 min-w-0 bg-background/80 px-3 text-foreground hover:bg-muted hover:text-foreground" size="sm" onClick={() => setImportHistoryOpen(true)}>
               <History className="mr-2 h-4 w-4" />Histórico
             </Button>
-            <Button variant="outline" className="h-10 min-w-0 px-3" size="sm" onClick={() => setImportModalOpen(true)}>
+            <Button variant="outline" className="h-10 min-w-0 bg-background/80 px-3 text-foreground hover:bg-muted hover:text-foreground" size="sm" onClick={() => setImportModalOpen(true)}>
               <Upload className="mr-2 h-4 w-4" />Importar arquivo
             </Button>
             <Button className="gradient-finance col-span-2 h-11 w-full px-4 text-finance-foreground shadow-sm transition-transform active:scale-[0.98] sm:h-10 sm:w-auto" size="sm" onClick={() => { setEditingTransaction(null); setTransactionModalOpen(true); }}>

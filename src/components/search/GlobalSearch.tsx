@@ -377,13 +377,13 @@ export function GlobalSearchButton({
     <button
       type="button"
       onClick={openSearch}
-      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-slate-400 transition-colors hover:bg-white/[0.055] hover:text-white"
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground dark:text-slate-400 dark:hover:bg-white/[0.055] dark:hover:text-white"
     >
       <SearchFlowIcon className="h-5 w-5 shrink-0" />
       {!compact && (
         <>
           <span className="flex-1 text-left text-sm font-medium">Buscar</span>
-          <kbd className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] text-slate-500">
+          <kbd className="rounded border border-border bg-muted/60 px-1.5 py-0.5 text-[10px] text-muted-foreground dark:border-white/10 dark:bg-white/5 dark:text-slate-500">
             Ctrl K
           </kbd>
         </>

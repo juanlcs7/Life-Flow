@@ -151,7 +151,7 @@ export default function Dashboard() {
         initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-[1.75rem] border border-white/60 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 p-6 text-white shadow-[0_24px_70px_-38px_rgba(8,145,178,.7)] sm:p-8"
+        className="relative overflow-hidden rounded-[1.75rem] border border-border/70 bg-gradient-to-br from-card via-card to-cyan-500/[0.09] p-6 text-foreground shadow-[0_24px_70px_-42px_rgba(8,145,178,.42)] dark:border-white/10 dark:from-slate-950 dark:via-slate-900 dark:to-cyan-950 dark:text-white dark:shadow-[0_24px_70px_-38px_rgba(8,145,178,.7)] sm:p-8"
       >
         <motion.div
           className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl"
@@ -173,29 +173,29 @@ export default function Dashboard() {
               onClick={() => navigate("/configuracoes")}
               whileHover={reduceMotion ? undefined : { scale: 1.04, rotate: -1 }}
               whileTap={{ scale: 0.97 }}
-              className="group relative mt-1 shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-4 focus-visible:ring-offset-slate-950"
+              className="group relative mt-1 shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-4 focus-visible:ring-offset-background dark:focus-visible:ring-cyan-300 dark:focus-visible:ring-offset-slate-950"
               aria-label="Abrir meu perfil"
             >
               <span className="absolute -inset-1 rounded-full bg-gradient-to-br from-cyan-300 via-emerald-300 to-violet-400 opacity-80 blur-[2px] transition group-hover:opacity-100" />
-              <Avatar className="relative h-16 w-16 border-[3px] border-slate-950 shadow-2xl sm:h-20 sm:w-20">
+              <Avatar className="relative h-16 w-16 border-[3px] border-card shadow-2xl dark:border-slate-950 sm:h-20 sm:w-20">
                 <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} className="object-cover" />
                 <AvatarFallback className="bg-gradient-to-br from-cyan-500 to-violet-600 text-lg font-bold text-white sm:text-xl">{initials}</AvatarFallback>
               </Avatar>
-              <span className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-[3px] border-slate-950 bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,.9)]" />
+              <span className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-[3px] border-card bg-emerald-500 shadow-[0_0_12px_rgba(52,211,153,.65)] dark:border-slate-950 dark:bg-emerald-400" />
             </motion.button>
 
             <div className="min-w-0">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-medium text-cyan-100 backdrop-blur">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.07] px-3 py-1.5 text-xs font-medium text-primary backdrop-blur dark:border-white/10 dark:bg-white/[0.07] dark:text-cyan-100">
               <AgendaFlowIcon className="h-3.5 w-3.5" />
               <span className="capitalize">{formattedDate}</span>
             </div>
-            <h1 className="font-display text-2xl font-bold tracking-[-0.03em] text-white sm:text-3xl lg:text-4xl">
+            <h1 className="font-display text-2xl font-bold tracking-[-0.03em] text-foreground dark:text-white sm:text-3xl lg:text-4xl">
               {greeting}, {displayName}.
             </h1>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
+            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground dark:text-slate-300 sm:text-base">
               Veja o que está pendente e organize o restante do dia.
             </p>
-            <div className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-emerald-200">
+            <div className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-200">
               <Sparkles className="h-3.5 w-3.5" />Seu dia em movimento
             </div>
             </div>
@@ -207,7 +207,7 @@ export default function Dashboard() {
                 variant="outline"
                 size="sm"
                 onClick={handleRequestNotifications}
-                className="gap-2 border-white/15 bg-white/[0.07] text-white hover:bg-white/15 hover:text-white"
+                className="gap-2 border-border bg-background/70 text-foreground hover:bg-muted hover:text-foreground dark:border-white/15 dark:bg-white/[0.07] dark:text-white dark:hover:bg-white/15 dark:hover:text-white"
               >
                 <Bell className="h-4 w-4" />
                 Ativar lembretes
@@ -217,7 +217,7 @@ export default function Dashboard() {
               variant="outline"
               size="sm"
               onClick={() => setIsCustomizing(!isCustomizing)}
-              className="gap-2 border-white/15 bg-white/[0.07] text-white hover:bg-white/15 hover:text-white"
+              className="gap-2 border-border bg-background/70 text-foreground hover:bg-muted hover:text-foreground dark:border-white/15 dark:bg-white/[0.07] dark:text-white dark:hover:bg-white/15 dark:hover:text-white"
             >
               {isCustomizing ? <Check className="h-4 w-4" /> : <Settings2 className="h-4 w-4" />}
               {isCustomizing ? "Concluir" : "Personalizar"}
