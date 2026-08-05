@@ -46,6 +46,7 @@ import { useTransactionImports } from "@/hooks/useTransactionImports";
 import { ImportHistoryModal } from "@/components/finance/ImportHistoryModal";
 import { MonthlyComparison } from "@/components/finance/MonthlyComparison";
 import { MonthForecast } from "@/components/finance/MonthForecast";
+import { PremiumFinancialSuite } from "@/components/premium/PremiumFinancialSuite";
 
 type TransactionFormData = Omit<NewTransaction, "date">;
 
@@ -370,10 +371,11 @@ export default function Financas() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid h-[52px] w-full grid-cols-3 rounded-2xl border border-finance/15 bg-gradient-to-r from-card/90 via-card to-finance/[0.06] p-1.5 shadow-sm lg:w-auto lg:inline-grid">
+        <TabsList className="grid h-[52px] w-full grid-cols-4 rounded-2xl border border-finance/15 bg-gradient-to-r from-card/90 via-card to-finance/[0.06] p-1.5 shadow-sm lg:w-auto lg:inline-grid">
           <TabsTrigger value="overview" className="gap-2 rounded-xl px-4 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><LayoutDashboard className="h-4 w-4" /><span className="hidden sm:inline">Visão Geral</span><span className="sm:hidden">Visão</span></TabsTrigger>
           <TabsTrigger value="management" className="gap-2 rounded-xl px-4 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><Landmark className="h-4 w-4" />Gestão</TabsTrigger>
           <TabsTrigger value="reports" className="gap-2 rounded-xl px-4 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><ChartSpline className="h-4 w-4" /><span className="hidden sm:inline">Relatórios</span><span className="sm:hidden">Dados</span></TabsTrigger>
+          <TabsTrigger value="intelligence" className="gap-2 rounded-xl px-2 sm:px-4 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-lg"><Sparkles className="h-4 w-4" /><span className="hidden sm:inline">Inteligência</span><span className="sm:hidden">IA</span></TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
@@ -493,6 +495,10 @@ export default function Financas() {
               </Button>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="intelligence" className="mt-4">
+          <PremiumFinancialSuite />
         </TabsContent>
       </Tabs>
     </div>

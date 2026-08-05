@@ -360,6 +360,42 @@ export type Database = {
         }
         Relationships: []
       }
+      debts: {
+        Row: {
+          annual_interest_rate: number
+          balance: number
+          created_at: string
+          due_day: number | null
+          id: string
+          minimum_payment: number
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          annual_interest_rate?: number
+          balance: number
+          created_at?: string
+          due_day?: number | null
+          id?: string
+          minimum_payment: number
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          annual_interest_rate?: number
+          balance?: number
+          created_at?: string
+          due_day?: number | null
+          id?: string
+          minimum_payment?: number
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           created_at: string

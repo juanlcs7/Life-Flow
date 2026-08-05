@@ -2,9 +2,11 @@ import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   BarChart3,
+  BrainCircuit,
   CalendarDays,
   Check,
   Clock3,
+  CircleDollarSign,
   Crown,
   FileText,
   HeartPulse,
@@ -39,15 +41,15 @@ const premiumHighlights = [
     tone: "from-violet-500/15 to-primary/5 text-violet-600 dark:text-violet-300",
   },
   {
-    icon: BarChart3,
-    title: "Decisões mais claras",
-    description: "Use relatórios avançados, comparativos e exportações para entender sua evolução.",
+    icon: BrainCircuit,
+    title: "Inteligência financeira",
+    description: "Receba resumo semanal, previsão de saldo e uma leitura prática dos seus gastos.",
     tone: "from-cyan-500/15 to-info/5 text-cyan-700 dark:text-cyan-300",
   },
   {
-    icon: Zap,
-    title: "Seu ritmo, sem interrupções",
-    description: "Continue construindo seu histórico financeiro e seus objetivos em um único fluxo.",
+    icon: CircleDollarSign,
+    title: "Decisões antes da compra",
+    description: "Simule compras e organize dívidas com estratégias de avalanche ou bola de neve.",
     tone: "from-emerald-500/15 to-success/5 text-emerald-700 dark:text-emerald-300",
   },
 ];
@@ -67,6 +69,8 @@ const comparison = [
   { label: "Metas ativas", free: `${PLAN_LIMITS.free.goals}`, premium: "Ilimitadas" },
   { label: "Relatórios avançados", free: false, premium: true },
   { label: "Exportações e análises", free: false, premium: true },
+  { label: "Previsão financeira de 90 dias", free: false, premium: true },
+  { label: "Simulador de compras e dívidas", free: false, premium: true },
 ];
 
 function Availability({ value }: { value: string | boolean }) {
