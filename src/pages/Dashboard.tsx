@@ -28,6 +28,7 @@ import { HabitModal } from "@/components/modals/HabitModal";
 import { PersonalGoalModal } from "@/components/goals/PersonalGoalModal";
 import { toast } from "sonner";
 import { GettingStartedChecklist } from "@/components/onboarding/GettingStartedChecklist";
+import { PlanLimitAlert } from "@/components/premium/PlanLimitAlert";
 
 const cardComponents: Record<CardId, React.ComponentType<{
   size?: "small" | "medium" | "large";
@@ -146,6 +147,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <GettingStartedChecklist />
+      <PlanLimitAlert />
       {/* Header */}
       <motion.div
         initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -20 }}
