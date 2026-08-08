@@ -51,6 +51,7 @@ import { IncomeSourcesSection } from "@/components/finance/IncomeSourcesSection"
 import { MoneyBriefing } from "@/components/finance/MoneyBriefing";
 import { useIncomeSources } from "@/hooks/useIncomeSources";
 import { TransactionReviewInbox } from "@/components/finance/TransactionReviewInbox";
+import { FinancialTimeline } from "@/components/finance/FinancialTimeline";
 
 type TransactionFormData = Omit<NewTransaction, "date">;
 
@@ -95,7 +96,7 @@ export default function Financas() {
   const { subscriptions, monthlyCost, upcomingRenewals, isLoading: subscriptionsLoading, addSubscription, updateSubscription, deleteSubscription, paySubscription, isPaying } = useSubscriptions();
   const [payingSubscriptionId, setPayingSubscriptionId] = useState<string | null>(null);
   const { totals: investmentTotals } = useInvestments();
-  const { monthlyIncome: expectedMonthlyIncome } = useIncomeSources();
+  const { activeIncomeSources, monthlyIncome: expectedMonthlyIncome } = useIncomeSources();
   const patrimony = totalBalance + totalSavings + investmentTotals.current;
 
   // Current month boundaries
@@ -399,6 +400,14 @@ export default function Financas() {
             onReviewAll={async () => { await reviewAllTransactions(); toast.success("Caixa financeira revisada"); }}
             onEdit={(transaction) => { setEditingTransaction(transaction); setTransactionModalOpen(true); }}
             isReviewing={isReviewing}
+          />
+          <FinancialTimeline
+            totalBalance={totalBalance}
+            accounts={accounts}
+            incomeSources={activeIncomeSources}
+            installments={installments}
+            payments={payments}
+            subscriptions={subscriptions}
           />
           <BudgetsSection selectedMonth={selectedMonth} transactions={monthTransactions} />
           <MonthlyComparison selectedMonth={selectedMonth} transactions={transactions} />
