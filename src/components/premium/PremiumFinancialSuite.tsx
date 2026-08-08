@@ -36,6 +36,7 @@ import { useAccounts } from "@/hooks/useAccounts";
 import { useInstallments } from "@/hooks/useInstallments";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { useDebts, type NewDebt } from "@/hooks/useDebts";
+import { useIncomeSources } from "@/hooks/useIncomeSources";
 import {
   buildBalanceForecast,
   buildDebtPayoffPlan,
@@ -65,12 +66,25 @@ function addSubscriptionCommitments(subscriptions: ReturnType<typeof useSubscrip
   });
 }
 
+function addIncomeCommitments(sources: ReturnType<typeof useIncomeSources>["activeIncomeSources"]) {
+  const now = new Date();
+  const end = addMonths(now, 3);
+  return sources.flatMap((source) => Array.from({ length: 4 }, (_, offset) => {
+    const year = addMonths(now, offset).getFullYear();
+    const month = addMonths(now, offset).getMonth();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    const date = new Date(year, month, Math.min(source.payment_day, lastDay));
+    return date > now && date <= end ? { amount: Number(source.amount), date: format(date, "yyyy-MM-dd") } : null;
+  }).filter((item): item is { amount: number; date: string } => item !== null));
+}
+
 export function PremiumFinancialSuite() {
   const { isPremium } = usePlan();
   const { transactions } = useTransactions();
   const { totalBalance } = useAccounts();
   const { payments, monthlyImpact } = useInstallments();
   const { subscriptions, monthlyCost } = useSubscriptions();
+  const { activeIncomeSources, monthlyIncome: configuredMonthlyIncome } = useIncomeSources();
   const { debts, addDebt, deleteDebt, isLoading: debtsLoading, isSaving } = useDebts({ enabled: isPremium });
   const reduceMotion = useReducedMotion();
   const [premiumOpen, setPremiumOpen] = useState(false);
@@ -86,14 +100,16 @@ export function PremiumFinancialSuite() {
     ...payments.filter((payment) => !payment.paid).map((payment) => ({ amount: Number(payment.amount), date: payment.due_date })),
     ...addSubscriptionCommitments(subscriptions),
   ], [payments, subscriptions]);
-  const forecast = useMemo(() => buildBalanceForecast({ currentBalance: totalBalance, transactions, commitments }), [commitments, totalBalance, transactions]);
-  const monthlyIncome = useMemo(() => {
+  const predictableIncome = useMemo(() => addIncomeCommitments(activeIncomeSources), [activeIncomeSources]);
+  const forecast = useMemo(() => buildBalanceForecast({ currentBalance: totalBalance, transactions, commitments, predictableIncome }), [commitments, predictableIncome, totalBalance, transactions]);
+  const historicalMonthlyIncome = useMemo(() => {
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 89);
     return transactions
       .filter((item) => item.type === "income" && parseISO(item.date) >= ninetyDaysAgo)
       .reduce((total, item) => total + Number(item.amount), 0) / 3;
   }, [transactions]);
+  const monthlyIncome = configuredMonthlyIncome > 0 ? configuredMonthlyIncome : historicalMonthlyIncome;
   const purchase = useMemo(() => {
     const price = Number(purchasePrice);
     if (!price || price <= 0) return null;
@@ -228,7 +244,7 @@ export function PremiumFinancialSuite() {
               <div key={item.days} className="rounded-2xl border border-border/60 bg-background/60 p-3 text-center shadow-sm">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{item.days} dias</p>
                 <p className={cn("mt-2 text-sm font-bold", item.projectedBalance >= 0 ? "text-success" : "text-destructive")}>{money(item.projectedBalance)}</p>
-                <p className="mt-1 text-[9px] text-muted-foreground">{money(item.scheduledCommitments)} agendados</p>
+                <p className="mt-1 text-[9px] text-muted-foreground">+{money(item.scheduledIncome)} renda • -{money(item.scheduledCommitments)}</p>
               </div>
             ))}
           </div>

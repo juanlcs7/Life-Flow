@@ -47,6 +47,7 @@ import { ImportHistoryModal } from "@/components/finance/ImportHistoryModal";
 import { MonthlyComparison } from "@/components/finance/MonthlyComparison";
 import { MonthForecast } from "@/components/finance/MonthForecast";
 import { PremiumFinancialSuite } from "@/components/premium/PremiumFinancialSuite";
+import { IncomeSourcesSection } from "@/components/finance/IncomeSourcesSection";
 
 type TransactionFormData = Omit<NewTransaction, "date">;
 
@@ -470,6 +471,7 @@ export default function Financas() {
 
         <TabsContent value="management" className="space-y-4 mt-4">
           <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
+            <IncomeSourcesSection accounts={accounts} />
             <AccountsSection accounts={accounts} totalBalance={totalBalance} isLoading={accountsLoading} onAdd={() => { setEditingAccount(null); setAccountModalOpen(true); }} onEdit={(a) => { setEditingAccount(a); setAccountModalOpen(true); }} onDelete={(id) => { deleteAccount(id); toast.success("Conta excluída!"); }} onTransfer={() => setTransferModalOpen(true)} />
             <FinancialGoalsSection goals={goals} isLoading={goalsLoading} onAdd={() => { setEditingGoal(null); setGoalModalOpen(true); }} onEdit={(g) => { setEditingGoal(g); setGoalModalOpen(true); }} onDelete={(id) => { deleteGoal(id); toast.success("Meta excluída!"); }} onAddToGoal={(g) => { setSelectedGoalForAdd(g); setAddToGoalModalOpen(true); }} onWithdraw={async (id, amount, accountId) => { await withdrawFromGoal({ id, amount, accountId }); toast.success("Valor resgatado!"); }} accounts={accounts} />
             <InstallmentsSection installments={installments} payments={payments} monthlyImpact={monthlyImpact} isLoading={installmentsLoading} onAdd={() => setInstallmentModalOpen(true)} onDelete={(id) => { deleteInstallment(id); toast.success("Parcelamento excluído!"); }} onMarkPaid={(id, paid) => { markPaymentPaid({ paymentId: id, paid }); toast.success(paid ? "Parcela paga!" : "Parcela desmarcada!"); }} />

@@ -360,6 +360,50 @@ export type Database = {
         }
         Relationships: []
       }
+      income_sources: {
+        Row: {
+          account_id: string | null
+          active: boolean
+          amount: number
+          created_at: string
+          id: string
+          name: string
+          payment_day: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          active?: boolean
+          amount: number
+          created_at?: string
+          id?: string
+          name: string
+          payment_day: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          active?: boolean
+          amount?: number
+          created_at?: string
+          id?: string
+          name?: string
+          payment_day?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "income_sources_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       debts: {
         Row: {
           annual_interest_rate: number

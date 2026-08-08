@@ -35,6 +35,23 @@ describe("premium financial insights", () => {
     expect(forecast.map((item) => item.projectedBalance)).toEqual([1200, 1250, 1550]);
   });
 
+  it("uses registered recurring income without duplicating historical income", () => {
+    const forecast = buildBalanceForecast({
+      currentBalance: 1000,
+      transactions: [
+        { type: "income", amount: 3000, category: "Salário", date: "2026-08-01" },
+        { type: "expense", amount: 900, category: "Casa", date: "2026-08-02" },
+      ],
+      commitments: [],
+      predictableIncome: [{ amount: 3000, date: "2026-09-05" }],
+      now: new Date(2026, 7, 4),
+      horizons: [60],
+    });
+
+    expect(forecast[0].scheduledIncome).toBe(3000);
+    expect(forecast[0].projectedBalance).toBe(3400);
+  });
+
   it("classifies the impact of a purchase", () => {
     expect(simulatePurchase({ price: 600, installments: 6, currentBalance: 2000, monthlyIncome: 4000, monthlyCommitments: 800 }).verdict).toBe("comfortable");
     expect(simulatePurchase({ price: 3000, installments: 1, currentBalance: 1000, monthlyIncome: 4000, monthlyCommitments: 800 }).verdict).toBe("risk");

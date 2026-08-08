@@ -67,12 +67,14 @@ export function buildBalanceForecast({
   currentBalance,
   transactions,
   commitments,
+  predictableIncome = [],
   now = new Date(),
   horizons = [30, 60, 90],
 }: {
   currentBalance: number;
   transactions: InsightTransaction[];
   commitments: ScheduledCommitment[];
+  predictableIncome?: ScheduledCommitment[];
   now?: Date;
   horizons?: number[];
 }) {
@@ -86,7 +88,10 @@ export function buildBalanceForecast({
     (total, item) => total + (item.type === "income" ? Number(item.amount) : -Number(item.amount)),
     0,
   );
-  const dailyNet = historicalNet / 90;
+  const historicalExpenses = history
+    .filter((item) => item.type === "expense")
+    .reduce((total, item) => total + Number(item.amount), 0);
+  const dailyNet = predictableIncome.length > 0 ? -historicalExpenses / 90 : historicalNet / 90;
 
   return horizons.map((days) => {
     const end = new Date(today.getTime() + days * DAY_MS);
@@ -96,10 +101,17 @@ export function buildBalanceForecast({
         return date > today && date <= end;
       })
       .reduce((total, item) => total + Number(item.amount), 0);
+    const income = predictableIncome
+      .filter((item) => {
+        const date = parseLocalDate(item.date);
+        return date > today && date <= end;
+      })
+      .reduce((total, item) => total + Number(item.amount), 0);
     return {
       days,
       scheduledCommitments: scheduled,
-      projectedBalance: currentBalance + dailyNet * days - scheduled,
+      scheduledIncome: income,
+      projectedBalance: currentBalance + dailyNet * days + income - scheduled,
     };
   });
 }
