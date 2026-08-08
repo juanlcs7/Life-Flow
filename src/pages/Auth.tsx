@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   CalendarDays,
   Check,
+  Clock3,
   Eye,
   EyeOff,
   Loader2,
@@ -11,6 +12,8 @@ import {
   Mail,
   MailCheck,
   Send,
+  ShieldCheck,
+  Sparkles,
   Target,
   User,
   WalletCards,
@@ -41,9 +44,9 @@ const signupSchema = loginSchema
   });
 
 const highlights = [
-  { icon: WalletCards, label: "Finanças sob controle" },
-  { icon: CalendarDays, label: "Rotina organizada" },
-  { icon: Target, label: "Metas que saem do papel" },
+  { icon: WalletCards, label: "Dinheiro sem planilhas", detail: "Saldo, gastos e metas em uma visão" },
+  { icon: CalendarDays, label: "Dia sem esquecimentos", detail: "Agenda, tarefas e hábitos conectados" },
+  { icon: Target, label: "Planos em movimento", detail: "Clareza para decidir o próximo passo" },
 ];
 
 export default function Auth() {
@@ -169,7 +172,7 @@ export default function Auth() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#07111f]">
+    <main className="relative min-h-screen overflow-hidden bg-[#050b18]">
       <Dialog open={recoveryOpen} onOpenChange={(next) => { setRecoveryOpen(next); if (!next) { setRecoverySent(false); setRecoveryEmail(""); } }}>
         <DialogContent className="border-slate-200 bg-white text-slate-950 sm:max-w-md">
           <DialogHeader><DialogTitle>{recoverySent ? "Confira seu e-mail" : "Recuperar acesso"}</DialogTitle></DialogHeader>
@@ -194,8 +197,9 @@ export default function Auth() {
         </DialogContent>
       </Dialog>
       <div className="absolute inset-0 auth-grid opacity-30" />
-      <div className="absolute -left-32 top-[-12rem] h-[34rem] w-[34rem] rounded-full bg-cyan-400/20 blur-[120px]" />
-      <div className="absolute -right-36 bottom-[-16rem] h-[38rem] w-[38rem] rounded-full bg-emerald-400/20 blur-[130px]" />
+      <div className="absolute -left-32 top-[-12rem] h-[34rem] w-[34rem] rounded-full bg-cyan-400/25 blur-[120px]" />
+      <div className="absolute right-[-12rem] top-1/4 h-[32rem] w-[32rem] rounded-full bg-violet-500/20 blur-[130px]" />
+      <div className="absolute -right-36 bottom-[-16rem] h-[38rem] w-[38rem] rounded-full bg-emerald-400/18 blur-[130px]" />
 
       <div className="relative mx-auto grid min-h-screen w-full max-w-[1440px] lg:grid-cols-[1.08fr_0.92fr]">
         <section className="hidden flex-col justify-between px-14 py-12 lg:flex xl:px-20 xl:py-16">
@@ -219,36 +223,36 @@ export default function Auth() {
           >
             <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-sm font-medium text-cyan-100">
               <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,.9)]" />
-              Organização sem complicação
+              <Sparkles className="h-4 w-4" />Sua vida em um único fluxo
             </div>
             <h1 className="font-display text-5xl font-bold leading-[1.08] tracking-[-0.04em] text-white xl:text-6xl">
-              Sua rotina, suas contas e seus planos{" "}
+              Menos tempo administrando.{" "}
               <span className="bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent">
-                no mesmo lugar.
+                Mais tempo vivendo.
               </span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
-              O LifeFlow ajuda você a lembrar do que precisa fazer e acompanhar o que mudou
-              durante a semana.
+              Finanças, compromissos, hábitos e objetivos trabalhando juntos para mostrar o que importa agora — e o que vem depois.
             </p>
 
             <div className="mt-10 grid gap-3 sm:grid-cols-3">
-              {highlights.map(({ icon: Icon, label }, index) => (
+              {highlights.map(({ icon: Icon, label, detail }, index) => (
                 <motion.div
                   key={label}
                   initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 + index * 0.08 }}
-                  className="rounded-2xl border border-white/10 bg-white/[0.055] p-4 backdrop-blur"
+                  className="group rounded-2xl border border-white/10 bg-white/[0.055] p-4 backdrop-blur transition hover:-translate-y-1 hover:border-cyan-300/25 hover:bg-white/[0.08]"
                 >
                   <Icon className="mb-3 h-5 w-5 text-cyan-300" />
                   <p className="text-sm font-medium text-slate-100">{label}</p>
+                  <p className="mt-1.5 text-[11px] leading-4 text-slate-400">{detail}</p>
                 </motion.div>
               ))}
             </div>
           </motion.div>
 
-          <p className="text-sm text-slate-500">Feito para o dia a dia.</p>
+          <div className="flex flex-wrap items-center gap-5 text-xs text-slate-400"><span className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-cyan-300" />Comece em poucos minutos</span><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-300" />Seus dados protegidos</span></div>
         </section>
 
         <section className="flex min-h-screen items-center justify-center p-4 sm:p-8 lg:p-12">
@@ -256,7 +260,7 @@ export default function Auth() {
             initial={{ opacity: 0, y: 24, scale: 0.985 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="w-full max-w-[470px] rounded-[2rem] border border-white/70 bg-white/[0.97] p-6 shadow-[0_32px_100px_-28px_rgba(2,12,27,.75)] backdrop-blur-xl sm:p-9"
+            className="w-full max-w-[470px] rounded-[2.25rem] border border-white/70 bg-white/[0.96] p-6 shadow-[0_38px_120px_-28px_rgba(2,12,27,.8)] backdrop-blur-2xl sm:p-9"
           >
             <div className="mb-8 flex items-center gap-3 lg:hidden">
               <img src="/lifeflow-logo.png" alt="LifeFlow" className="h-11 w-11 object-contain" />
@@ -288,15 +292,15 @@ export default function Auth() {
             ) : <>
             <div className="mb-7">
               <p className="mb-2 text-sm font-semibold text-teal-600">
-                {isLogin ? "Área pessoal" : "Novo por aqui?"}
+                {isLogin ? "Sua central espera por você" : "Seu novo fluxo começa aqui"}
               </p>
               <h2 className="font-display text-3xl font-bold tracking-tight text-slate-950">
                 {isLogin ? "Entre na sua conta" : "Crie sua conta"}
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">
                 {isLogin
-                  ? "Digite seus dados para continuar."
-                  : "Preencha os dados abaixo para começar a usar."}
+                  ? "Entre e veja tudo o que merece sua atenção hoje."
+                  : "Crie sua conta e organize o essencial em poucos minutos."}
               </p>
             </div>
 

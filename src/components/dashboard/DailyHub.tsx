@@ -209,11 +209,12 @@ export function DailyHub() {
       initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: 0.08 }}
-      className="relative overflow-hidden rounded-[1.75rem] border border-primary/15 bg-gradient-to-br from-card via-card to-primary/[0.035] shadow-[0_22px_60px_-38px_rgba(8,145,178,.55)]"
+      className="relative overflow-hidden rounded-[2.25rem] border border-border/70 bg-card/80 shadow-[0_30px_90px_-55px_rgba(15,23,42,.5)] backdrop-blur-2xl"
     >
       <div className="pointer-events-none absolute -right-20 -top-28 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
       <div className="pointer-events-none absolute left-1/4 top-20 h-48 w-48 rounded-full bg-violet-400/[0.055] blur-3xl" />
-      <div className="relative border-b border-primary/10 bg-gradient-to-r from-primary/[0.075] via-transparent to-accent/[0.06] px-5 py-5 sm:px-6 sm:py-6">
+      <div className="relative border-b border-white/10 bg-[#07111f] px-5 py-6 text-white sm:px-7 sm:py-7">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(34,211,238,.16),transparent_32%),radial-gradient(circle_at_20%_100%,rgba(139,92,246,.13),transparent_30%)]" />
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <motion.div
@@ -225,12 +226,12 @@ export function DailyHub() {
             </motion.div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-display text-xl font-bold tracking-tight">Resumo de hoje</h2>
-                <span className="inline-flex items-center gap-1 rounded-full border border-primary/15 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">
+                <h2 className="font-display text-2xl font-extrabold tracking-[-.04em] text-white">Seu painel de agora</h2>
+                <span className="inline-flex items-center gap-1 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 text-[10px] font-semibold text-cyan-200">
                   <Sparkles className="h-3 w-3" />Hoje
                 </span>
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-sm text-slate-400">
                 {completedEverything
                   ? "Você terminou tudo que estava planejado para hoje."
                   : `${completedDailyItems} de ${totalDailyItems || 0} itens concluídos hoje`}
@@ -238,13 +239,13 @@ export function DailyHub() {
             </div>
           </div>
 
-          <div className="flex min-w-56 items-center gap-3 rounded-2xl border border-white/60 bg-background/70 p-3 pr-4 shadow-sm backdrop-blur dark:border-white/5">
+          <div className="relative flex min-w-56 items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] p-3 pr-4 shadow-xl backdrop-blur">
             <div className="relative grid h-14 w-14 shrink-0 place-items-center rounded-full" style={{ background: `conic-gradient(hsl(var(--primary)) ${progress * 3.6}deg, hsl(var(--muted)) 0deg)` }}>
-              <div className="grid h-10 w-10 place-items-center rounded-full bg-card text-xs font-bold text-primary">{progress}%</div>
+              <div className="grid h-10 w-10 place-items-center rounded-full bg-[#07111f] text-xs font-bold text-cyan-200">{progress}%</div>
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Seu ritmo</p>
-              <p className="mt-1 text-xs font-medium text-foreground">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-200">Seu ritmo</p>
+              <p className="mt-1 text-xs font-medium text-white">
                   {progress === 100
                     ? "Tudo pronto"
                   : progress >= 50

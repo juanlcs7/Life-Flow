@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,30 +9,30 @@
 @layer base {
   :root {
     /* Core Background & Foreground */
-    --background: 210 20% 98%;
-    --foreground: 220 30% 15%;
+    --background: 220 33% 98%;
+    --foreground: 228 38% 11%;
 
     /* Cards with subtle glassmorphism */
     --card: 0 0% 100%;
-    --card-foreground: 220 30% 15%;
+    --card-foreground: 228 38% 11%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 220 30% 15%;
 
     /* Primary - Teal/Cyan for productivity */
-    --primary: 175 70% 40%;
+    --primary: 174 84% 34%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary - Soft slate */
-    --secondary: 210 20% 94%;
-    --secondary-foreground: 220 30% 25%;
+    --secondary: 220 32% 95%;
+    --secondary-foreground: 228 32% 20%;
 
     /* Muted elements */
-    --muted: 210 20% 96%;
-    --muted-foreground: 220 15% 50%;
+    --muted: 220 30% 96%;
+    --muted-foreground: 222 15% 46%;
 
     /* Accent - Warm coral for CTAs */
-    --accent: 15 90% 60%;
+    --accent: 260 85% 62%;
     --accent-foreground: 0 0% 100%;
 
     /* Semantic colors */
@@ -69,26 +69,26 @@
     --contacts-foreground: 0 0% 100%;
 
     /* UI Elements */
-    --border: 220 15% 90%;
-    --input: 220 15% 92%;
-    --ring: 175 70% 40%;
+    --border: 222 24% 89%;
+    --input: 222 24% 88%;
+    --ring: 174 84% 34%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     /* Sidebar */
-    --sidebar-background: 220 25% 12%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 175 70% 50%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 228 38% 11%;
+    --sidebar-primary: 174 84% 34%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 25% 18%;
-    --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 220 20% 20%;
-    --sidebar-ring: 175 70% 50%;
-    --sidebar-muted: 220 15% 45%;
+    --sidebar-accent: 174 65% 95%;
+    --sidebar-accent-foreground: 174 84% 25%;
+    --sidebar-border: 222 24% 89%;
+    --sidebar-ring: 174 84% 34%;
+    --sidebar-muted: 222 14% 48%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(175 70% 40%) 0%, hsl(200 80% 45%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(15 90% 60%) 0%, hsl(35 90% 55%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(174 84% 34%) 0%, hsl(190 92% 42%) 52%, hsl(225 82% 58%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(260 85% 62%) 0%, hsl(320 78% 58%) 100%);
     --gradient-finance: linear-gradient(135deg, hsl(250 70% 60%) 0%, hsl(280 70% 55%) 100%);
     --gradient-health: linear-gradient(135deg, hsl(140 65% 50%) 0%, hsl(160 70% 45%) 100%);
     --gradient-tasks: linear-gradient(135deg, hsl(200 80% 50%) 0%, hsl(220 80% 55%) 100%);
@@ -101,21 +101,21 @@
     --shadow-md: 0 4px 6px -1px hsl(220 30% 15% / 0.08), 0 2px 4px -1px hsl(220 30% 15% / 0.04);
     --shadow-lg: 0 10px 15px -3px hsl(220 30% 15% / 0.1), 0 4px 6px -2px hsl(220 30% 15% / 0.05);
     --shadow-xl: 0 20px 25px -5px hsl(220 30% 15% / 0.1), 0 10px 10px -5px hsl(220 30% 15% / 0.04);
-    --shadow-card: 0 2px 8px -2px hsl(220 30% 15% / 0.08), 0 4px 16px -4px hsl(220 30% 15% / 0.12);
-    --shadow-glow: 0 0 20px hsl(175 70% 40% / 0.3);
+    --shadow-card: 0 1px 1px hsl(228 38% 11% / 0.03), 0 18px 45px -30px hsl(228 38% 11% / 0.28);
+    --shadow-glow: 0 0 32px hsl(174 84% 40% / 0.26);
   }
 
   .dark {
-    --background: 220 25% 8%;
+    --background: 228 34% 7%;
     --foreground: 210 20% 95%;
 
-    --card: 220 25% 12%;
+    --card: 227 30% 11%;
     --card-foreground: 210 20% 95%;
 
     --popover: 220 25% 12%;
     --popover-foreground: 210 20% 95%;
 
-    --primary: 175 70% 50%;
+    --primary: 174 76% 48%;
     --primary-foreground: 220 30% 10%;
 
     --secondary: 220 25% 18%;
@@ -130,11 +130,11 @@
     --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 20%;
-    --input: 220 25% 18%;
+    --border: 225 22% 20%;
+    --input: 225 22% 19%;
     --ring: 175 70% 50%;
 
-    --sidebar-background: 220 30% 6%;
+    --sidebar-background: 228 38% 7%;
     --sidebar-foreground: 210 20% 90%;
     --sidebar-primary: 175 70% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -157,6 +157,20 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-image:
+      radial-gradient(circle at 8% 0%, hsl(var(--primary) / 0.08), transparent 26rem),
+      radial-gradient(circle at 92% 4%, hsl(var(--accent) / 0.06), transparent 28rem);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.2);
+    color: hsl(var(--foreground));
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.24) transparent;
   }
 }
 
@@ -171,12 +185,25 @@
 
   .dashboard-aurora {
     background:
-      radial-gradient(circle at 12% 10%, hsl(180 80% 50% / 0.16), transparent 34%),
-      radial-gradient(circle at 82% 0%, hsl(205 85% 58% / 0.13), transparent 31%);
+      radial-gradient(circle at 10% 8%, hsl(var(--primary) / 0.1), transparent 32rem),
+      radial-gradient(circle at 88% 0%, hsl(var(--accent) / 0.08), transparent 35rem),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
   .glass {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+    @apply border border-white/50 bg-card/75 backdrop-blur-2xl dark:border-white/[0.08];
+  }
+
+  .flow-surface {
+    @apply border border-border/65 bg-card/85 shadow-[var(--shadow-card)] backdrop-blur-xl;
+  }
+
+  .flow-grid {
+    background-image:
+      linear-gradient(hsl(var(--foreground) / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.035) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
   }
 
   .gradient-primary {
@@ -219,4 +246,76 @@
     @apply bg-clip-text text-transparent;
     background: var(--gradient-primary);
   }
+}
+
+/* LifeFlow V2 — cockpit visual. These rules deliberately normalize legacy
+   one-off card styles so every module shares the same unmistakable identity. */
+.lifeflow-v2 [data-lifeflow-card] {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border) / 0.72) !important;
+  border-radius: 1.75rem !important;
+  background: linear-gradient(145deg, hsl(var(--card) / 0.96), hsl(var(--card) / 0.78)) !important;
+  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.5) inset, 0 24px 70px -48px hsl(228 50% 10% / 0.5) !important;
+  backdrop-filter: blur(22px);
+}
+
+.lifeflow-v2 aside {
+  --sidebar-foreground: 210 25% 97%;
+  --sidebar-muted: 215 16% 66%;
+  --sidebar-border: 218 28% 18%;
+  --sidebar-accent: 216 30% 16%;
+  background:
+    radial-gradient(circle at 20% 0%, hsl(174 80% 45% / 0.16), transparent 15rem),
+    radial-gradient(circle at 100% 70%, hsl(260 85% 62% / 0.13), transparent 18rem),
+    linear-gradient(180deg, hsl(222 47% 9%), hsl(228 52% 6%)) !important;
+}
+
+.lifeflow-v2 [data-lifeflow-card]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 35%, hsl(var(--primary) / 0.035), transparent 70%);
+}
+
+.lifeflow-v2 [data-lifeflow-card]:hover {
+  border-color: hsl(var(--primary) / 0.24) !important;
+  box-shadow: 0 28px 75px -48px hsl(var(--primary) / 0.45) !important;
+}
+
+.lifeflow-v2 [data-lifeflow-button] {
+  min-height: 2.6rem;
+  border-radius: 0.9rem !important;
+  letter-spacing: -0.01em;
+}
+
+.lifeflow-v2 [data-lifeflow-input] {
+  min-height: 2.85rem;
+  border-radius: 1rem !important;
+  background: hsl(var(--background) / 0.72) !important;
+}
+
+.lifeflow-v2 [data-lifeflow-tabs] {
+  min-height: 3.25rem;
+  border-radius: 1.25rem !important;
+  background: hsl(var(--card) / 0.78) !important;
+  box-shadow: 0 14px 35px -28px hsl(228 50% 10% / 0.45);
+}
+
+.lifeflow-v2 main > div:last-child > div.space-y-4,
+.lifeflow-v2 main > div:last-child > div.space-y-5,
+.lifeflow-v2 main > div:last-child > div.space-y-6 {
+  animation: lifeflow-page-enter 0.5s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes lifeflow-page-enter {
+  from { opacity: 0; transform: translateY(12px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lifeflow-v2 * { scroll-behavior: auto !important; }
+  .lifeflow-v2 main > div:last-child > div { animation: none !important; }
 }

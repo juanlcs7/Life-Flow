@@ -153,7 +153,7 @@ export default function Dashboard() {
         initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-[1.75rem] border border-border/70 bg-gradient-to-br from-card via-card to-cyan-500/[0.09] p-6 text-foreground shadow-[0_24px_70px_-42px_rgba(8,145,178,.42)] dark:border-white/10 dark:from-slate-950 dark:via-slate-900 dark:to-cyan-950 dark:text-white dark:shadow-[0_24px_70px_-38px_rgba(8,145,178,.7)] sm:p-8"
+        className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#07111f] p-6 text-white shadow-[0_38px_110px_-48px_rgba(2,12,27,.85)] sm:p-8 lg:p-10"
       >
         <motion.div
           className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl"
@@ -166,6 +166,7 @@ export default function Dashboard() {
           transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
         />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_75%_30%,rgba(34,211,238,.12),transparent_28%),linear-gradient(115deg,transparent_40%,rgba(255,255,255,.04)_50%,transparent_60%)]" />
+        <div className="pointer-events-none absolute -bottom-10 right-5 font-display text-[9rem] font-extrabold tracking-[-.08em] text-white/[0.025] sm:text-[13rem]">NOW</div>
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/70 to-transparent" />
 
         <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
@@ -187,18 +188,18 @@ export default function Dashboard() {
             </motion.button>
 
             <div className="min-w-0">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.07] px-3 py-1.5 text-xs font-medium text-primary backdrop-blur dark:border-white/10 dark:bg-white/[0.07] dark:text-cyan-100">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-medium text-cyan-100 backdrop-blur">
               <AgendaFlowIcon className="h-3.5 w-3.5" />
               <span className="capitalize">{formattedDate}</span>
             </div>
-            <h1 className="font-display text-2xl font-bold tracking-[-0.03em] text-foreground dark:text-white sm:text-3xl lg:text-4xl">
+            <h1 className="font-display text-3xl font-extrabold tracking-[-0.055em] text-white sm:text-4xl lg:text-5xl">
               {greeting}, {displayName}.
             </h1>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground dark:text-slate-300 sm:text-base">
-              Veja o que está pendente e organize o restante do dia.
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
+              Sua central reuniu o que importa para você decidir o próximo passo sem perder tempo.
             </p>
-            <div className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-200">
-              <Sparkles className="h-3.5 w-3.5" />Seu dia em movimento
+            <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-emerald-300/10 px-3 py-1.5 text-xs font-semibold text-emerald-200">
+              <Sparkles className="h-3.5 w-3.5" />Tudo em um único fluxo
             </div>
             </div>
           </div>
@@ -209,7 +210,7 @@ export default function Dashboard() {
                 variant="outline"
                 size="sm"
                 onClick={handleRequestNotifications}
-                className="gap-2 border-border bg-background/70 text-foreground hover:bg-muted hover:text-foreground dark:border-white/15 dark:bg-white/[0.07] dark:text-white dark:hover:bg-white/15 dark:hover:text-white"
+                className="gap-2 border-white/15 bg-white/[0.07] text-white hover:bg-white/15 hover:text-white"
               >
                 <Bell className="h-4 w-4" />
                 Ativar lembretes
@@ -219,7 +220,7 @@ export default function Dashboard() {
               variant="outline"
               size="sm"
               onClick={() => setIsCustomizing(!isCustomizing)}
-              className="gap-2 border-border bg-background/70 text-foreground hover:bg-muted hover:text-foreground dark:border-white/15 dark:bg-white/[0.07] dark:text-white dark:hover:bg-white/15 dark:hover:text-white"
+              className="gap-2 border-white/15 bg-white/[0.07] text-white hover:bg-white/15 hover:text-white"
             >
               {isCustomizing ? <Check className="h-4 w-4" /> : <Settings2 className="h-4 w-4" />}
               {isCustomizing ? "Concluir" : "Personalizar"}

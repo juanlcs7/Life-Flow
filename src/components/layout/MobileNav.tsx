@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LogOut,
   Menu,
+  MoreHorizontal,
 } from "lucide-react";
 import {
   AgendaFlowIcon,
@@ -100,14 +101,16 @@ export function MobileNav() {
   const initials = displayName.substring(0, 2).toUpperCase();
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b bg-background lg:hidden">
-      <div className="flex h-16 items-center justify-between px-4">
+    <>
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/75 backdrop-blur-2xl lg:hidden">
+      <div className="flex h-[68px] items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md border bg-card">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-cyan-500 to-violet-600 shadow-lg shadow-primary/20">
             <img src="/lifeflow-logo.png" alt="" className="h-8 w-8 object-contain" />
           </div>
           <div>
-            <h1 className="font-display font-bold tracking-tight text-foreground">LifeFlow</h1>
+            <h1 className="font-display font-extrabold tracking-[-0.04em] text-foreground">LifeFlow</h1>
+            <p className="text-[8px] font-bold uppercase tracking-[.2em] text-primary">Life OS</p>
           </div>
         </div>
 
@@ -119,7 +122,7 @@ export function MobileNav() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="rounded-md text-foreground hover:bg-muted"
+                className="rounded-xl text-foreground hover:bg-primary/[0.07]"
                 aria-label="Abrir menu principal"
               >
                 <Menu className="w-6 h-6" />
@@ -127,7 +130,7 @@ export function MobileNav() {
             </SheetTrigger>
           <SheetContent
             side="right"
-            className="w-[300px] border-border bg-card p-0 text-foreground dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+            className="w-[320px] border-border/70 bg-card/95 p-0 text-foreground backdrop-blur-2xl dark:border-white/10"
           >
             <div className="flex flex-col h-full">
               {/* User Info */}
@@ -167,10 +170,10 @@ export function MobileNav() {
                       to={item.href}
                       onClick={() => setOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 rounded-md px-4 py-3 transition-colors",
+                        "flex items-center gap-3 rounded-xl px-4 py-3 transition-all",
                         isActive
-                          ? "bg-primary/10 text-foreground dark:bg-white/[0.09] dark:text-white"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground dark:text-slate-400 dark:hover:bg-white/[0.055] dark:hover:text-white"
+                          ? "bg-gradient-to-r from-primary/15 to-cyan-500/[0.05] text-foreground shadow-sm"
+                          : "text-muted-foreground hover:translate-x-0.5 hover:bg-muted hover:text-foreground"
                       )}
                     >
                       <item.icon
@@ -215,5 +218,13 @@ export function MobileNav() {
         </div>
       </div>
     </header>
+    <nav className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-4 rounded-[1.4rem] border border-white/60 bg-card/85 p-1.5 shadow-[0_18px_50px_-18px_rgba(15,23,42,.4)] backdrop-blur-2xl dark:border-white/10 lg:hidden" aria-label="Atalhos principais">
+      {navItems.slice(0, 3).map((item) => {
+        const isActive = location.pathname === item.href;
+        return <Link key={item.href} to={item.href} className={cn("flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[9px] font-semibold transition-all", isActive ? "bg-gradient-to-br from-primary to-cyan-600 text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:bg-primary/[0.07] hover:text-foreground")}><item.icon className="h-5 w-5" /><span>{item.label}</span></Link>;
+      })}
+      <button type="button" onClick={() => setOpen(true)} className="flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[9px] font-semibold text-muted-foreground transition-all hover:bg-primary/[0.07] hover:text-foreground"><MoreHorizontal className="h-5 w-5" /><span>Mais</span></button>
+    </nav>
+    </>
   );
 }

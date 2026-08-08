@@ -58,7 +58,7 @@ export function DashboardCard({
     >
       <Card
         className={cn(
-          "group relative cursor-pointer overflow-hidden border-white/70 bg-card/90 shadow-card backdrop-blur-sm transition-all duration-300 before:absolute before:inset-x-0 before:top-0 before:h-1 hover:-translate-y-1 hover:shadow-xl dark:border-white/5",
+          "group relative cursor-pointer overflow-hidden border-white/70 bg-card/90 shadow-card backdrop-blur-sm transition-all duration-300 before:absolute before:left-5 before:top-0 before:h-1 before:w-14 before:rounded-b-full hover:-translate-y-1.5 hover:shadow-xl dark:border-white/5",
           variantStyles[variant],
           sizeStyles[size],
           isCustomizing && "ring-2 ring-primary/20"
@@ -72,10 +72,10 @@ export function DashboardCard({
                 <GripVertical className="w-4 h-4 text-muted-foreground" />
               </div>
             )}
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted/70">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border/60 bg-background/70 shadow-sm">
               <Icon className="h-4 w-4 text-foreground/75" />
             </div>
-            <CardTitle className="text-sm font-semibold">{title}</CardTitle>
+            <CardTitle className="font-display text-sm font-extrabold tracking-[-.025em]">{title}</CardTitle>
           </div>
           {!isCustomizing && (
             <Button

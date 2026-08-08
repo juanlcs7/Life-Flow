@@ -115,10 +115,10 @@ export function PremiumModal({ open, onOpenChange, reason, onSubscribe, isSubscr
                 <Crown className="h-4 w-4" />LifeFlow Premium
               </div>
               <h2 className="mt-5 max-w-xl font-display text-3xl font-bold leading-tight tracking-[-0.035em] sm:text-4xl">
-                Mais espaço para cuidar do que importa.
+                Decida melhor. Organize mais rápido.
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
-                Transforme suas finanças, tarefas, hábitos e objetivos em uma visão completa da sua vida — sem limites no caminho.
+                Tenha uma visão inteligente do seu dinheiro e liberdade para administrar toda a sua rotina sem limites no caminho.
               </p>
 
               <div className="mt-5 flex flex-wrap gap-2">
@@ -231,7 +231,7 @@ export function PremiumModal({ open, onOpenChange, reason, onSubscribe, isSubscr
             <div className="sticky bottom-0 -mx-5 -mb-5 border-t border-border/70 bg-card/95 px-5 py-4 shadow-[0_-16px_35px_-28px_rgba(15,23,42,.45)] backdrop-blur-xl sm:-mx-8 sm:-mb-8 sm:px-8">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm font-bold">Pronto para elevar seu LifeFlow?</p>
+                  <p className="text-sm font-bold">Menos esforço para administrar. Mais clareza para viver.</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">R$ {PREMIUM_PRICE.toFixed(2).replace(".", ",")} por mês • cancele quando quiser</p>
                 </div>
                 <Button
@@ -240,7 +240,7 @@ export function PremiumModal({ open, onOpenChange, reason, onSubscribe, isSubscr
                   disabled={!onSubscribe || isSubscribing}
                   className="min-w-56 bg-gradient-to-r from-violet-600 via-primary to-cyan-500 text-white shadow-lg shadow-primary/20 hover:brightness-110"
                 >
-                  {onSubscribe ? "Continuar para pagamento" : "Pagamento disponível em breve"}
+                  {onSubscribe ? "Quero simplificar minha rotina" : "Pagamento disponível em breve"}
                   {onSubscribe ? <ArrowRight className="ml-2 h-4 w-4" /> : <Clock3 className="ml-2 h-4 w-4" />}
                 </Button>
               </div>

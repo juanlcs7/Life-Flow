@@ -48,6 +48,8 @@ import { MonthlyComparison } from "@/components/finance/MonthlyComparison";
 import { MonthForecast } from "@/components/finance/MonthForecast";
 import { PremiumFinancialSuite } from "@/components/premium/PremiumFinancialSuite";
 import { IncomeSourcesSection } from "@/components/finance/IncomeSourcesSection";
+import { MoneyBriefing } from "@/components/finance/MoneyBriefing";
+import { useIncomeSources } from "@/hooks/useIncomeSources";
 
 type TransactionFormData = Omit<NewTransaction, "date">;
 
@@ -92,6 +94,7 @@ export default function Financas() {
   const { subscriptions, monthlyCost, upcomingRenewals, isLoading: subscriptionsLoading, addSubscription, updateSubscription, deleteSubscription, paySubscription, isPaying } = useSubscriptions();
   const [payingSubscriptionId, setPayingSubscriptionId] = useState<string | null>(null);
   const { totals: investmentTotals } = useInvestments();
+  const { monthlyIncome: expectedMonthlyIncome } = useIncomeSources();
   const patrimony = totalBalance + totalSavings + investmentTotals.current;
 
   // Current month boundaries
@@ -380,6 +383,14 @@ export default function Financas() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
+          <MoneyBriefing
+            transactions={monthTransactions}
+            totalBalance={totalBalance}
+            expectedMonthlyIncome={expectedMonthlyIncome}
+            payments={payments}
+            subscriptions={subscriptions}
+            selectedMonth={selectedMonth}
+          />
           <BudgetsSection selectedMonth={selectedMonth} transactions={monthTransactions} />
           <MonthlyComparison selectedMonth={selectedMonth} transactions={transactions} />
           <MonthForecast
