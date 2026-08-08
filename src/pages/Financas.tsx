@@ -50,6 +50,7 @@ import { PremiumFinancialSuite } from "@/components/premium/PremiumFinancialSuit
 import { IncomeSourcesSection } from "@/components/finance/IncomeSourcesSection";
 import { MoneyBriefing } from "@/components/finance/MoneyBriefing";
 import { useIncomeSources } from "@/hooks/useIncomeSources";
+import { TransactionReviewInbox } from "@/components/finance/TransactionReviewInbox";
 
 type TransactionFormData = Omit<NewTransaction, "date">;
 
@@ -85,7 +86,7 @@ export default function Financas() {
   });
 
   // Hooks
-  const { transactions, isLoading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
+  const { transactions, isLoading, addTransaction, updateTransaction, deleteTransaction, reviewTransaction, reviewAllTransactions, isReviewing } = useTransactions();
   const { categoryRules, saveCategoryRules } = useTransactionCategoryRules();
   const { imports, isLoading: importsLoading, createImport, undoImport, undoingImportId } = useTransactionImports();
   const { accounts, totalBalance, isLoading: accountsLoading, addAccount, updateAccount, deleteAccount, transfer } = useAccounts();
@@ -390,6 +391,14 @@ export default function Financas() {
             payments={payments}
             subscriptions={subscriptions}
             selectedMonth={selectedMonth}
+          />
+          <TransactionReviewInbox
+            transactions={transactions}
+            accounts={accounts}
+            onReview={async (id) => { await reviewTransaction(id); toast.success("Lançamento revisado"); }}
+            onReviewAll={async () => { await reviewAllTransactions(); toast.success("Caixa financeira revisada"); }}
+            onEdit={(transaction) => { setEditingTransaction(transaction); setTransactionModalOpen(true); }}
+            isReviewing={isReviewing}
           />
           <BudgetsSection selectedMonth={selectedMonth} transactions={monthTransactions} />
           <MonthlyComparison selectedMonth={selectedMonth} transactions={transactions} />

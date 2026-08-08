@@ -1274,6 +1274,7 @@ export type Database = {
           date: string
           description: string
           id: string
+          reviewed_at: string | null
           type: string
           user_id: string
         }
@@ -1285,6 +1286,7 @@ export type Database = {
           date?: string
           description: string
           id?: string
+          reviewed_at?: string | null
           type: string
           user_id: string
         }
@@ -1296,6 +1298,7 @@ export type Database = {
           date?: string
           description?: string
           id?: string
+          reviewed_at?: string | null
           type?: string
           user_id?: string
         }

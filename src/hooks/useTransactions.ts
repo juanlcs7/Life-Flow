@@ -12,9 +12,10 @@ export interface Transaction {
   date: string;
   account_id: string | null;
   created_at: string;
+  reviewed_at?: string | null;
 }
 
-export type NewTransaction = Omit<Transaction, "id" | "user_id" | "created_at">;
+export type NewTransaction = Omit<Transaction, "id" | "user_id" | "created_at" | "reviewed_at">;
 
 export function useTransactions() {
   const { user } = useAuth();
@@ -48,7 +49,13 @@ export function useTransactions() {
           p_account_id: transaction.account_id,
         });
       if (error) throw error;
-      return data as Transaction;
+      const created = data as Transaction;
+      const { error: reviewError } = await supabase
+        .from("transactions")
+        .update({ reviewed_at: new Date().toISOString() })
+        .eq("id", created.id);
+      if (reviewError) throw reviewError;
+      return created;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] });
@@ -92,6 +99,22 @@ export function useTransactions() {
     },
   });
 
+  const reviewMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("transactions").update({ reviewed_at: new Date().toISOString() }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] }),
+  });
+
+  const reviewAllMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("transactions").update({ reviewed_at: new Date().toISOString() }).is("reviewed_at", null);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] }),
+  });
+
   return {
     transactions: query.data ?? [],
     isLoading: query.isLoading,
@@ -99,6 +122,10 @@ export function useTransactions() {
     addTransaction: addMutation.mutateAsync,
     updateTransaction: updateMutation.mutateAsync,
     deleteTransaction: deleteMutation.mutateAsync,
+    reviewTransaction: reviewMutation.mutateAsync,
+    reviewAllTransactions: reviewAllMutation.mutateAsync,
+    pendingReviewCount: (query.data ?? []).filter((transaction) => !transaction.reviewed_at).length,
+    isReviewing: reviewMutation.isPending || reviewAllMutation.isPending,
     isAdding: addMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
