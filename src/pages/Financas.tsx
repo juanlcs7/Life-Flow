@@ -53,6 +53,7 @@ import { useIncomeSources } from "@/hooks/useIncomeSources";
 import { TransactionReviewInbox } from "@/components/finance/TransactionReviewInbox";
 import { FinancialTimeline } from "@/components/finance/FinancialTimeline";
 import { RecurringExpenseDetector } from "@/components/finance/RecurringExpenseDetector";
+import { FinancialSignals } from "@/components/finance/FinancialSignals";
 
 type TransactionFormData = Omit<NewTransaction, "date">;
 
@@ -395,6 +396,7 @@ export default function Financas() {
             subscriptions={subscriptions}
             selectedMonth={selectedMonth}
           />
+          <FinancialSignals transactions={transactions} />
           <TransactionReviewInbox
             transactions={transactions}
             accounts={accounts}

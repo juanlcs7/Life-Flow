@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { getUpcomingBrazilianCalendarEvents } from "@/lib/brazilianCalendar";
 import { usePersonalEvents } from "@/hooks/usePersonalEvents";
+import { buildFinancialSignals } from "@/lib/financialSignals";
 
 type AlertTone = "danger" | "warning" | "info";
 
@@ -237,6 +238,21 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
         icon: MoneyFlowIcon,
       });
     });
+
+    buildFinancialSignals(transactions, today)
+      .filter((signal) => signal.severity !== "positive")
+      .slice(0, 3)
+      .forEach((signal) => {
+        items.push({
+          id: `financial-signal-${format(today, "yyyy-MM")}-${signal.id}`,
+          title: signal.title,
+          description: signal.description,
+          date: format(today, "yyyy-MM-dd"),
+          href: "/financas",
+          tone: signal.severity === "danger" ? "danger" : "warning",
+          icon: MoneyFlowIcon,
+        });
+      });
 
     return items.sort((a, b) => a.date.localeCompare(b.date));
   }, [budgets, financialGoals, installments, payments, personalEvents, personalGoals, subscriptions, tasks, transactions]);
