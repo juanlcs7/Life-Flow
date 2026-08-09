@@ -29,6 +29,7 @@ import { PersonalGoalModal } from "@/components/goals/PersonalGoalModal";
 import { toast } from "sonner";
 import { GettingStartedChecklist } from "@/components/onboarding/GettingStartedChecklist";
 import { PlanLimitAlert } from "@/components/premium/PlanLimitAlert";
+import { FinancialHealthScore } from "@/components/dashboard/FinancialHealthScore";
 
 const cardComponents: Record<CardId, React.ComponentType<{
   size?: "small" | "medium" | "large";
@@ -228,6 +229,8 @@ export default function Dashboard() {
           </div>
         </div>
       </motion.div>
+
+      <FinancialHealthScore />
 
       {/* Customization Panel */}
       <CustomizeDashboard isOpen={isCustomizing} onClose={() => setIsCustomizing(false)} />
