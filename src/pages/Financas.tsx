@@ -52,6 +52,7 @@ import { MoneyBriefing } from "@/components/finance/MoneyBriefing";
 import { useIncomeSources } from "@/hooks/useIncomeSources";
 import { TransactionReviewInbox } from "@/components/finance/TransactionReviewInbox";
 import { FinancialTimeline } from "@/components/finance/FinancialTimeline";
+import { RecurringExpenseDetector } from "@/components/finance/RecurringExpenseDetector";
 
 type TransactionFormData = Omit<NewTransaction, "date">;
 
@@ -79,6 +80,7 @@ export default function Financas() {
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [editingGoal, setEditingGoal] = useState<FinancialGoal | null>(null);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+  const [suggestedSubscription, setSuggestedSubscription] = useState<Partial<NewSubscription> | null>(null);
   const [selectedGoalForAdd, setSelectedGoalForAdd] = useState<FinancialGoal | null>(null);
   
   // Filters
@@ -211,7 +213,7 @@ export default function Financas() {
 
     try {
       for (const item of items) {
-        const transaction = await addTransaction(item);
+        const transaction = await addTransaction({ ...item, pending_review: true });
         importedIds.push(transaction.id);
       }
     } catch (error) {
@@ -271,7 +273,7 @@ export default function Financas() {
       <AccountModal open={accountModalOpen} onOpenChange={setAccountModalOpen} onSubmit={handleAddAccount} editData={editingAccount} />
       <FinancialGoalModal open={goalModalOpen} onOpenChange={setGoalModalOpen} onSubmit={handleAddGoal} editData={editingGoal} />
       <InstallmentModal open={installmentModalOpen} onOpenChange={setInstallmentModalOpen} onSubmit={async (data) => { await addInstallment(data); toast.success("Parcelamento registrado!"); }} accounts={accounts} />
-      <SubscriptionModal open={subscriptionModalOpen} onOpenChange={setSubscriptionModalOpen} onSubmit={handleAddSubscription} editData={editingSubscription} accounts={accounts} />
+      <SubscriptionModal open={subscriptionModalOpen} onOpenChange={(open) => { setSubscriptionModalOpen(open); if (!open) setSuggestedSubscription(null); }} onSubmit={handleAddSubscription} editData={editingSubscription} initialData={suggestedSubscription} accounts={accounts} />
       <TransferModal open={transferModalOpen} onOpenChange={setTransferModalOpen} onSubmit={async (data) => { await transfer(data); toast.success("Transferência realizada!"); }} accounts={accounts} />
       <AddToGoalModal open={addToGoalModalOpen} onOpenChange={setAddToGoalModalOpen} onSubmit={async (data) => { await addToGoal(data); toast.success("Valor adicionado!"); }} goal={selectedGoalForAdd} accounts={accounts} />
       <ImportTransactionsModal
@@ -500,6 +502,7 @@ export default function Financas() {
 
         <TabsContent value="management" className="space-y-4 mt-4">
           <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
+            <div className="lg:col-span-2"><RecurringExpenseDetector transactions={transactions} subscriptions={subscriptions} onCreate={(suggestion) => { setEditingSubscription(null); setSuggestedSubscription(suggestion); setSubscriptionModalOpen(true); }} /></div>
             <IncomeSourcesSection accounts={accounts} />
             <AccountsSection accounts={accounts} totalBalance={totalBalance} isLoading={accountsLoading} onAdd={() => { setEditingAccount(null); setAccountModalOpen(true); }} onEdit={(a) => { setEditingAccount(a); setAccountModalOpen(true); }} onDelete={(id) => { deleteAccount(id); toast.success("Conta excluída!"); }} onTransfer={() => setTransferModalOpen(true)} />
             <FinancialGoalsSection goals={goals} isLoading={goalsLoading} onAdd={() => { setEditingGoal(null); setGoalModalOpen(true); }} onEdit={(g) => { setEditingGoal(g); setGoalModalOpen(true); }} onDelete={(id) => { deleteGoal(id); toast.success("Meta excluída!"); }} onAddToGoal={(g) => { setSelectedGoalForAdd(g); setAddToGoalModalOpen(true); }} onWithdraw={async (id, amount, accountId) => { await withdrawFromGoal({ id, amount, accountId }); toast.success("Valor resgatado!"); }} accounts={accounts} />

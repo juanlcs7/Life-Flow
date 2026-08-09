@@ -15,7 +15,9 @@ export interface Transaction {
   reviewed_at?: string | null;
 }
 
-export type NewTransaction = Omit<Transaction, "id" | "user_id" | "created_at" | "reviewed_at">;
+export type NewTransaction = Omit<Transaction, "id" | "user_id" | "created_at" | "reviewed_at"> & {
+  pending_review?: boolean;
+};
 
 export function useTransactions() {
   const { user } = useAuth();
@@ -39,22 +41,25 @@ export function useTransactions() {
   const addMutation = useMutation({
     mutationFn: async (transaction: NewTransaction) => {
       if (!user) throw new Error("User not authenticated");
+      const { pending_review: pendingReview, ...financialTransaction } = transaction;
       const { data, error } = await supabase
         .rpc("create_financial_transaction", {
-          p_type: transaction.type,
-          p_category: transaction.category,
-          p_amount: transaction.amount,
-          p_description: transaction.description,
-          p_date: transaction.date,
-          p_account_id: transaction.account_id,
+          p_type: financialTransaction.type,
+          p_category: financialTransaction.category,
+          p_amount: financialTransaction.amount,
+          p_description: financialTransaction.description,
+          p_date: financialTransaction.date,
+          p_account_id: financialTransaction.account_id,
         });
       if (error) throw error;
       const created = data as Transaction;
-      const { error: reviewError } = await supabase
-        .from("transactions")
-        .update({ reviewed_at: new Date().toISOString() })
-        .eq("id", created.id);
-      if (reviewError) throw reviewError;
+      if (!pendingReview) {
+        const { error: reviewError } = await supabase
+          .from("transactions")
+          .update({ reviewed_at: new Date().toISOString() })
+          .eq("id", created.id);
+        if (reviewError) throw reviewError;
+      }
       return created;
     },
     onSuccess: () => {

@@ -14,6 +14,7 @@ interface SubscriptionModalProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: NewSubscription) => Promise<void>;
   editData?: Subscription | null;
+  initialData?: Partial<NewSubscription> | null;
   accounts: Account[];
 }
 
@@ -28,7 +29,7 @@ const categories = [
   "Outros",
 ];
 
-export function SubscriptionModal({ open, onOpenChange, onSubmit, editData, accounts }: SubscriptionModalProps) {
+export function SubscriptionModal({ open, onOpenChange, onSubmit, editData, initialData, accounts }: SubscriptionModalProps) {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [frequency, setFrequency] = useState<"weekly" | "monthly" | "yearly">("monthly");
@@ -52,17 +53,17 @@ export function SubscriptionModal({ open, onOpenChange, onSubmit, editData, acco
       setActive(editData.active);
       setAutoDebit(editData.auto_debit);
     } else {
-      setName("");
-      setAmount("");
-      setFrequency("monthly");
-      setCategory("Streaming");
-      setNextBillingDate("");
-      setReminderDaysBefore("3");
-      setAccountId("");
-      setActive(true);
-      setAutoDebit(false);
+      setName(initialData?.name ?? "");
+      setAmount(initialData?.amount ? String(initialData.amount) : "");
+      setFrequency(initialData?.frequency ?? "monthly");
+      setCategory(initialData?.category ?? "Streaming");
+      setNextBillingDate(initialData?.next_billing_date ?? "");
+      setReminderDaysBefore(String(initialData?.reminder_days_before ?? 3));
+      setAccountId(initialData?.account_id ?? "");
+      setActive(initialData?.active ?? true);
+      setAutoDebit(initialData?.auto_debit ?? false);
     }
-  }, [editData, open]);
+  }, [editData, initialData, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
