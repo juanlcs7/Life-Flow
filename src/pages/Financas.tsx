@@ -413,7 +413,7 @@ export default function Financas() {
             payments={payments}
             subscriptions={subscriptions}
           />
-          <BudgetsSection selectedMonth={selectedMonth} transactions={monthTransactions} />
+          <BudgetsSection selectedMonth={selectedMonth} transactions={monthTransactions} historyTransactions={transactions} />
           <MonthlyComparison selectedMonth={selectedMonth} transactions={transactions} />
           <MonthForecast
             selectedMonth={selectedMonth}

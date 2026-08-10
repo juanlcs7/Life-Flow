@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, Pencil, Plus, Trash2, WalletCards } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Pencil, Plus, Sparkles, Trash2, WalletCards, WandSparkles } from "lucide-react";
 import { isSameMonth } from "date-fns";
 import { toast } from "sonner";
 import type { Transaction } from "@/hooks/useTransactions";
@@ -14,13 +14,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { useTransactionCategories } from "@/hooks/useTransactionCategories";
 import { useBudgetAlerts } from "@/hooks/useBudgetAlerts";
+import { buildSmartBudgetSuggestions } from "@/lib/smartBudget";
 
 export function BudgetsSection({
   selectedMonth,
   transactions,
+  historyTransactions,
 }: {
   selectedMonth: Date;
   transactions: Transaction[];
+  historyTransactions?: Transaction[];
 }) {
   const { categories: transactionCategories } = useTransactionCategories();
   const { budgets, isLoading, saveBudget, deleteBudget, isSaving } = useBudgets(selectedMonth);
@@ -52,6 +55,10 @@ export function BudgetsSection({
   );
   const exceededBudgets = budgetProgress.filter((item) => item.exceeded);
   const nearBudgets = budgetProgress.filter((item) => item.near && !item.exceeded);
+  const smartSuggestions = useMemo(() => {
+    const existing = new Set(budgets.map((budget) => budget.category));
+    return buildSmartBudgetSuggestions(historyTransactions ?? transactions).filter((suggestion) => !existing.has(suggestion.category)).slice(0, 6);
+  }, [budgets, historyTransactions, transactions]);
 
   useEffect(() => {
     if (isLoading || !isSameMonth(selectedMonth, new Date())) return;
@@ -112,6 +119,11 @@ export function BudgetsSection({
     setOpen(false);
   };
 
+  const createSuggestedBudgets = async () => {
+    await Promise.all(smartSuggestions.map((suggestion) => saveBudget({ category: suggestion.category, amount: suggestion.suggestedAmount })));
+    toast.success(`${smartSuggestions.length} ${smartSuggestions.length === 1 ? "orçamento criado" : "orçamentos criados"} com base no seu histórico`);
+  };
+
   return (
     <>
       <Card className="relative overflow-hidden rounded-[1.75rem] border-warning/15 bg-gradient-to-br from-card via-card to-warning/[0.055] p-4 shadow-sm sm:p-5">
@@ -126,6 +138,14 @@ export function BudgetsSection({
             <Plus className="mr-1.5 h-4 w-4" />Novo limite
           </Button>
         </div>
+
+        {smartSuggestions.length > 0 && (
+          <div className="relative mt-5 overflow-hidden rounded-[1.5rem] border border-violet-500/20 bg-gradient-to-br from-violet-500/[0.08] via-background/60 to-cyan-500/[0.06] p-4">
+            <div className="pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full bg-violet-500/15 blur-3xl" />
+            <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"><div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-violet-500/10 text-violet-600"><WandSparkles className="h-5 w-5" /></span><div><p className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[.16em] text-violet-600"><Sparkles className="h-3 w-3" />Orçamento que se monta sozinho</p><p className="mt-1 text-sm font-extrabold">Encontramos {smartSuggestions.length} limites possíveis</p><p className="mt-1 text-[10px] leading-4 text-muted-foreground">Calculados com os últimos três meses completos e uma margem para variações.</p></div></div><Button size="sm" onClick={createSuggestedBudgets} disabled={isSaving}><CheckCircle2 className="h-4 w-4" />Criar todos</Button></div>
+            <div className="relative mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{smartSuggestions.map((suggestion) => <div key={suggestion.category} className="flex items-center justify-between rounded-xl border border-border/55 bg-background/65 px-3 py-2.5"><div className="min-w-0"><p className="truncate text-xs font-bold">{suggestion.category}</p><p className="mt-0.5 text-[9px] text-muted-foreground">Média {suggestion.average.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} • confiança {suggestion.confidence === "high" ? "alta" : "média"}</p></div><button type="button" onClick={async () => { await saveBudget({ category: suggestion.category, amount: suggestion.suggestedAmount }); toast.success(`Orçamento de ${suggestion.category} criado`); }} className="ml-2 shrink-0 rounded-lg bg-violet-500/10 px-2.5 py-1.5 text-[10px] font-extrabold text-violet-600 hover:bg-violet-500/15">{suggestion.suggestedAmount.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 })}</button></div>)}</div>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="mt-5 h-24 animate-pulse rounded-xl bg-muted/40" />
