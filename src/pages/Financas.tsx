@@ -54,6 +54,8 @@ import { TransactionReviewInbox } from "@/components/finance/TransactionReviewIn
 import { FinancialTimeline } from "@/components/finance/FinancialTimeline";
 import { RecurringExpenseDetector } from "@/components/finance/RecurringExpenseDetector";
 import { FinancialSignals } from "@/components/finance/FinancialSignals";
+import { MoneyAllocationPlan } from "@/components/finance/MoneyAllocationPlan";
+import { useBudgets } from "@/hooks/useBudgets";
 
 type TransactionFormData = Omit<NewTransaction, "date">;
 
@@ -100,6 +102,7 @@ export default function Financas() {
   const [payingSubscriptionId, setPayingSubscriptionId] = useState<string | null>(null);
   const { totals: investmentTotals } = useInvestments();
   const { activeIncomeSources, monthlyIncome: expectedMonthlyIncome } = useIncomeSources();
+  const { budgets: currentBudgets } = useBudgets(selectedMonth);
   const patrimony = totalBalance + totalSavings + investmentTotals.current;
 
   // Current month boundaries
@@ -414,6 +417,14 @@ export default function Financas() {
             subscriptions={subscriptions}
           />
           <BudgetsSection selectedMonth={selectedMonth} transactions={monthTransactions} historyTransactions={transactions} />
+          <MoneyAllocationPlan
+            expectedIncome={expectedMonthlyIncome}
+            budgets={currentBudgets}
+            subscriptions={subscriptions}
+            installments={installments}
+            payments={payments}
+            goals={goals}
+          />
           <MonthlyComparison selectedMonth={selectedMonth} transactions={transactions} />
           <MonthForecast
             selectedMonth={selectedMonth}
