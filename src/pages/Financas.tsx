@@ -424,6 +424,8 @@ export default function Financas() {
             installments={installments}
             payments={payments}
             goals={goals}
+            transactions={monthTransactions}
+            selectedMonth={selectedMonth}
           />
           <MonthlyComparison selectedMonth={selectedMonth} transactions={transactions} />
           <MonthForecast

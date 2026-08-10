@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildMoneyPlan } from "@/lib/moneyPlan";
+import { buildMoneyPlan, calculateSafeToSpend } from "@/lib/moneyPlan";
 
 describe("money plan", () => {
   it("does not double count commitments already covered by a category budget", () => {
@@ -13,5 +13,17 @@ describe("money plan", () => {
     const plan = buildMoneyPlan({ income: 3000, commitments: [], budgets: [], goals: [{ name: "Viagem", remaining: 1200, monthsRemaining: 4 }] });
     expect(plan.goals).toBe(300);
     expect(plan.unassigned).toBe(2700);
+  });
+
+  it("turns the remaining flexible money into a safe daily amount", () => {
+    const safe = calculateSafeToSpend({ unassigned: 300, variableBudget: 900, variableSpent: 600, daysRemaining: 10 });
+    expect(safe.available).toBe(600);
+    expect(safe.daily).toBe(60);
+  });
+
+  it("never recommends spending money when the plan is overallocated", () => {
+    const safe = calculateSafeToSpend({ unassigned: -200, variableBudget: 500, variableSpent: 700, daysRemaining: 5 });
+    expect(safe.available).toBe(0);
+    expect(safe.daily).toBe(0);
   });
 });
