@@ -4,6 +4,7 @@ import {
   LogOut,
   Menu,
   MoreHorizontal,
+  Plus,
 } from "lucide-react";
 import {
   AgendaFlowIcon,
@@ -218,8 +219,13 @@ export function MobileNav() {
         </div>
       </div>
     </header>
-    <nav className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-4 rounded-[1.4rem] border border-white/60 bg-card/85 p-1.5 shadow-[0_18px_50px_-18px_rgba(15,23,42,.4)] backdrop-blur-2xl dark:border-white/10 lg:hidden" aria-label="Atalhos principais">
-      {navItems.slice(0, 3).map((item) => {
+    <nav className="fixed inset-x-3 bottom-[max(.75rem,env(safe-area-inset-bottom))] z-40 grid grid-cols-5 items-end rounded-[1.4rem] border border-white/60 bg-card/85 p-1.5 shadow-[0_18px_50px_-18px_rgba(15,23,42,.4)] backdrop-blur-2xl dark:border-white/10 lg:hidden" aria-label="Atalhos principais">
+      {navItems.slice(0, 2).map((item) => {
+        const isActive = location.pathname === item.href;
+        return <Link key={item.href} to={item.href} className={cn("flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[9px] font-semibold transition-all", isActive ? "bg-gradient-to-br from-primary to-cyan-600 text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:bg-primary/[0.07] hover:text-foreground")}><item.icon className="h-5 w-5" /><span>{item.label}</span></Link>;
+      })}
+      <button type="button" onClick={() => navigate("/financas?novaTransacao=1")} className="group -mt-5 flex flex-col items-center gap-1 text-[9px] font-extrabold text-primary" aria-label="Adicionar nova transação"><span className="grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-primary via-cyan-500 to-finance text-white shadow-[0_12px_28px_-8px_rgba(6,182,212,.8)] ring-4 ring-background/95 transition-transform group-active:scale-90"><Plus className="h-7 w-7" strokeWidth={2.75} /></span><span>Nova</span></button>
+      {navItems.slice(2, 3).map((item) => {
         const isActive = location.pathname === item.href;
         return <Link key={item.href} to={item.href} className={cn("flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[9px] font-semibold transition-all", isActive ? "bg-gradient-to-br from-primary to-cyan-600 text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:bg-primary/[0.07] hover:text-foreground")}><item.icon className="h-5 w-5" /><span>{item.label}</span></Link>;
       })}

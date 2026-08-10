@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { Plus, TrendingUp, TrendingDown, Wallet, PiggyBank, Loader2, CreditCard, BarChart3, Upload, History, LayoutDashboard, Landmark, ChartSpline, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ type TransactionFormData = Omit<NewTransaction, "date">;
 
 export default function Financas() {
   const reduceMotion = useReducedMotion();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const { isPremium, canAddTransaction, canUseReports, usage, limits } = usePlan();
@@ -104,6 +106,22 @@ export default function Financas() {
   const { activeIncomeSources, monthlyIncome: expectedMonthlyIncome } = useIncomeSources();
   const { budgets: currentBudgets } = useBudgets(selectedMonth);
   const patrimony = totalBalance + totalSavings + investmentTotals.current;
+
+  useEffect(() => {
+    if (searchParams.get("novaTransacao") !== "1") return;
+
+    setEditingTransaction(null);
+    if (canAddTransaction) {
+      setTransactionModalOpen(true);
+    } else {
+      setPremiumReason(`Plano gratuito permite ${limits.transactionsPerMonth} transações por mês. Você já registrou ${usage.transactionsThisMonth}.`);
+      setPremiumOpen(true);
+    }
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("novaTransacao");
+    setSearchParams(nextParams, { replace: true });
+  }, [canAddTransaction, limits.transactionsPerMonth, searchParams, setSearchParams, usage.transactionsThisMonth]);
 
   // Current month boundaries
   const currentMonthStart = startOfMonth(selectedMonth);
