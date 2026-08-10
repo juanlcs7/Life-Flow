@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import { Plus, TrendingUp, TrendingDown, Wallet, PiggyBank, Loader2, CreditCard, BarChart3, Upload, History, LayoutDashboard, Landmark, ChartSpline, Sparkles } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Wallet, PiggyBank, Loader2, CreditCard, BarChart3, Upload, History, LayoutDashboard, Landmark, ChartSpline, Sparkles, Route, ListChecks, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -57,8 +57,16 @@ import { RecurringExpenseDetector } from "@/components/finance/RecurringExpenseD
 import { FinancialSignals } from "@/components/finance/FinancialSignals";
 import { MoneyAllocationPlan } from "@/components/finance/MoneyAllocationPlan";
 import { useBudgets } from "@/hooks/useBudgets";
+import { cn } from "@/lib/utils";
 
 type TransactionFormData = Omit<NewTransaction, "date">;
+
+function FinanceSectionIntro({ icon: Icon, eyebrow, title, description, tone = "from-finance/15 to-primary/5" }: { icon: LucideIcon; eyebrow: string; title: string; description: string; tone?: string }) {
+  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn("relative overflow-hidden rounded-[1.6rem] border border-finance/10 bg-gradient-to-r p-4 sm:p-5", tone)}>
+    <div className="pointer-events-none absolute -right-10 -top-14 h-32 w-32 rounded-full bg-finance/10 blur-3xl" />
+    <div className="relative flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-finance/10 bg-background/60 text-finance shadow-sm"><Icon className="h-4.5 w-4.5" /></span><div><p className="text-[9px] font-black uppercase tracking-[.2em] text-finance">{eyebrow}</p><h2 className="mt-1 font-display text-lg font-black tracking-[-.03em]">{title}</h2><p className="mt-1 max-w-2xl text-[11px] leading-5 text-muted-foreground">{description}</p></div></div>
+  </motion.div>;
+}
 
 export default function Financas() {
   const reduceMotion = useReducedMotion();
@@ -401,14 +409,17 @@ export default function Financas() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid h-[52px] w-full grid-cols-4 rounded-2xl border border-finance/15 bg-gradient-to-r from-card/90 via-card to-finance/[0.06] p-1.5 shadow-sm lg:w-auto lg:inline-grid">
-          <TabsTrigger value="overview" className="gap-2 rounded-xl px-4 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><LayoutDashboard className="h-4 w-4" /><span className="hidden sm:inline">Visão Geral</span><span className="sm:hidden">Visão</span></TabsTrigger>
-          <TabsTrigger value="management" className="gap-2 rounded-xl px-4 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><Landmark className="h-4 w-4" />Gestão</TabsTrigger>
-          <TabsTrigger value="reports" className="gap-2 rounded-xl px-4 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><ChartSpline className="h-4 w-4" /><span className="hidden sm:inline">Relatórios</span><span className="sm:hidden">Dados</span></TabsTrigger>
-          <TabsTrigger value="intelligence" className="gap-2 rounded-xl px-2 sm:px-4 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-lg"><Sparkles className="h-4 w-4" /><span className="hidden sm:inline">Inteligência</span><span className="sm:hidden">IA</span></TabsTrigger>
+        <TabsList className="flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-2xl border border-finance/15 bg-gradient-to-r from-card/90 via-card to-finance/[0.06] p-1.5 shadow-sm [scrollbar-width:none]">
+          <TabsTrigger value="overview" className="h-10 shrink-0 gap-2 rounded-xl px-3.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><LayoutDashboard className="h-4 w-4" />Resumo</TabsTrigger>
+          <TabsTrigger value="planning" className="h-10 shrink-0 gap-2 rounded-xl px-3.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><Route className="h-4 w-4" />Plano</TabsTrigger>
+          <TabsTrigger value="transactions" className="h-10 shrink-0 gap-2 rounded-xl px-3.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><ListChecks className="h-4 w-4" />Lançamentos</TabsTrigger>
+          <TabsTrigger value="management" className="h-10 shrink-0 gap-2 rounded-xl px-3.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><Landmark className="h-4 w-4" />Gestão</TabsTrigger>
+          <TabsTrigger value="reports" className="h-10 shrink-0 gap-2 rounded-xl px-3.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-finance data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg"><ChartSpline className="h-4 w-4" />Relatórios</TabsTrigger>
+          <TabsTrigger value="intelligence" className="h-10 shrink-0 gap-2 rounded-xl px-3.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-lg"><Sparkles className="h-4 w-4" />Inteligência</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
+          <FinanceSectionIntro icon={LayoutDashboard} eyebrow="Leitura rápida" title="Seu mês em perspectiva" description="O essencial para entender onde você está, o que mudou e o que merece atenção agora." />
           <MoneyBriefing
             transactions={monthTransactions}
             totalBalance={totalBalance}
@@ -418,33 +429,6 @@ export default function Financas() {
             selectedMonth={selectedMonth}
           />
           <FinancialSignals transactions={transactions} />
-          <TransactionReviewInbox
-            transactions={transactions}
-            accounts={accounts}
-            onReview={async (id) => { await reviewTransaction(id); toast.success("Lançamento revisado"); }}
-            onReviewAll={async () => { await reviewAllTransactions(); toast.success("Caixa financeira revisada"); }}
-            onEdit={(transaction) => { setEditingTransaction(transaction); setTransactionModalOpen(true); }}
-            isReviewing={isReviewing}
-          />
-          <FinancialTimeline
-            totalBalance={totalBalance}
-            accounts={accounts}
-            incomeSources={activeIncomeSources}
-            installments={installments}
-            payments={payments}
-            subscriptions={subscriptions}
-          />
-          <BudgetsSection selectedMonth={selectedMonth} transactions={monthTransactions} historyTransactions={transactions} />
-          <MoneyAllocationPlan
-            expectedIncome={expectedMonthlyIncome}
-            budgets={currentBudgets}
-            subscriptions={subscriptions}
-            installments={installments}
-            payments={payments}
-            goals={goals}
-            transactions={monthTransactions}
-            selectedMonth={selectedMonth}
-          />
           <MonthlyComparison selectedMonth={selectedMonth} transactions={transactions} />
           <MonthForecast
             selectedMonth={selectedMonth}
@@ -495,45 +479,27 @@ export default function Financas() {
             )}
           </Card>
 
-          {/* Filters & Transactions */}
+        </TabsContent>
+
+        <TabsContent value="planning" className="mt-4 space-y-4">
+          <FinanceSectionIntro icon={Route} eyebrow="Plano do mês" title="Dê uma função ao seu dinheiro" description="Organize compromissos, limites e metas antes de decidir o que pode gastar." tone="from-emerald-500/12 to-cyan-500/5" />
+          <FinancialTimeline totalBalance={totalBalance} accounts={accounts} incomeSources={activeIncomeSources} installments={installments} payments={payments} subscriptions={subscriptions} />
+          <BudgetsSection selectedMonth={selectedMonth} transactions={monthTransactions} historyTransactions={transactions} />
+          <MoneyAllocationPlan expectedIncome={expectedMonthlyIncome} budgets={currentBudgets} subscriptions={subscriptions} installments={installments} payments={payments} goals={goals} transactions={monthTransactions} selectedMonth={selectedMonth} />
+        </TabsContent>
+
+        <TabsContent value="transactions" className="mt-4 space-y-4">
+          <FinanceSectionIntro icon={ListChecks} eyebrow="Caixa financeira" title="Revise e encontre cada lançamento" description="Importações pendentes, filtros e histórico mensal ficam reunidos aqui." tone="from-violet-500/10 to-cyan-500/5" />
+          <TransactionReviewInbox transactions={transactions} accounts={accounts} onReview={async (id) => { await reviewTransaction(id); toast.success("Lançamento revisado"); }} onReviewAll={async () => { await reviewAllTransactions(); toast.success("Caixa financeira revisada"); }} onEdit={(transaction) => { setEditingTransaction(transaction); setTransactionModalOpen(true); }} isReviewing={isReviewing} />
           <TransactionFilters accounts={accounts} onFilter={setFilters} categories={categories} />
           <Card className="overflow-hidden rounded-[1.75rem] border-finance/10 bg-gradient-to-br from-card via-card to-primary/[0.035] p-4 shadow-sm sm:p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h3 className="font-display text-base font-semibold">Transações recentes</h3>
-                <p className="mt-0.5 text-xs text-muted-foreground">{filteredTransactions.length} lançamento{filteredTransactions.length === 1 ? "" : "s"} no período</p>
-              </div>
-              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">{format(selectedMonth, "MMM yyyy", { locale: ptBR })}</span>
-            </div>
-            {isLoading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div> : filteredTransactions.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground"><p className="text-sm">Nenhuma transação encontrada</p></div>
-            ) : (
-              <div className="max-h-96 space-y-1.5 overflow-y-auto pr-1">
-                {filteredTransactions.slice(0, 20).map(t => (
-                  <div key={t.id} className="group flex items-center justify-between rounded-2xl border border-border/40 bg-background/55 p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-finance/20 hover:bg-finance/[0.035] hover:shadow-md motion-reduce:hover:translate-y-0">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-2xl shadow-sm ${t.type === "income" ? "bg-success/10" : "bg-destructive/10"}`}>
-                        {t.type === "income" ? <TrendingUp className="w-4 h-4 text-success" /> : <CreditCard className="w-4 h-4 text-destructive" />}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-xs font-semibold sm:text-sm">{t.description}</p>
-                        <p className="text-[10px] sm:text-xs text-muted-foreground">{t.category} • {format(parseISO(t.date), "dd MMM", { locale: ptBR })}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <p className={`text-xs font-bold sm:text-sm ${t.type === "income" ? "text-success" : "text-destructive"}`}>
-                        {t.type === "income" ? "+" : "-"}{t.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                      </p>
-                      <ContextActionMenu onEdit={() => { setEditingTransaction(t); setTransactionModalOpen(true); }} onDelete={() => { deleteTransaction(t.id); toast.success("Excluído!"); }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="mb-4 flex items-center justify-between"><div><h3 className="font-display text-base font-semibold">Transações do período</h3><p className="mt-0.5 text-xs text-muted-foreground">{filteredTransactions.length} lançamento{filteredTransactions.length === 1 ? "" : "s"} encontrado{filteredTransactions.length === 1 ? "" : "s"}</p></div><span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">{format(selectedMonth, "MMM yyyy", { locale: ptBR })}</span></div>
+            {isLoading ? <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div> : filteredTransactions.length === 0 ? <div className="py-8 text-center text-muted-foreground"><p className="text-sm">Nenhuma transação encontrada</p></div> : <div className="max-h-[34rem] space-y-1.5 overflow-y-auto pr-1">{filteredTransactions.slice(0, 30).map((transaction) => <div key={transaction.id} className="group flex items-center justify-between rounded-2xl border border-border/40 bg-background/55 p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-finance/20 hover:bg-finance/[0.035] hover:shadow-md motion-reduce:hover:translate-y-0"><div className="flex min-w-0 flex-1 items-center gap-2"><div className={cn("flex h-10 w-10 items-center justify-center rounded-2xl shadow-sm", transaction.type === "income" ? "bg-success/10" : "bg-destructive/10")}>{transaction.type === "income" ? <TrendingUp className="h-4 w-4 text-success" /> : <CreditCard className="h-4 w-4 text-destructive" />}</div><div className="min-w-0"><p className="truncate text-xs font-semibold sm:text-sm">{transaction.description}</p><p className="text-[10px] text-muted-foreground sm:text-xs">{transaction.category} • {format(parseISO(transaction.date), "dd MMM", { locale: ptBR })}</p></div></div><div className="flex items-center gap-2"><p className={cn("text-xs font-bold sm:text-sm", transaction.type === "income" ? "text-success" : "text-destructive")}>{transaction.type === "income" ? "+" : "-"}{transaction.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p><ContextActionMenu onEdit={() => { setEditingTransaction(transaction); setTransactionModalOpen(true); }} onDelete={() => { deleteTransaction(transaction.id); toast.success("Excluído!"); }} /></div></div>)}</div>}
           </Card>
         </TabsContent>
 
         <TabsContent value="management" className="space-y-4 mt-4">
+          <FinanceSectionIntro icon={Landmark} eyebrow="Estrutura financeira" title="Tudo que sustenta seu dinheiro" description="Renda, contas, parcelas, assinaturas, metas e investimentos organizados por função." tone="from-blue-500/10 to-violet-500/5" />
           <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
             <div className="lg:col-span-2"><RecurringExpenseDetector transactions={transactions} subscriptions={subscriptions} onCreate={(suggestion) => { setEditingSubscription(null); setSuggestedSubscription(suggestion); setSubscriptionModalOpen(true); }} /></div>
             <IncomeSourcesSection accounts={accounts} />
@@ -546,7 +512,8 @@ export default function Financas() {
           </div>
         </TabsContent>
 
-        <TabsContent value="reports" className="mt-4">
+        <TabsContent value="reports" className="mt-4 space-y-4">
+          <FinanceSectionIntro icon={ChartSpline} eyebrow="Leitura profunda" title="Relatórios sem distrações" description="Compare períodos, encontre padrões e transforme seus dados em decisões." tone="from-sky-500/10 to-indigo-500/5" />
           {canUseReports ? (
             <AdvancedReports transactions={transactions} isLoading={isLoading} />
           ) : (
@@ -564,7 +531,8 @@ export default function Financas() {
           )}
         </TabsContent>
 
-        <TabsContent value="intelligence" className="mt-4">
+        <TabsContent value="intelligence" className="mt-4 space-y-4">
+          <FinanceSectionIntro icon={Sparkles} eyebrow="LifeFlow Intelligence" title="Seu dinheiro, interpretado" description="Insights avançados para antecipar riscos, descobrir oportunidades e evoluir seu plano." tone="from-violet-500/12 to-cyan-500/5" />
           <PremiumFinancialSuite />
         </TabsContent>
       </Tabs>
