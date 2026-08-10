@@ -1,14 +1,15 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { differenceInCalendarDays, differenceInCalendarMonths, endOfMonth, isSameMonth, parseISO } from "date-fns";
-import { CalendarDays, CircleAlert, Coins, Flag, Gauge, Layers3, ReceiptText, Sparkles, WalletCards } from "lucide-react";
+import { CalendarDays, CircleAlert, Coins, Flag, Gauge, Layers3, ReceiptText, ShieldCheck, ShoppingBag, Sparkles, TriangleAlert, WalletCards } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import type { MonthlyBudget } from "@/hooks/useBudgets";
 import type { FinancialGoal } from "@/hooks/useFinancialGoals";
 import type { Installment, InstallmentPayment } from "@/hooks/useInstallments";
 import type { Subscription } from "@/hooks/useSubscriptions";
 import type { Transaction } from "@/hooks/useTransactions";
-import { buildMoneyPlan, calculateSafeToSpend } from "@/lib/moneyPlan";
+import { buildMoneyPlan, calculateSafeToSpend, simulatePurchaseImpact } from "@/lib/moneyPlan";
 import { monthlyEquivalent } from "@/lib/financialCalculations";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,20 @@ interface Props {
   goals: FinancialGoal[];
   transactions: Transaction[];
   selectedMonth: Date;
+}
+
+function PurchaseSimulator({ available, daysRemaining }: { available: number; daysRemaining: number }) {
+  const [purchaseValue, setPurchaseValue] = useState("");
+  const amount = Number(purchaseValue.replace(",", ".")) || 0;
+  const simulation = simulatePurchaseImpact({ amount, available, daysRemaining });
+  const feedback = simulation.status === "risk"
+    ? { title: "Essa compra ultrapassa seu valor seguro", text: `Faltariam ${money(Math.max(0, simulation.purchase - available))} para manter o plano intacto.`, tone: "border-rose-500/20 bg-rose-500/[0.06] text-rose-600", icon: TriangleAlert }
+    : simulation.status === "caution"
+      ? { title: "Cabe no mês, mas reduz sua margem", text: `Seu limite diário cairia para ${money(simulation.dailyAfter)}.`, tone: "border-amber-500/20 bg-amber-500/[0.06] text-amber-600", icon: TriangleAlert }
+      : { title: "A compra cabe no seu plano", text: `Depois dela, ainda restariam ${money(simulation.remaining)} disponíveis.`, tone: "border-emerald-500/20 bg-emerald-500/[0.06] text-emerald-600", icon: ShieldCheck };
+  const FeedbackIcon = feedback.icon;
+
+  return <div className="mt-3 rounded-[1.5rem] border border-border/55 bg-background/45 p-4 sm:p-5"><div className="flex flex-col gap-4 lg:flex-row lg:items-end"><div className="flex-1"><div className="flex items-center gap-2"><ShoppingBag className="h-4 w-4 text-violet-500" /><p className="text-[10px] font-bold uppercase tracking-[.16em] text-violet-600">Antes de comprar</p></div><p className="mt-1 text-xs text-muted-foreground">Simule uma compra sem alterar suas transações.</p><div className="relative mt-3 max-w-xs"><span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">R$</span><Input inputMode="decimal" value={purchaseValue} onChange={(event) => setPurchaseValue(event.target.value.replace(/[^0-9,.]/g, ""))} placeholder="0,00" className="h-11 rounded-xl pl-10 text-sm font-bold" /></div></div><div className="flex flex-wrap gap-2">{[50, 100, 250, 500].map((preset) => <button key={preset} type="button" onClick={() => setPurchaseValue(String(preset))} className="rounded-full border border-border/60 bg-background/70 px-3 py-1.5 text-[10px] font-semibold transition-colors hover:border-violet-500/30 hover:text-violet-600">+ {money(preset)}</button>)}</div></div>{simulation.status !== "idle" && <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className={cn("mt-4 flex items-start gap-3 rounded-2xl border p-3.5", feedback.tone)}><FeedbackIcon className="mt-0.5 h-4 w-4 shrink-0" /><div><p className="text-xs font-extrabold">{feedback.title}</p><p className="mt-1 text-[10px] leading-4 text-muted-foreground">{feedback.text}</p><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-background/60"><span className="block h-full rounded-full bg-current transition-all" style={{ width: `${simulation.impactPercent}%` }} /></div></div></motion.div>}</div>;
 }
 
 export function MoneyAllocationPlan({ expectedIncome, budgets, subscriptions, installments, payments, goals, transactions, selectedMonth }: Props) {
@@ -69,6 +84,7 @@ export function MoneyAllocationPlan({ expectedIncome, budgets, subscriptions, in
           <div className="mt-6 flex h-4 overflow-hidden rounded-full bg-muted">{parts.slice(0, 3).map((part) => <span key={part.label} className={part.color} style={{ width: `${Math.min(100, Math.max(0, (part.value / plan.income) * 100))}%` }} />)}{!plan.overallocated && <span className={parts[3].color} style={{ width: `${Math.min(100, Math.max(0, (plan.unassigned / plan.income) * 100))}%` }} />}</div>
           <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">{parts.map((part) => { const Icon = part.icon; return <div key={part.label} className="rounded-2xl border border-border/55 bg-background/55 p-3.5"><span className={cn("grid h-8 w-8 place-items-center rounded-xl", part.tone)}><Icon className="h-4 w-4" /></span><p className="mt-3 text-[10px] text-muted-foreground">{part.label}</p><p className={cn("mt-1 text-sm font-extrabold", plan.overallocated && part === parts[3] && "text-rose-600")}>{money(part.value)}</p></div>; })}</div>
           {isSameMonth(selectedMonth, new Date()) && !plan.overallocated && <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-cyan-500/20 bg-gradient-to-r from-cyan-500/[0.09] via-background/70 to-violet-500/[0.08] p-4 sm:p-5"><div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-cyan-500/12 text-cyan-600"><Gauge className="h-5 w-5" /></span><div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-cyan-700 dark:text-cyan-300">Quanto posso gastar hoje?</p><p className="mt-1 font-display text-2xl font-black tracking-tight text-foreground">{money(safeSpending.daily)}</p><p className="mt-1 text-[10px] leading-4 text-muted-foreground">Valor diário sugerido sem consumir o que já está reservado no seu plano.</p></div></div><div className="flex items-center gap-2 rounded-2xl border border-border/50 bg-background/60 px-3.5 py-2.5 text-[10px] text-muted-foreground"><CalendarDays className="h-4 w-4 text-violet-500" /><span><strong className="text-foreground">{safeSpending.daysRemaining} dias</strong> restantes · {money(safeSpending.available)} disponíveis</span></div></div></div>}
+          {isSameMonth(selectedMonth, new Date()) && !plan.overallocated && safeSpending.available > 0 && <PurchaseSimulator available={safeSpending.available} daysRemaining={safeSpending.daysRemaining} />}
           {plan.overallocated ? <div className="mt-4 flex items-start gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/[0.06] p-4"><CircleAlert className="mt-0.5 h-5 w-5 text-rose-600" /><div><p className="text-sm font-bold text-rose-700 dark:text-rose-300">Seu plano ultrapassa a renda prevista</p><p className="mt-1 text-xs text-muted-foreground">Revise limites, assinaturas ou o valor mensal reservado para metas.</p></div></div> : plan.unassigned > plan.income * 0.2 && <div className="mt-4 rounded-2xl border border-amber-500/15 bg-amber-500/[0.05] p-4 text-xs"><strong className="text-amber-700 dark:text-amber-300">Ainda há {money(plan.unassigned)} sem destino.</strong><span className="text-muted-foreground"> Você pode aumentar sua reserva, acelerar uma meta ou manter esse valor como margem.</span></div>}
           {plan.goalAllocations.length > 0 && <div className="mt-4 border-t border-border/60 pt-4"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-muted-foreground">Reserva mensal para metas</p><div className="mt-2 flex flex-wrap gap-2">{plan.goalAllocations.slice(0, 4).map((goal) => <span key={goal.name} className="rounded-full border border-emerald-500/15 bg-emerald-500/[0.06] px-3 py-1.5 text-[10px]"><strong>{goal.name}</strong> • {money(goal.amount)}/mês</span>)}</div></div>}
         </>}

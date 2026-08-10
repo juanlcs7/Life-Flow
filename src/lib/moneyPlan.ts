@@ -21,6 +21,18 @@ export function calculateSafeToSpend({
   };
 }
 
+export function simulatePurchaseImpact({ amount, available, daysRemaining }: { amount: number; available: number; daysRemaining: number }) {
+  const purchase = Math.max(0, amount);
+  const safeAvailable = Math.max(0, available);
+  const safeDays = Math.max(1, daysRemaining);
+  const remaining = Math.max(0, safeAvailable - purchase);
+  const dailyBefore = safeAvailable / safeDays;
+  const dailyAfter = remaining / safeDays;
+  const impactPercent = safeAvailable > 0 ? Math.min(100, (purchase / safeAvailable) * 100) : purchase > 0 ? 100 : 0;
+  const status = purchase <= 0 ? "idle" : purchase > safeAvailable ? "risk" : impactPercent <= 15 ? "safe" : "caution";
+  return { purchase, remaining, dailyBefore, dailyAfter, impactPercent, status } as const;
+}
+
 export function buildMoneyPlan({ income, commitments, budgets, goals }: { income: number; commitments: PlannedCommitment[]; budgets: PlannedBudget[]; goals: PlannedGoal[] }) {
   const fixedByCategory = new Map<string, number>();
   commitments.forEach((item) => fixedByCategory.set(item.category, (fixedByCategory.get(item.category) ?? 0) + Math.max(0, item.amount)));
