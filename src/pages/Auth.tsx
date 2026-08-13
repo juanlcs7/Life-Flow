@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
+  ArrowLeft,
   CalendarDays,
   Check,
   Clock3,
@@ -27,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { translateAuthError } from "@/lib/authErrors";
+import { LifeFlowLanding } from "@/components/auth/LifeFlowLanding";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -50,6 +52,7 @@ const highlights = [
 ];
 
 export default function Auth() {
+  const [showAuth, setShowAuth] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -70,6 +73,13 @@ export default function Auth() {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const openAuth = (login: boolean) => {
+    setIsLogin(login);
+    setShowAuth(true);
+    setErrors({});
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   useEffect(() => {
     if (user) navigate("/");
@@ -170,6 +180,10 @@ export default function Auth() {
     }
     setRecoverySent(true);
   };
+
+  if (!showAuth) {
+    return <LifeFlowLanding onLogin={() => openAuth(true)} onSignup={() => openAuth(false)} />;
+  }
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050b18]">
@@ -290,6 +304,7 @@ export default function Auth() {
                 <p className="mt-4 text-xs text-slate-400">Não encontrou? Verifique a caixa de spam ou lixo eletrônico.</p>
               </div>
             ) : <>
+            <button type="button" onClick={() => setShowAuth(false)} className="mb-5 inline-flex items-center gap-2 text-xs font-semibold text-slate-400 transition hover:text-slate-700"><ArrowLeft className="h-4 w-4" />Voltar para apresentação</button>
             <div className="mb-7">
               <p className="mb-2 text-sm font-semibold text-teal-600">
                 {isLogin ? "Sua central espera por você" : "Seu novo fluxo começa aqui"}
