@@ -54,7 +54,9 @@ export function LifeFlowLanding({ onLogin, onSignup }: Props) {
     </header>
 
     <section id="inicio" className="relative mx-auto max-w-[1380px] px-5 pb-24 pt-14 text-center sm:px-8 sm:pt-20 lg:px-12 lg:pt-24">
-      <motion.div initial={reveal} animate={{ opacity: 1, y: 0 }} transition={{ duration: .65 }} className="mx-auto max-w-4xl">
+      <HeroFinancePhone reduceMotion={Boolean(reduceMotion)} />
+      <HeroParticles reduceMotion={Boolean(reduceMotion)} />
+      <motion.div initial={reveal} animate={{ opacity: 1, y: 0 }} transition={{ duration: .65 }} className="relative z-20 mx-auto max-w-4xl">
         <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/15 bg-cyan-300/[0.07] px-4 py-2 text-[10px] font-bold text-cyan-100 backdrop-blur"><Sparkles className="h-3.5 w-3.5 text-cyan-300" />Uma central para o que realmente importa</div>
         <h1 className="mt-7 font-display text-[clamp(2.8rem,7vw,6.5rem)] font-medium leading-[.92] tracking-[-.07em] text-white">Administre menos.<br /><span className="bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent">Viva com mais clareza.</span></h1>
         <p className="mx-auto mt-7 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base">O LifeFlow conecta dinheiro, rotina, saúde e metas para mostrar o que merece sua atenção agora — e o que vem depois.</p>
@@ -111,6 +113,37 @@ function HeroProduct({ reduceMotion }: { reduceMotion: boolean }) {
       <div className="grid gap-3 pt-4 md:grid-cols-[1fr_.72fr]"><div className="rounded-[1.6rem] border border-white/[0.08] bg-gradient-to-br from-white/[0.065] to-cyan-400/[0.035] p-5"><p className="text-[9px] font-black uppercase tracking-[.16em] text-cyan-300">Boa noite, Juan.</p><h3 className="mt-2 font-display text-2xl font-black tracking-[-.045em]">Seu dia está em movimento.</h3><p className="mt-1 text-[10px] text-slate-500">Veja o que merece sua atenção agora.</p><div className="mt-6 grid grid-cols-2 gap-2"><MiniStat label="Saldo disponível" value="R$ 2.640" icon={WalletCards} /><MiniStat label="Gasto seguro hoje" value="R$ 86,40" icon={CircleDollarSign} /></div></div><div className="space-y-3"><div className="rounded-[1.6rem] border border-white/[0.08] bg-white/[0.04] p-4"><div className="flex items-center justify-between"><span className="text-[9px] font-bold text-slate-400">Seu ritmo</span><span className="text-xs font-black text-emerald-300">72%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.06]"><span className="block h-full w-[72%] rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400" /></div></div><div className="rounded-[1.6rem] border border-white/[0.08] bg-white/[0.04] p-4"><p className="text-[9px] font-bold text-slate-400">Próximo passo</p><div className="mt-3 flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-violet-400/10 text-violet-300"><CalendarDays className="h-4 w-4" /></span><div><p className="text-[10px] font-bold">Revisar orçamento</p><p className="text-[8px] text-slate-600">Leva menos de 2 minutos</p></div></div></div></div></div>
     </div>
   </motion.div>;
+}
+
+function HeroFinancePhone({ reduceMotion }: { reduceMotion: boolean }) {
+  const bars = [42, 58, 48, 76, 64, 88, 72];
+  return <motion.div
+    aria-hidden="true"
+    initial={reduceMotion ? { opacity: .2 } : { opacity: 0, y: 36, rotate: 8, scale: .9 }}
+    animate={reduceMotion ? { opacity: .2 } : { opacity: [.16, .24, .16], y: [0, -12, 0], rotate: [8, 5.5, 8], scale: 1 }}
+    transition={reduceMotion ? { duration: 0 } : { opacity: { duration: 7, repeat: Infinity, ease: "easeInOut" }, y: { duration: 7, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 9, repeat: Infinity, ease: "easeInOut" }, scale: { duration: .9 } }}
+    className="pointer-events-none absolute left-1/2 top-[-1.5rem] z-0 h-[460px] w-[230px] -translate-x-1/2 overflow-hidden rounded-[3rem] border-[6px] border-slate-700/60 bg-[#081423] p-3 shadow-[0_0_100px_20px_rgba(6,182,212,.2)] blur-[.2px] sm:top-[-3rem] sm:h-[560px] sm:w-[278px] lg:left-[73%] lg:top-[-2rem] lg:h-[610px] lg:w-[302px] lg:opacity-30"
+  >
+    <div className="absolute inset-0 bg-gradient-to-b from-cyan-400/[0.06] via-transparent to-violet-500/[0.08]" />
+    <div className="relative mx-auto h-5 w-24 rounded-full bg-black/90" />
+    <div className="relative mt-5 flex items-center justify-between"><div className="flex items-center gap-2"><img src="/lifeflow-logo.png" alt="" className="h-7 w-7" /><div className="text-left"><p className="text-[7px] font-black uppercase tracking-[.16em] text-cyan-300">Dinheiro</p><p className="text-[10px] font-black">Finanças</p></div></div><span className="grid h-7 w-7 place-items-center rounded-full bg-white/[0.06]"><Sparkles className="h-3 w-3 text-cyan-300" /></span></div>
+    <div className="relative mt-5 rounded-[1.4rem] border border-white/[0.08] bg-white/[0.045] p-4 text-left"><p className="text-[7px] uppercase tracking-[.14em] text-slate-500">Saldo disponível</p><p className="mt-1 font-display text-xl font-black tracking-[-.04em]">R$ 2.640,00</p><div className="mt-3 flex items-center gap-1.5 text-[7px] font-bold text-emerald-300"><TrendingUp className="h-3 w-3" />12% melhor que o mês anterior</div></div>
+    <div className="relative mt-3 grid grid-cols-2 gap-2"><div className="rounded-2xl border border-white/[0.07] bg-emerald-400/[0.06] p-3 text-left"><TrendingUp className="h-3.5 w-3.5 text-emerald-300" /><p className="mt-3 text-[6px] text-slate-500">Receitas</p><p className="mt-1 text-[10px] font-black text-emerald-300">R$ 4.850</p></div><div className="rounded-2xl border border-white/[0.07] bg-rose-400/[0.05] p-3 text-left"><TrendingDown className="h-3.5 w-3.5 text-rose-300" /><p className="mt-3 text-[6px] text-slate-500">Despesas</p><p className="mt-1 text-[10px] font-black text-rose-300">R$ 2.210</p></div></div>
+    <div className="relative mt-3 rounded-[1.4rem] border border-white/[0.07] bg-black/15 p-3 text-left"><div className="flex items-center justify-between"><p className="text-[7px] font-bold text-slate-400">Fluxo do mês</p><BarChart3 className="h-3 w-3 text-violet-300" /></div><div className="mt-4 flex h-20 items-end gap-1.5">{bars.map((height, index) => <span key={index} className="flex-1 rounded-t bg-gradient-to-t from-cyan-500/40 to-emerald-300/80" style={{ height: `${height}%` }} />)}</div></div>
+    <div className="relative mt-3 rounded-[1.4rem] border border-cyan-300/10 bg-cyan-300/[0.045] p-3 text-left"><p className="text-[6px] font-black uppercase tracking-[.14em] text-cyan-300">Pode gastar hoje</p><div className="mt-1 flex items-end justify-between"><p className="font-display text-lg font-black">R$ 86,40</p><span className="rounded-full bg-emerald-400/10 px-2 py-1 text-[6px] font-bold text-emerald-300">Seguro</span></div></div>
+    <div className="absolute inset-x-4 bottom-4 flex justify-around rounded-2xl border border-white/[0.07] bg-black/35 py-3"><LayoutDashboard className="h-3.5 w-3.5 text-slate-600" /><WalletCards className="h-3.5 w-3.5 text-cyan-300" /><Target className="h-3.5 w-3.5 text-slate-600" /></div>
+  </motion.div>;
+}
+
+function HeroParticles({ reduceMotion }: { reduceMotion: boolean }) {
+  const particles = [
+    { left: "8%", top: "20%", color: "bg-cyan-300", delay: 0 },
+    { left: "18%", top: "52%", color: "bg-lime-300", delay: .8 },
+    { left: "84%", top: "18%", color: "bg-violet-300", delay: 1.4 },
+    { left: "92%", top: "48%", color: "bg-cyan-300", delay: .3 },
+    { left: "72%", top: "63%", color: "bg-emerald-300", delay: 1.8 },
+  ];
+  return <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 hidden sm:block">{particles.map((particle, index) => <motion.span key={index} className={`absolute h-1.5 w-1.5 rounded-full ${particle.color} shadow-[0_0_14px_currentColor]`} style={{ left: particle.left, top: particle.top }} animate={reduceMotion ? undefined : { y: [0, -14, 0], opacity: [.25, .9, .25], scale: [.8, 1.35, .8] }} transition={{ duration: 4 + index * .45, delay: particle.delay, repeat: Infinity, ease: "easeInOut" }} />)}</div>;
 }
 
 function FloatingCard({ className, icon: Icon, label, value, tone }: { className: string; icon: typeof TrendingUp; label: string; value: string; tone: string }) { return <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }} className={`absolute z-20 w-44 rounded-2xl border border-white/10 bg-[#0a1728]/90 p-4 text-left shadow-2xl backdrop-blur ${className}`}><Icon className={`h-4 w-4 ${tone}`} /><p className="mt-4 text-[8px] text-slate-500">{label}</p><p className={`mt-1 text-sm font-black ${tone}`}>{value}</p></motion.div>; }
